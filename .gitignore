@@ -1,0 +1,14 @@
+# Node.js dependencies for the frontend
+frontend/node_modules/
+
+# Next.js build outputs
+frontend/.next/
+frontend/out/
+
+# Optional: Environment files
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+.DS_Store
