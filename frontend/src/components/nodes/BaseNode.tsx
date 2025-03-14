@@ -23,6 +23,7 @@ const BaseNode = memo(({ icon: Icon, label, selected, children }: BaseNodeProps)
     <Box
       p={4}
       borderRadius="lg"
+      className="drag"
       bg={styles.bgColor}
       border="2px"
       borderColor={styles.borderColor}
@@ -35,18 +36,18 @@ const BaseNode = memo(({ icon: Icon, label, selected, children }: BaseNodeProps)
         }
       }}
     >
-      <Handle 
-        type="target" 
-        position={Position.Top} 
-        style={{ 
+      <Handle
+        type="target"
+        position={Position.Top}
+        style={{
           background: styles.handleColor,
           width: '8px',
           height: '8px',
         }}
       />
-      
-      <HStack 
-        mb={3} 
+
+      <HStack
+        mb={3}
         className="drag"
         cursor="grab"
         userSelect="none"
@@ -73,10 +74,10 @@ const BaseNode = memo(({ icon: Icon, label, selected, children }: BaseNodeProps)
         {children}
       </Box>
 
-      <Handle 
-        type="source" 
+      <Handle
+        type="source"
         position={Position.Bottom}
-        style={{ 
+        style={{
           background: styles.handleColor,
           width: '8px',
           height: '8px',
@@ -88,4 +89,4 @@ const BaseNode = memo(({ icon: Icon, label, selected, children }: BaseNodeProps)
 
 BaseNode.displayName = 'BaseNode'
 
-export default BaseNode 
+export default BaseNode

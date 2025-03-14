@@ -1,5 +1,3 @@
-'use client'
-
 import {
   Box,
   Button,
@@ -16,26 +14,26 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { FiPlus, FiSettings, FiChevronDown, FiFolderPlus } from 'react-icons/fi'
-import { useRouter } from 'next/navigation'
+import { useNavigate } from 'react-router-dom' // Updated import
 
 export default function Dashboard() {
-  const router = useRouter()
+  const navigate = useNavigate() // Changed hook
   const bgColor = useColorModeValue('gray.50', 'gray.900')
   const cardBg = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.700')
 
   const handleCreateBot = () => {
-    router.push('/editor')
+    navigate('/editor') // Updated navigation
   }
 
   return (
     <Box minH="100vh" bg={bgColor}>
       {/* Header */}
-      <Box 
-        w="full" 
-        py={4} 
-        px={6} 
-        borderBottom="1px" 
+      <Box
+        w="full"
+        py={4}
+        px={6}
+        borderBottom="1px"
         borderColor={borderColor}
         bg={cardBg}
       >
@@ -51,21 +49,12 @@ export default function Dashboard() {
               </Icon>
             </Box>
             <HStack spacing={4}>
-              <Button
-                leftIcon={<FiSettings />}
-                variant="ghost"
-                size="sm"
-              >
+              <Button leftIcon={<FiSettings />} variant="ghost" size="sm">
                 Settings & Members
               </Button>
               <Text>Kauan Massuia&apos;s workspace</Text>
               <Menu>
-                <MenuButton
-                  as={Button}
-                  rightIcon={<FiChevronDown />}
-                  variant="ghost"
-                  size="sm"
-                >
+                <MenuButton as={Button} rightIcon={<FiChevronDown />} variant="ghost" size="sm">
                   Free
                 </MenuButton>
                 <MenuList>
@@ -81,11 +70,7 @@ export default function Dashboard() {
       {/* Main Content */}
       <Container maxW="1440px" py={8}>
         <HStack mb={8} spacing={4}>
-          <Button
-            leftIcon={<FiFolderPlus />}
-            variant="outline"
-            size="sm"
-          >
+          <Button leftIcon={<FiFolderPlus />} variant="outline" size="sm">
             Create a folder
           </Button>
         </HStack>
@@ -121,3 +106,4 @@ export default function Dashboard() {
     </Box>
   )
 }
+

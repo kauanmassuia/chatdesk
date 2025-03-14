@@ -1,5 +1,3 @@
-'use client'
-
 import { Box, Flex, useColorModeValue } from '@chakra-ui/react'
 import ReactFlow, {
   Background,
@@ -12,24 +10,24 @@ import ReactFlow, {
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { useCallback, useEffect, useState } from 'react'
-import { useFlowStore } from '../../store/flowStore'
-import Sidebar from '../../components/Sidebar'
-import Header from '../../components/Header'
-import TextNode from '../../components/nodes/TextNode'
-import ImageNode from '../../components/nodes/ImageNode'
-import VideoNode from '../../components/nodes/VideoNode'
-import AudioNode from '../../components/nodes/AudioNode'
-import StartNode from '../../components/nodes/StartNode'
-import TextInputNode from '../../components/nodes/inputs/TextInputNode'
-import NumberInputNode from '../../components/nodes/inputs/NumberInputNode'
-import EmailInputNode from '../../components/nodes/inputs/EmailInputNode'
-import WebsiteInputNode from '../../components/nodes/inputs/WebsiteInputNode'
-import DateInputNode from '../../components/nodes/inputs/DateInputNode'
-import TimeInputNode from '../../components/nodes/inputs/TimeInputNode'
-import PhoneInputNode from '../../components/nodes/inputs/PhoneInputNode'
-import ButtonsInputNode from '../../components/nodes/inputs/ButtonsInputNode'
-import PicChoiceInputNode from '../../components/nodes/inputs/PicChoiceInputNode'
-import PaymentInputNode from '../../components/nodes/inputs/PaymentInputNode'
+import { useFlowStore } from '../store/flowStore'
+import Sidebar from '../components/Sidebar'
+import Header from '../components/Header'
+import TextNode from '../components/nodes/TextNode'
+import ImageNode from '../components/nodes/ImageNode'
+import VideoNode from '../components/nodes/VideoNode'
+import AudioNode from '../components/nodes/AudioNode'
+import StartNode from '../components/nodes/StartNode'
+import TextInputNode from '../components/nodes/inputs/TextInputNode'
+import NumberInputNode from '../components/nodes/inputs/NumberInputNode'
+import EmailInputNode from '../components/nodes/inputs/EmailInputNode'
+import WebsiteInputNode from '../components/nodes/inputs/WebsiteInputNode'
+import DateInputNode from '../components/nodes/inputs/DateInputNode'
+import TimeInputNode from '../components/nodes/inputs/TimeInputNode'
+import PhoneInputNode from '../components/nodes/inputs/PhoneInputNode'
+import ButtonsInputNode from '../components/nodes/inputs/ButtonsInputNode'
+import PicChoiceInputNode from '../components/nodes/inputs/PicChoiceInputNode'
+import PaymentInputNode from '../components/nodes/inputs/PaymentInputNode'
 
 const nodeTypes = {
   text: TextNode,
@@ -52,10 +50,19 @@ const nodeTypes = {
 const proOptions = { hideAttribution: true }
 
 function EditorContent() {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, setNodes, updateNodeData } = useFlowStore()
+  const {
+    nodes,
+    edges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    addNode,
+    setNodes,
+    updateNodeData,
+  } = useFlowStore()
   const { project } = useReactFlow()
   const [isDragging, setIsDragging] = useState(false)
-  
+
   const bgColor = useColorModeValue('gray.50', 'gray.900')
   const dropHighlightColor = useColorModeValue('blue.50', 'blue.900')
 
@@ -130,8 +137,8 @@ function EditorContent() {
       <Header />
       <Flex flex={1} mt="56px">
         <Sidebar />
-        <Box 
-          flex={1} 
+        <Box
+          flex={1}
           bg={isDragging ? dropHighlightColor : bgColor}
           transition="background-color 0.1s ease-out"
           position="relative"
@@ -170,7 +177,7 @@ function EditorContent() {
           >
             <Background gap={16} size={1} />
             <Controls showInteractive={false} />
-            <MiniMap 
+            <MiniMap
               nodeColor={useColorModeValue('#E2E8F0', '#2D3748')}
               maskColor={useColorModeValue('rgba(241, 245, 249, 0.5)', 'rgba(23, 25, 35, 0.5)')}
             />
@@ -207,4 +214,4 @@ export default function Editor() {
       <EditorContent />
     </ReactFlowProvider>
   )
-} 
+}
