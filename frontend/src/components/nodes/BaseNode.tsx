@@ -12,12 +12,19 @@ interface BaseNodeProps {
 }
 
 const BaseNode = memo(({ icon: Icon, label, selected, children }: BaseNodeProps) => {
+  // Call hooks at the top level
+  const bgColor = useColorModeValue('white', 'gray.700')
+  const borderColor = useColorModeValue(selected ? 'blue.500' : 'gray.200', selected ? 'blue.400' : 'gray.600')
+  const headerBg = useColorModeValue('gray.50', 'gray.800')
+  const handleColor = useColorModeValue('#CBD5E0', '#4A5568')
+
+  // Combine values using useMemo if needed
   const styles = useMemo(() => ({
-    bgColor: useColorModeValue('white', 'gray.700'),
-    borderColor: useColorModeValue(selected ? 'blue.500' : 'gray.200', selected ? 'blue.400' : 'gray.600'),
-    headerBg: useColorModeValue('gray.50', 'gray.800'),
-    handleColor: useColorModeValue('#CBD5E0', '#4A5568')
-  }), [selected])
+    bgColor,
+    borderColor,
+    headerBg,
+    handleColor,
+  }), [bgColor, borderColor, headerBg, handleColor])
 
   return (
     <Box

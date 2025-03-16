@@ -1,6 +1,6 @@
 import { Handle, Position } from 'reactflow'
 import { Box, Text, Textarea } from '@chakra-ui/react'
-import { memo } from 'react'
+import { memo, useState } from 'react'
 
 interface MessageNodeProps {
   data: {
@@ -9,6 +9,8 @@ interface MessageNodeProps {
 }
 
 const MessageNode = memo(({ data }: MessageNodeProps) => {
+  const [message, setMessage] = useState(data.message)
+
   return (
     <Box
       p={4}
@@ -23,10 +25,12 @@ const MessageNode = memo(({ data }: MessageNodeProps) => {
         Mensagem
       </Text>
       <Textarea
-        value={data.message}
-        onChange={(e) => {
-          data.message = e.target.value
-        }}
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        onMouseDown={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+        pointerEvents="auto"
         placeholder="Digite sua mensagem..."
         size="sm"
         resize="vertical"
@@ -39,4 +43,4 @@ const MessageNode = memo(({ data }: MessageNodeProps) => {
 
 MessageNode.displayName = 'MessageNode'
 
-export default MessageNode 
+export default MessageNode

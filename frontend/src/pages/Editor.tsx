@@ -60,7 +60,7 @@ function EditorContent() {
     setNodes,
     updateNodeData,
   } = useFlowStore()
-  const { project } = useReactFlow()
+  const { screenToFlowPosition } = useReactFlow()
   const [isDragging, setIsDragging] = useState(false)
 
   const bgColor = useColorModeValue('gray.50', 'gray.900')
@@ -97,9 +97,10 @@ function EditorContent() {
       const type = event.dataTransfer.getData('application/reactflow')
       if (!type) return
 
-      const position = project({
-        x: event.clientX - 240,
-        y: event.clientY - 60,
+      // Use screenToFlowPosition without manual offset adjustments
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
       })
 
       const newNode: Node = {
@@ -107,6 +108,7 @@ function EditorContent() {
         type,
         position,
         data: {
+          // Initial data for the node
           text: '',
           imageUrl: '',
           alt: '',
@@ -129,7 +131,7 @@ function EditorContent() {
 
       addNode(newNode)
     },
-    [project, addNode, updateNodeData]
+    [screenToFlowPosition, addNode, updateNodeData]
   )
 
   return (
