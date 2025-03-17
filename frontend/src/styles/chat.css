@@ -1,0 +1,8 @@
+:root {
+  --bot-bubble-bg: #F7F8FF;
+  --bot-bubble-color: #303235;
+  --user-bubble-bg: #E1FFC7;
+  --user-bubble-color: #303235;
+  --chat-font-size: 16px;
+  --chat-padding: 1rem;
+}
