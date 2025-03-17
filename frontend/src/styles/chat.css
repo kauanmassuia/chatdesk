@@ -6,3 +6,17 @@
   --chat-font-size: 16px;
   --chat-padding: 1rem;
 }
+
+/* Utility classes that reference our CSS variables */
+.bg-bot-bubble {
+  background-color: var(--bot-bubble-bg) !important;
+}
+.text-bot-bubble {
+  color: var(--bot-bubble-color) !important;
+}
+.bg-user-bubble {
+  background-color: var(--user-bubble-bg) !important;
+}
+.text-user-bubble {
+  color: var(--user-bubble-color) !important;
+}

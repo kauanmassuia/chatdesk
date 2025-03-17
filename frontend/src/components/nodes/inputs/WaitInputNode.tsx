@@ -1,7 +1,7 @@
 import { BsClock } from 'react-icons/bs'
 import InputNode from './InputNode'
 
-interface TimeInputNodeProps {
+interface WaitInputNodeProps {
   data: {
     value: string
     onChange: (field: string, value: string) => void
@@ -9,17 +9,17 @@ interface TimeInputNodeProps {
   selected: boolean
 }
 
-const TimeInputNode = ({ data, selected }: TimeInputNodeProps) => {
+const WaitInputNode = ({ data, selected }: WaitInputNodeProps) => {
   return (
     <InputNode
       icon={BsClock}
-      label="Time Input"
+      label="Wait Time (seconds)"
       selected={selected}
-      type="time"
+      type="number"
       value={data.value}
       onChange={(value) => data.onChange('value', value)}
     />
   )
 }
 
-export default TimeInputNode 
+export default WaitInputNode
