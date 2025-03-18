@@ -122,9 +122,9 @@ function EditorContent() {
           amount: '',
           currency: 'BRL',
           description: '',
-          onChange: (field: string, value: any) => {
-            updateNodeData(newNode.id, { [field]: value })
-          },
+          onChange: type === 'text'
+            ? (value: string) => updateNodeData(newNode.id, { text: value })  // For TextNode
+            : (field: string, value: string) => updateNodeData(newNode.id, { [field]: value }) // For all other nodes
         },
         dragHandle: '.drag',
       }

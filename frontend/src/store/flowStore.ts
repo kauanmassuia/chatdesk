@@ -47,4 +47,22 @@ export const useFlowStore = create<FlowState>((set) => ({
       ),
     }))
   },
-})) 
+}))
+
+export const exportFlow = (nodes: Node[], edges: Edge[]): string => {
+  const edgeMap = new Map(edges.map(edge => [edge.source, edge.target]));
+
+  const exportedNodes = nodes.map(node => {
+    return {
+      id: node.id,
+      type: node.type,
+      position: node.position,
+      data: {
+        text: node.data.text ?? '' // Ensure text is not undefined
+      },
+      next: edgeMap.get(node.id) || null // Find the next node via edges
+    };
+  });
+
+  return JSON.stringify({ nodes: exportedNodes, edges }, null, 2);
+};

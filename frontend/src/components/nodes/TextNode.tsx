@@ -39,4 +39,4 @@ const TextNode = memo(({ data, selected }: TextNodeProps) => {
 
 TextNode.displayName = 'TextNode'
 
-export default TextNode 
+export default TextNode
