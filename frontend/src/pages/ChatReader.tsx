@@ -3,66 +3,62 @@ import { Box, Text, Input, Button, VStack, HStack } from '@chakra-ui/react';
 import '../styles/chat.css';
 
 /**
- * Example JSON with a variety of node types.
- * In production, you'll load this via an API.
+ * Use your exported JSON flow.
  */
 const chatFlow = {
-  version: "1.0",
-  id: "test_flow_all_nodes",
-  name: "Test Flow - All Nodes",
-  nodes: [
+  "version": "1.0",
+  "id": "exported_flow",
+  "name": "Exported Flow",
+  "nodes": [
     {
-      id: "start_1",
-      type: "start",
-      content: { text: "Hello! Welcome to our chatbot." },
-      next: "choice_1",
+      "id": "start",
+      "type": "start",
+      "content": {},
+      "next": "text-1742316018021"
     },
     {
-      id: "choice_1",
-      type: "choice",
-      content: {
-        text: "What would you like to do?",
-        choices: [
-          { id: "c1", text: "Learn more", next: "email_input_1" },
-          { id: "c2", text: "Exit", next: "end_1" },
-        ],
+      "id": "text-1742316018021",
+      "type": "text",
+      "content": {
+        "text": "Oie"
       },
+      "next": "video-1742316027855"
     },
     {
-      id: "email_input_1",
-      type: "email-input",
-      content: { prompt: "Please enter your email:" },
-      next: "wait_input_1",
-    },
-    {
-      id: "wait_input_1",
-      type: "wait-input",
-      options: { secondsToWaitFor: "3" },
-      next: "media_1",
-    },
-    {
-      id: "media_1",
-      type: "media",
-      content: {
-        mediaType: "video",
-        url: "https://www.w3schools.com/html/mov_bbb.mp4",
+      "id": "video-1742316027855",
+      "type": "video",
+      "content": {
+        "videoUrl": "https://www.youtube.com/watch?v=Vj2ICyclWO4&pp=0gcJCU8JAYcqIYzv",
+        "mediaType": "youtube"
       },
-      next: "end_1",
+      "next": "image-1742316068271"
     },
     {
-      id: "end_1",
-      type: "end",
-      content: { text: "Thank you for chatting!" },
+      "id": "image-1742316068271",
+      "type": "image",
+      "content": {
+        "imageUrl": "https://media.istockphoto.com/id/1443562748/pt/foto/cute-ginger-cat.jpg?s=612x612&w=0&k=20&c=OqlMF3bysUX6cVux5kKc1gqCGMghQpGc5ukyw1qG82s=",
+        "alt": "Gato laranja"
+      },
+      "next": "input_text-1742316119673"
     },
-  ],
+    {
+      "id": "input_text-1742316119673",
+      "type": "text-input",
+      "content": {
+        "prompt": "Oq achou disso?"
+      },
+      "next": null
+    }
+  ]
 };
 
-/** Find a node by ID */
+/** Helper to find a node by ID */
 function getNodeById(flow: typeof chatFlow, id: string | null) {
   return flow.nodes.find((n) => n.id === id) || null;
 }
 
-/** Node types that require user interaction (prompts) */
+/** List of interactive node types */
 const interactiveTypes = [
   "input",
   "text-input",
@@ -79,20 +75,10 @@ const interactiveTypes = [
   "wait-input",
 ];
 
-/** Node types that are purely bot messages (automatically displayed) */
-const autoTypes = ["start", "message", "media", "end", "text", "base", "audio", "image", "video"];
+/** Auto types: nodes that are automatically displayed (bot messages) */
+const autoTypes = ["start", "message", "text", "base", "audio", "image", "video", "end"];
 
-/**
- * Decide if a node bubble is rendered on the left or right.
- * - "user" bubbles always on right
- * - "choice", "input" prompts on left
- * - "wait-input" doesn't usually show a bubble, but if it does, also on left
- */
-function isRightAligned(nodeType: string): boolean {
-  return nodeType === "user";
-}
-
-/** Mapping from node.type to HTML <input> type */
+/** Mapping from node type to HTML input type */
 const inputTypeMapping: Record<string, string> = {
   "text-input": "text",
   "email-input": "email",
@@ -104,17 +90,30 @@ const inputTypeMapping: Record<string, string> = {
   "payment-input": "number",
 };
 
+/** Helper: Determine if a bubble should be right-aligned (user responses) */
+function isRightAligned(nodeType: string): boolean {
+  return nodeType === "user";
+}
+
+/** Helper: Convert YouTube URL to embed URL */
+function getYoutubeEmbedUrl(url: string): string {
+  const match = url.match(/(?:v=|youtu\.be\/)([^&]+)/);
+  if (match && match[1]) {
+    return `https://www.youtube.com/embed/${match[1]}`;
+  }
+  return url;
+}
+
 const ChatReader: React.FC = () => {
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
   const [conversation, setConversation] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState("");
   const chatHistoryRef = useRef<HTMLDivElement>(null);
 
-  // --- 1) On mount, go to start node (if any).
+  // 1. Initialize conversation with the start node.
   useEffect(() => {
-    const startNode = getNodeById(chatFlow, "start_1"); // or find((n) => n.type === 'start')
+    const startNode = getNodeById(chatFlow, "start");
     if (startNode) {
-      // Add to conversation if it's an auto-type node
       if (autoTypes.includes(startNode.type)) {
         setConversation([startNode]);
       }
@@ -122,33 +121,30 @@ const ChatReader: React.FC = () => {
     }
   }, []);
 
-  // --- 2) Autoscroll on conversation update.
+  // 2. Auto-scroll chat history.
   useEffect(() => {
     if (chatHistoryRef.current) {
       chatHistoryRef.current.scrollTop = chatHistoryRef.current.scrollHeight;
     }
   }, [conversation]);
 
-  // --- 3) On currentNodeId change, handle logic for the new node.
+  // 3. Handle new node arrival.
   useEffect(() => {
     if (!currentNodeId) return;
     const node = getNodeById(chatFlow, currentNodeId);
     if (!node) return;
 
-    // a) WAIT-INPUT node => no bubble, just delay
+    // For wait-input nodes: delay without rendering prompt.
     if (node.type === "wait-input") {
       const seconds = parseInt(node.options?.secondsToWaitFor ?? "1", 10);
       const timer = setTimeout(() => {
-        // We don't display anything for wait nodes in conversation
-        // Just move on
         setCurrentNodeId(node.next ?? null);
       }, seconds * 1000);
       return () => clearTimeout(timer);
     }
 
-    // b) If node is auto-type => append to conversation automatically
+    // For auto nodes: auto-append after a delay.
     if (autoTypes.includes(node.type)) {
-      // Delay 1 second for a more natural feel
       const timer = setTimeout(() => {
         setConversation((prev) => [...prev, node]);
         setCurrentNodeId(node.next ?? null);
@@ -156,29 +152,25 @@ const ChatReader: React.FC = () => {
       return () => clearTimeout(timer);
     }
 
-    // c) If node is interactive => show it once in conversation on the left
-    //    (But do not re-append if it's already there)
+    // For interactive nodes: if not already appended, add the prompt.
     if (interactiveTypes.includes(node.type)) {
-      // If it's not in conversation yet, append it
       const alreadyInHistory = conversation.some((c) => c.id === node.id);
       if (!alreadyInHistory) {
         setConversation((prev) => [...prev, node]);
       }
     }
-  }, [currentNodeId]);
+  }, [currentNodeId, conversation]);
 
-  // --- 4) Handle user input submission
+  // 4. Handle interactive input submission.
   function handleInputSubmit() {
     if (!inputValue.trim()) return;
-    // Append user bubble on the right
     const userBubble = {
       id: `user_${Date.now()}`,
       type: "user",
       content: { text: inputValue },
     };
+    // Append the user bubble on the right.
     setConversation((prev) => [...prev, userBubble]);
-
-    // Move on to next node
     setTimeout(() => {
       const node = getNodeById(chatFlow, currentNodeId);
       if (node) {
@@ -188,34 +180,31 @@ const ChatReader: React.FC = () => {
     setInputValue("");
   }
 
-  // Submit on Enter
+  // Submit on Enter.
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       handleInputSubmit();
     }
   }
 
-  // --- 5) Handle choice selection
+  // 5. Handle choice selection.
   function handleChoiceSelect(choice: any) {
-    // Add user bubble on right
     const userBubble = {
       id: `user_${Date.now()}`,
       type: "user",
       content: { text: choice.text },
     };
     setConversation((prev) => [...prev, userBubble]);
-
-    // Move on
     setTimeout(() => {
       setCurrentNodeId(choice.next ?? null);
     }, 500);
   }
 
-  // --- 6) Render node content
+  // 6. Render node content.
   function renderNode(node: any) {
-    // a) Interactive input nodes
+    // a) Interactive input nodes (non-choice).
     if (interactiveTypes.includes(node.type) && node.type !== "choice" && node.type !== "wait-input") {
-      const inputType = inputTypeMapping[node.type] ?? "text";
+      const htmlInputType = inputTypeMapping[node.type] || "text";
       return (
         <VStack spacing={3} align="stretch" className={`bubble-${node.type}`}>
           <Box>
@@ -223,7 +212,7 @@ const ChatReader: React.FC = () => {
           </Box>
           <HStack className="input-container">
             <Input
-              type={inputType}
+              type={htmlInputType}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -238,7 +227,7 @@ const ChatReader: React.FC = () => {
       );
     }
 
-    // b) Choice node
+    // b) Choice node.
     if (node.type === "choice") {
       return (
         <VStack spacing={3} align="stretch" className={`bubble-${node.type}`}>
@@ -247,11 +236,7 @@ const ChatReader: React.FC = () => {
           </Box>
           <HStack className="choices-container">
             {node.content.choices.map((choice: any) => (
-              <Button
-                key={choice.id}
-                onClick={() => handleChoiceSelect(choice)}
-                colorScheme="teal"
-              >
+              <Button key={choice.id} onClick={() => handleChoiceSelect(choice)} colorScheme="teal">
                 {choice.text}
               </Button>
             ))}
@@ -260,44 +245,49 @@ const ChatReader: React.FC = () => {
       );
     }
 
-    // c) Wait-input => typically we don't render anything
+    // c) Wait-input: no UI.
     if (node.type === "wait-input") {
       return null;
     }
 
-    // d) Media node
-    if (node.type === "media") {
-      const { mediaType, url } = node.content;
-      if (mediaType === "video") {
+    // d) Video node.
+    if (node.type === "video") {
+      const { mediaType, videoUrl, url } = node.content;
+      if (mediaType === "youtube") {
+        const embedUrl = getYoutubeEmbedUrl(videoUrl || url);
         return (
           <Box className={`bubble-${node.type}`}>
-            <video controls className="w-64">
-              <source src={url} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            <iframe
+              src={embedUrl}
+              title="YouTube video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-64 h-40"
+            />
           </Box>
         );
       }
-      if (mediaType === "audio") {
-        return (
-          <Box className={`bubble-${node.type}`}>
-            <audio controls>
-              <source src={url} type="audio/mpeg" />
-              Your browser does not support the audio element.
-            </audio>
-          </Box>
-        );
-      }
-      if (mediaType === "image") {
-        return (
-          <Box className={`bubble-${node.type}`}>
-            <img src={url} alt="media" className="w-64" />
-          </Box>
-        );
-      }
+      // If it's a direct video URL:
+      return (
+        <Box className={`bubble-${node.type}`}>
+          <video controls className="w-64">
+            <source src={videoUrl || url} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </Box>
+      );
     }
 
-    // e) All other auto-types (start, message, end, etc.)
+    // e) Image node.
+    if (node.type === "image") {
+      return (
+        <Box className={`bubble-${node.type}`}>
+          <img src={node.content.imageUrl} alt={node.content.alt} className="w-64" />
+        </Box>
+      );
+    }
+
+    // f) All other auto nodes (start, message, text, etc.)
     return (
       <Box className={`bubble-${node.type}`}>
         <Text>{node.content?.text}</Text>
@@ -305,13 +295,12 @@ const ChatReader: React.FC = () => {
     );
   }
 
-  // --- 7) Current node if it’s interactive but not appended yet
+  // 7. Get the current node.
   const currentNode = getNodeById(chatFlow, currentNodeId);
 
   return (
     <div className="flex flex-col h-screen">
       <div ref={chatHistoryRef} className="flex flex-col flex-1 overflow-y-auto p-4 space-y-2">
-        {/* Conversation so far */}
         {conversation.map((node, idx) => {
           const alignRight = isRightAligned(node.type);
           return (
@@ -329,17 +318,11 @@ const ChatReader: React.FC = () => {
             </div>
           );
         })}
-
-        {/* If the current node is interactive & not in conversation, show it on left. */}
+        {/* Render the current interactive prompt if not already in conversation */}
         {currentNode &&
           interactiveTypes.includes(currentNode.type) &&
           !conversation.some((c) => c.id === currentNode.id) && (
-            <div
-              className={
-                "self-start bg-bot-bubble text-bot-bubble rounded-xl p-2 max-w-[80%] bubble-" +
-                currentNode.type
-              }
-            >
+            <div className={"self-start bg-bot-bubble text-bot-bubble rounded-xl p-2 max-w-[80%] bubble-" + currentNode.type}>
               {renderNode(currentNode)}
             </div>
           )}

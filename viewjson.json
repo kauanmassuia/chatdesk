@@ -1,0 +1,47 @@
+{
+  "version": "1.0",
+  "id": "exported_flow",
+  "name": "Exported Flow",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "start",
+      "content": {},
+      "next": "text-1742316018021"
+    },
+    {
+      "id": "text-1742316018021",
+      "type": "text",
+      "content": {
+        "text": "Oie"
+      },
+      "next": "video-1742316027855"
+    },
+    {
+      "id": "video-1742316027855",
+      "type": "video",
+      "content": {
+        "videoUrl": "https://www.youtube.com/watch?v=Vj2ICyclWO4&pp=0gcJCU8JAYcqIYzv",
+        "mediaType": "youtube"
+      },
+      "next": "image-1742316068271"
+    },
+    {
+      "id": "image-1742316068271",
+      "type": "image",
+      "content": {
+        "imageUrl": "https://media.istockphoto.com/id/1443562748/pt/foto/cute-ginger-cat.jpg?s=612x612&w=0&k=20&c=OqlMF3bysUX6cVux5kKc1gqCGMghQpGc5ukyw1qG82s=",
+        "alt": "Gato laranja"
+      },
+      "next": "input_text-1742316119673"
+    },
+    {
+      "id": "input_text-1742316119673",
+      "type": "text-input",
+      "content": {
+        "prompt": "Oq achou disso?"
+      },
+      "next": null
+    }
+  ]
+}

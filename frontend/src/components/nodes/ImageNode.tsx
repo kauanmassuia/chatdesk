@@ -48,6 +48,16 @@ const ImageNode = memo(({ data, selected }: ImageNodeProps) => {
   )
 })
 
+export function exportImageNode(node: any) {
+  return {
+    type: 'image',
+    content: {
+      imageUrl: node.data?.imageUrl || '',
+      alt: node.data?.alt || '',
+    },
+  }
+}
+
 ImageNode.displayName = 'ImageNode'
 
-export default ImageNode 
+export default ImageNode

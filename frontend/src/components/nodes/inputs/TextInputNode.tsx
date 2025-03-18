@@ -22,4 +22,13 @@ const TextInputNode = ({ data, selected }: TextInputNodeProps) => {
   )
 }
 
-export default TextInputNode 
+export function exportTextInputNode(node: any) {
+  return {
+    type: 'text-input', // or "input_text" if you prefer
+    content: {
+      prompt: node.data?.value || '',
+    },
+  }
+}
+
+export default TextInputNode
