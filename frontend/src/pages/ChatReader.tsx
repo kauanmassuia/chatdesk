@@ -1,112 +1,65 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Text, Input, Button, VStack, HStack } from '@chakra-ui/react';
 import '../styles/chat.css';
+import { getYoutubeEmbedUrl } from '../utils/getYoutubeEmbedUrl.ts'; // assume you have a helper for YouTube URLs
 
-/**
- * Use your exported JSON flow.
- */
-const chatFlow = {
-  "version": "1.0",
-  "id": "exported_flow",
-  "name": "Exported Flow",
-  "nodes": [
-    {
-      "id": "start",
-      "type": "start",
-      "content": {},
-      "next": "text-1742316018021"
-    },
-    {
-      "id": "text-1742316018021",
-      "type": "text",
-      "content": {
-        "text": "Oie"
-      },
-      "next": "video-1742316027855"
-    },
-    {
-      "id": "video-1742316027855",
-      "type": "video",
-      "content": {
-        "videoUrl": "https://www.youtube.com/watch?v=Vj2ICyclWO4&pp=0gcJCU8JAYcqIYzv",
-        "mediaType": "youtube"
-      },
-      "next": "image-1742316068271"
-    },
-    {
-      "id": "image-1742316068271",
-      "type": "image",
-      "content": {
-        "imageUrl": "https://media.istockphoto.com/id/1443562748/pt/foto/cute-ginger-cat.jpg?s=612x612&w=0&k=20&c=OqlMF3bysUX6cVux5kKc1gqCGMghQpGc5ukyw1qG82s=",
-        "alt": "Gato laranja"
-      },
-      "next": "input_text-1742316119673"
-    },
-    {
-      "id": "input_text-1742316119673",
-      "type": "text-input",
-      "content": {
-        "prompt": "Oq achou disso?"
-      },
-      "next": null
-    }
-  ]
-};
+// Import the exported flow JSON – replace this with your actual JSON import or assignment.
+import chatFlowData from '../data/ultimateflowtest.json';
 
-/** Helper to find a node by ID */
-function getNodeById(flow: typeof chatFlow, id: string | null) {
+// Type for a node in the exported flow.
+interface FlowNode {
+  id: string;
+  type: string;
+  content: any;
+  next: string | null;
+}
+
+// Our exported flow:
+const chatFlow: { nodes: FlowNode[] } = chatFlowData;
+
+// --- Helper functions ---
+function getNodeById(flow: { nodes: FlowNode[] }, id: string | null): FlowNode | null {
+  if (!id) return null;
   return flow.nodes.find((n) => n.id === id) || null;
 }
 
-/** List of interactive node types */
-const interactiveTypes = [
-  "input",
+// Updated interactive and auto node type lists to match exported JSON.
+const interactiveTypes: string[] = [
   "text-input",
-  "email-input",
-  "phone-input",
-  "website-input",
-  "number-input",
-  "date-input",
-  "time-input",
-  "payment-input",
-  "buttons-input",
-  "pic-choice-input",
-  "choice",
-  "wait-input",
+  "input_date",
+  "input_buttons",
+  "input_website",
+  "input_phone",
+  "input_email",
+  "input_wait",
+  "input_pic_choice"
 ];
+const autoTypes: string[] = ["start", "text", "image", "video", "audio"];
 
-/** Auto types: nodes that are automatically displayed (bot messages) */
-const autoTypes = ["start", "message", "text", "base", "audio", "image", "video", "end"];
-
-/** Mapping from node type to HTML input type */
+// Mapping from interactive node type to HTML input type.
 const inputTypeMapping: Record<string, string> = {
   "text-input": "text",
-  "email-input": "email",
-  "phone-input": "tel",
-  "website-input": "url",
-  "number-input": "number",
-  "date-input": "date",
-  "time-input": "time",
-  "payment-input": "number",
+  "input_date": "date",
+  "input_website": "url",
+  "input_phone": "tel",
+  "input_email": "email",
+  // for numeric inputs if any:
+  "input_number": "number",
+  // others default to text.
 };
 
-/** Helper: Determine if a bubble should be right-aligned (user responses) */
+// Helper: Determine if a bubble is right-aligned (user responses).
 function isRightAligned(nodeType: string): boolean {
   return nodeType === "user";
 }
 
-/** Helper: Convert YouTube URL to embed URL */
-function getYoutubeEmbedUrl(url: string): string {
-  const match = url.match(/(?:v=|youtu\.be\/)([^&]+)/);
-  if (match && match[1]) {
-    return `https://www.youtube.com/embed/${match[1]}`;
-  }
-  return url;
-}
-
+// --- ChatReader Component ---
 const ChatReader: React.FC = () => {
+  // currentNodeId: id of the next node to be processed.
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
+  // conversation: array of nodes (and user responses) that have been rendered.
   const [conversation, setConversation] = useState<any[]>([]);
+  // inputValue: for interactive text inputs.
   const [inputValue, setInputValue] = useState("");
   const chatHistoryRef = useRef<HTMLDivElement>(null);
 
@@ -114,6 +67,7 @@ const ChatReader: React.FC = () => {
   useEffect(() => {
     const startNode = getNodeById(chatFlow, "start");
     if (startNode) {
+      // For auto nodes, add them immediately.
       if (autoTypes.includes(startNode.type)) {
         setConversation([startNode]);
       }
@@ -128,23 +82,25 @@ const ChatReader: React.FC = () => {
     }
   }, [conversation]);
 
-  // 3. Handle new node arrival.
+  // 3. Process new node arrival.
   useEffect(() => {
     if (!currentNodeId) return;
     const node = getNodeById(chatFlow, currentNodeId);
     if (!node) return;
 
-    // For wait-input nodes: delay without rendering prompt.
-    if (node.type === "wait-input") {
-      const seconds = parseInt(node.options?.secondsToWaitFor ?? "1", 10);
+    if (node.type === "input_wait") {
+      // For wait nodes, delay according to waitTime.
+      const seconds = node.content?.waitTime || 1;
       const timer = setTimeout(() => {
+        // Append the wait node (optional) and move on.
+        setConversation((prev) => [...prev, node]);
         setCurrentNodeId(node.next ?? null);
       }, seconds * 1000);
       return () => clearTimeout(timer);
     }
 
-    // For auto nodes: auto-append after a delay.
     if (autoTypes.includes(node.type)) {
+      // Auto nodes: append after a short delay.
       const timer = setTimeout(() => {
         setConversation((prev) => [...prev, node]);
         setCurrentNodeId(node.next ?? null);
@@ -152,7 +108,7 @@ const ChatReader: React.FC = () => {
       return () => clearTimeout(timer);
     }
 
-    // For interactive nodes: if not already appended, add the prompt.
+    // Interactive nodes: if not already in conversation, append them.
     if (interactiveTypes.includes(node.type)) {
       const alreadyInHistory = conversation.some((c) => c.id === node.id);
       if (!alreadyInHistory) {
@@ -161,7 +117,7 @@ const ChatReader: React.FC = () => {
     }
   }, [currentNodeId, conversation]);
 
-  // 4. Handle interactive input submission.
+  // 4. Handle interactive input submission (for text-input, input_date, etc.).
   function handleInputSubmit() {
     if (!inputValue.trim()) return;
     const userBubble = {
@@ -169,8 +125,8 @@ const ChatReader: React.FC = () => {
       type: "user",
       content: { text: inputValue },
     };
-    // Append the user bubble on the right.
     setConversation((prev) => [...prev, userBubble]);
+    // After submission, auto-advance to next node.
     setTimeout(() => {
       const node = getNodeById(chatFlow, currentNodeId);
       if (node) {
@@ -180,19 +136,18 @@ const ChatReader: React.FC = () => {
     setInputValue("");
   }
 
-  // Submit on Enter.
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       handleInputSubmit();
     }
   }
 
-  // 5. Handle choice selection.
+  // 5. Handle choice selection for buttons and picture choices.
   function handleChoiceSelect(choice: any) {
     const userBubble = {
       id: `user_${Date.now()}`,
       type: "user",
-      content: { text: choice.text },
+      content: { text: choice.label }, // use the label as the user's choice
     };
     setConversation((prev) => [...prev, userBubble]);
     setTimeout(() => {
@@ -200,24 +155,24 @@ const ChatReader: React.FC = () => {
     }, 500);
   }
 
-  // 6. Render node content.
-  function renderNode(node: any) {
-    // a) Interactive input nodes (non-choice).
-    if (interactiveTypes.includes(node.type) && node.type !== "choice" && node.type !== "wait-input") {
+  // 6. Render node content based on type.
+  function renderNode(node: FlowNode) {
+    // --- Interactive Nodes (excluding wait) ---
+    if (interactiveTypes.includes(node.type) && node.type !== "input_buttons" && node.type !== "input_pic_choice" && node.type !== "input_wait") {
       const htmlInputType = inputTypeMapping[node.type] || "text";
       return (
-        <VStack spacing={3} align="stretch" className={`bubble-${node.type}`}>
+        <VStack spacing={3} align="stretch">
           <Box>
             <Text>{node.content.prompt}</Text>
           </Box>
-          <HStack className="input-container">
+          <HStack>
             <Input
               type={htmlInputType}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your answer..."
-              className="flex-1"
+              flex="1"
             />
             <Button onClick={handleInputSubmit} colorScheme="blue">
               Send
@@ -226,76 +181,95 @@ const ChatReader: React.FC = () => {
         </VStack>
       );
     }
-
-    // b) Choice node.
-    if (node.type === "choice") {
+    // --- Choice Nodes ---
+    if (node.type === "input_buttons") {
       return (
-        <VStack spacing={3} align="stretch" className={`bubble-${node.type}`}>
+        <VStack spacing={3} align="stretch">
           <Box>
-            <Text>{node.content.text}</Text>
+            <Text>{node.content.prompt}</Text>
           </Box>
-          <HStack className="choices-container">
-            {node.content.choices.map((choice: any) => (
-              <Button key={choice.id} onClick={() => handleChoiceSelect(choice)} colorScheme="teal">
-                {choice.text}
+          <HStack spacing={3}>
+            {node.content.choices.map((choice: any, idx: number) => (
+              <Button key={idx} onClick={() => handleChoiceSelect(choice)} colorScheme="teal">
+                {choice.label}
               </Button>
             ))}
           </HStack>
         </VStack>
       );
     }
-
-    // c) Wait-input: no UI.
-    if (node.type === "wait-input") {
+    if (node.type === "input_pic_choice") {
+      return (
+        <VStack spacing={3} align="stretch">
+          <Box>
+            <Text>{node.content.prompt}</Text>
+          </Box>
+          <HStack spacing={4}>
+            {node.content.choices.map((choice: any, idx: number) => (
+              <Button key={idx} onClick={() => handleChoiceSelect(choice)} variant="outline">
+                <img
+                  src={choice.imageUrl}
+                  alt={choice.label}
+                  style={{ maxHeight: "50px", marginRight: "8px" }}
+                />
+                <span>{choice.label}</span>
+              </Button>
+            ))}
+          </HStack>
+        </VStack>
+      );
+    }
+    // --- Wait Node ---
+    if (node.type === "input_wait") {
+      // Wait nodes do not display any UI.
       return null;
     }
-
-    // d) Video node.
-    if (node.type === "video") {
-      const { mediaType, videoUrl, url } = node.content;
-      if (mediaType === "youtube") {
-        const embedUrl = getYoutubeEmbedUrl(videoUrl || url);
+    // --- Auto Nodes ---
+    if (autoTypes.includes(node.type)) {
+      if (node.type === "text") {
+        return <Box><Text>{node.content.text}</Text></Box>;
+      }
+      if (node.type === "image") {
         return (
-          <Box className={`bubble-${node.type}`}>
+          <Box>
+            <img src={node.content.imageUrl} alt={node.content.alt} style={{ maxWidth: "250px" }} />
+          </Box>
+        );
+      }
+      if (node.type === "video") {
+        const embedUrl = getYoutubeEmbedUrl(node.content.videoUrl || node.content.url);
+        return (
+          <Box>
             <iframe
               src={embedUrl}
-              title="YouTube video"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              title="video"
+              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              className="w-64 h-40"
+              style={{ width: "300px", height: "200px" }}
             />
           </Box>
         );
       }
-      // If it's a direct video URL:
-      return (
-        <Box className={`bubble-${node.type}`}>
-          <video controls className="w-64">
-            <source src={videoUrl || url} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </Box>
-      );
+      if (node.type === "audio") {
+        return (
+          <Box>
+            <audio controls style={{ width: "300px" }}>
+              <source src={node.content.audioUrl} type="audio/mpeg" />
+              Your browser does not support the audio element.
+            </audio>
+          </Box>
+        );
+      }
+      if (node.type === "start") {
+        return null; // Start node might not render anything.
+      }
     }
-
-    // e) Image node.
-    if (node.type === "image") {
-      return (
-        <Box className={`bubble-${node.type}`}>
-          <img src={node.content.imageUrl} alt={node.content.alt} className="w-64" />
-        </Box>
-      );
-    }
-
-    // f) All other auto nodes (start, message, text, etc.)
-    return (
-      <Box className={`bubble-${node.type}`}>
-        <Text>{node.content?.text}</Text>
-      </Box>
-    );
+    // --- Fallback ---
+    return <Box><Text>{node.content?.text || ""}</Text></Box>;
   }
 
-  // 7. Get the current node.
+  // --- Main Render ---
+  // Get the current node (if exists).
   const currentNode = getNodeById(chatFlow, currentNodeId);
 
   return (
@@ -318,7 +292,7 @@ const ChatReader: React.FC = () => {
             </div>
           );
         })}
-        {/* Render the current interactive prompt if not already in conversation */}
+        {/* Render current interactive prompt if not already in conversation */}
         {currentNode &&
           interactiveTypes.includes(currentNode.type) &&
           !conversation.some((c) => c.id === currentNode.id) && (
