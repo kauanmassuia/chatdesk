@@ -25,4 +25,12 @@ const StartNode = memo(() => {
 
 StartNode.displayName = 'StartNode'
 
-export default StartNode 
+// Exporter function for StartNode:
+export function exportStartNode(node: any) {
+  return {
+    type: "start",
+    content: {},  // No message; just a marker.
+  }
+}
+
+export default StartNode

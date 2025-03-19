@@ -1,3 +1,4 @@
+// AudioNode.tsx
 import { memo } from 'react'
 import { Input, VStack, Box, useColorModeValue } from '@chakra-ui/react'
 import { FiHeadphones } from 'react-icons/fi'
@@ -53,4 +54,15 @@ const AudioNode = memo(({ data, selected }: AudioNodeProps) => {
 
 AudioNode.displayName = 'AudioNode'
 
-export default AudioNode 
+// Exporter function for AudioNode:
+export function exportAudioNode(node: any) {
+  return {
+    type: "audio",
+    content: {
+      audioUrl: node.data?.audioUrl || "",
+      title: node.data?.title || "",
+    },
+  }
+}
+
+export default AudioNode

@@ -3,7 +3,7 @@ import InputNode from './InputNode'
 
 interface NumberInputNodeProps {
   data: {
-    value: string
+    prompt: string  // Use prompt here instead of value
     onChange: (field: string, value: string) => void
   }
   selected: boolean
@@ -15,16 +15,29 @@ const NumberInputNode = ({ data, selected }: NumberInputNodeProps) => {
       icon={MdOutlineNumbers}
       label="Number Input"
       selected={selected}
-      type="number"
-      placeholder="Digite um número..."
-      value={data.value}
-      onChange={(value) => data.onChange('value', value)}
-      validation={{
-        pattern: '[0-9]*',
-        message: 'Por favor, digite apenas números'
-      }}
+      // In the editor we want a text input so you can type the prompt.
+      type="text"
+      placeholder="Digite a pergunta para número..."
+      value={data.prompt}
+      onChange={(value) => data.onChange('prompt', value)}
     />
   )
 }
 
-export default NumberInputNode 
+// Export function for the chat UI.
+export function exportNumberInputNode(node: any) {
+  return {
+    type: 'input_number',
+    content: {
+      prompt: node.data?.prompt || '',
+      validation: {
+        pattern: '^[0-9]+$',
+        message: 'Por favor, digite apenas números'
+      }
+    },
+  }
+}
+
+NumberInputNode.displayName = 'NumberInputNode'
+
+export default NumberInputNode

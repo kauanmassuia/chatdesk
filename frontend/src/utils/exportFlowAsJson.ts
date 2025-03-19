@@ -3,40 +3,50 @@ import { Node, Edge } from 'reactflow'
 import { nodeExporters } from './nodeExporters'
 
 export function exportFlowAsJson(nodes: Node[], edges: Edge[]) {
-  // 1) Build a map: nodeId -> partial JSON
   const exportedMap: Record<string, any> = {}
 
+  // 1) Process each node using its exporter.
   for (const node of nodes) {
-    const exporter = node.type ? nodeExporters[node.type] : undefined;
-    // If no exporter, fallback
-    const partial = exporter
-      ? exporter(node)
-      : { type: node.type, content: {} }
-
+    const exporter = node.type ? nodeExporters[node.type] : undefined
+    const partial = exporter ? exporter(node) : { type: node.type, content: {} }
     exportedMap[node.id] = {
       id: node.id,
       ...partial,
-      // We'll fill in "next" below
-      next: null,
+      next: null, // default
     }
   }
 
-  // 2) Use edges to define next pointers
-  //    (If you have branching or multiple edges, adapt accordingly.)
+  // 2) Process edges.
   for (const edge of edges) {
-    const sourceId = edge.source
-    const targetId = edge.target
+    const { source, sourceHandle, target } = edge
+    const nodeEntry = exportedMap[source]
+    if (!nodeEntry) continue
 
-    // If the source node is valid, set "next" to targetId
-    if (exportedMap[sourceId]) {
-      exportedMap[sourceId].next = targetId
+    if (nodeEntry.type === 'input_buttons') {
+      // Expect the sourceHandle to be in the form "button-<index>"
+      const match = sourceHandle?.match(/button-(\d+)/)
+      if (match) {
+        const index = parseInt(match[1], 10)
+        if (nodeEntry.content?.choices && nodeEntry.content.choices[index]) {
+          nodeEntry.content.choices[index].next = target
+        }
+      }
+    } else if (nodeEntry.type === 'input_pic_choice') {
+      // If it's a PicChoice node, connect the choices with their next nodes
+      nodeEntry.content.choices.forEach((choice: any, index: number) => {
+        const matchingEdge = edges.find((edge) => edge.source === nodeEntry.id && edge.sourceHandle === `button-${index}`)
+        if (matchingEdge) {
+          choice.next = matchingEdge.target
+        }
+      })
+    } else {
+      // For non-button nodes, simply assign the target as the next pointer.
+      nodeEntry.next = target
     }
   }
 
-  // 3) Convert map to array
+  // 3) Finalize and return the export.
   const finalNodes = Object.values(exportedMap)
-
-  // 4) Return final JSON
   return {
     version: '1.0',
     id: 'exported_flow',

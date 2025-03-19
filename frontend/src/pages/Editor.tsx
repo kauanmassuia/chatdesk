@@ -23,7 +23,7 @@ import NumberInputNode from '../components/nodes/inputs/NumberInputNode'
 import EmailInputNode from '../components/nodes/inputs/EmailInputNode'
 import WebsiteInputNode from '../components/nodes/inputs/WebsiteInputNode'
 import DateInputNode from '../components/nodes/inputs/DateInputNode'
-import TimeInputNode from '../components/nodes/inputs/WaitInputNode'
+import WaitInputNode from '../components/nodes/inputs/WaitInputNode'
 import PhoneInputNode from '../components/nodes/inputs/PhoneInputNode'
 import ButtonsInputNode from '../components/nodes/inputs/ButtonsInputNode'
 import PicChoiceInputNode from '../components/nodes/inputs/PicChoiceInputNode'
@@ -40,7 +40,7 @@ const nodeTypes = {
   input_email: EmailInputNode,
   input_website: WebsiteInputNode,
   input_date: DateInputNode,
-  input_time: TimeInputNode,
+  input_wait: WaitInputNode,
   input_phone: PhoneInputNode,
   input_buttons: ButtonsInputNode,
   input_pic_choice: PicChoiceInputNode,
