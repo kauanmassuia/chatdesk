@@ -75,9 +75,9 @@ nav a {
 }
 
 .hero h1 {
-  font-size: 48px;
-  margin-bottom: 20px;
-  max-width: 800px;
+  font-size: 60px;
+  margin-bottom: 30px;
+  max-width: 1400px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -162,7 +162,7 @@ nav a {
 }
 
 .feature-cta {
-  background-color: #2575fc;
+  background-color: #FF9E2C;
   color: white;
   border: none;
   padding: 12px 24px;

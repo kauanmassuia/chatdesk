@@ -1,7 +1,6 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import "../styles/chat.css";
- // Você precisará criar este arquivo CSS
 
 export default function Home() {
   const navigate = useNavigate()
@@ -9,6 +8,74 @@ export default function Home() {
   const goToLogin = () => {
     navigate('/login')
   }
+
+
+  useEffect(() => {
+    const counters = document.querySelectorAll('.count');
+    const duration = 2000; // 2 segundos de duração
+    const easeOutQuad = (t) => t * (2 - t);
+  
+    const animateCounters = () => {
+      counters.forEach(counter => {
+        const target = parseInt(counter.getAttribute('data-val'), 10);
+        let current = 0;
+        const increment = 1000; // Contar sempre de mil em mil
+  
+        const updateCounter = (timestamp, start) => {
+          const progress = Math.min((timestamp - start) / duration, 1);
+          const eased = easeOutQuad(progress);
+  
+          // Atualiza a contagem de mil em mil
+          current = Math.min(Math.floor(eased * target), target);
+  
+          // Formatar o número
+          counter.textContent = current.toLocaleString();
+  
+          if (progress < 1) {
+            requestAnimationFrame((timestamp) => updateCounter(timestamp, start));
+          } else {
+            // Adiciona o sufixo apropriado após a contagem terminar
+            if (counter.classList.contains('count-mil')) {
+              counter.textContent = `+${target}mil`;
+            } else if (counter.classList.contains('count-percent')) {
+              counter.textContent = `+${target}%`;
+            } else {
+              counter.textContent = `+${target}`;
+            }
+          }
+        };
+  
+        // Inicia a animação
+        const startAnimation = () => {
+          const step = (timestamp) => {
+            let start = timestamp;
+            updateCounter(timestamp, start);
+          };
+  
+          requestAnimationFrame(step);
+        };
+  
+        startAnimation();
+      });
+    };
+  
+    // Observer para detectar quando a seção estiver visível
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          animateCounters();
+          observer.disconnect(); // Desconectar após a animação
+        }
+      },
+      { threshold: 0.5 } // Verifica quando pelo menos 50% do elemento estiver visível
+    );
+  
+    observer.observe(document.querySelector('.stats'));
+  
+    return () => observer.disconnect(); // Limpar quando o componente for desmontado
+  }, []);
+
+  
 
   return (
     <div className="landing-page">
@@ -27,8 +94,8 @@ export default function Home() {
       {/* Hero Section */}
       <section className="hero">
         <div className="hero-content">
-          <h1>Gerencie seu atendimento com a ajuda da I.A e a simplicidade do ChatDesk</h1>
-          <h2>Nunca foi tão fácil organizar, responder e acompanhar seus atendimentos.</h2>
+          <h1>Crie Chatbots Automáticos e Melhore a Experiência do Cliente</h1>
+          <h2>Crie e implemente chatbots inteligentes para um atendimento rápido, escalável e preciso.</h2>
           <button onClick={goToLogin} className="cta-button">Assinar agora</button>
         </div>
       </section>
@@ -38,15 +105,15 @@ export default function Home() {
         <h2>Veja nossos números</h2>
         <div className="stats-container">
           <div className="stat-item">
-            <h3>+0mil</h3>
-            <p>Atendimentos realizados</p>
+            <h3 className="count count-mil" data-val="68">0</h3>
+            <p>Conversas Registradas</p>
           </div>
           <div className="stat-item">
-            <h3>+0%</h3>
+            <h3 className="count count-percent" data-val="99">0</h3>
             <p>Aumento na satisfação</p>
           </div>
           <div className="stat-item">
-            <h3>+0mil</h3>
+            <h3 className="count" data-val="78">0</h3>
             <p>Empresas utilizam diariamente</p>
           </div>
         </div>
@@ -60,17 +127,17 @@ export default function Home() {
             <div className="image-placeholder"></div>
           </div>
           <div className="feature-content">
-            <h2>Atendimento com IA integrada</h2>
-            <p>Nossa IA analisa e sugere respostas para agilizar seu atendimento ao cliente, incluindo respostas personalizadas.</p>
-            <button onClick={goToLogin} className="feature-cta">Assine agora →</button>
+            <h2>Construa Bots com Simples Arrastar e Soltar</h2>
+            <p>Crie chatbots personalizados com facilidade! Com apenas um arrastar de blocos, você define de forma intuitiva o caminho que o seu bot seguirá, criando interações inteligentes e eficientes. Sem código, sem complicação. O controle está em suas mãos!</p>
+            <button onClick={goToLogin} className="feature-cta">Leia o Docs →</button>
           </div>
         </div>
 
         <div className="feature-item reverse">
           <div className="feature-content">
-            <h2>Gerenciamento centralizado</h2>
-            <p>Centralize todos os seus canais de atendimento em uma única plataforma e gerencie com facilidade.</p>
-            <button onClick={goToLogin} className="feature-cta">Assine agora →</button>
+            <h2>Importe e Exporte Templates Prontos</h2>
+            <p>Acelere o seu processo de criação com templates prontos! Importe e exporte facilmente funis de vendas, respostas automáticas e fluxos de atendimento já validados no mercado. Economize tempo e use modelos que já foram testados e aprovados, garantindo resultados eficazes desde o primeiro momento.</p>
+            <button onClick={goToLogin} className="feature-cta">Leia o Docs →</button>
           </div>
           <div className="feature-image">
             {/* Placeholder for image */}
@@ -84,9 +151,9 @@ export default function Home() {
             <div className="image-placeholder"></div>
           </div>
           <div className="feature-content">
-            <h2>Análise de desempenho</h2>
-            <p>Acompanhe métricas importantes e descubra oportunidades de melhoria no seu atendimento.</p>
-            <button onClick={goToLogin} className="feature-cta">Assine agora →</button>
+            <h2>Mais do que apenas um Bot: Análise de Performance para o Crescimento</h2>
+            <p>Acompanhe o desempenho do seu chatbot em tempo real e otimize sua estratégia com nossas poderosas ferramentas de análise. Acesse métricas detalhadas como taxas de desistência, conclusão de fluxos e engajamento, permitindo que você tome decisões informadas para melhorar a experiência do cliente. Use esses insights para refinar seu atendimento e impulsionar o crescimento do seu negócio.</p>
+            <button onClick={goToLogin} className="feature-cta">Leia o Docs →</button>
           </div>
         </div>
       </section>
