@@ -29,9 +29,10 @@ export default function Register() {
   const bgColor = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
 
+  // In your Register.tsx
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     if (password !== confirmPassword) {
       toast({
@@ -40,35 +41,37 @@ export default function Register() {
         status: 'error',
         duration: 3000,
         isClosable: true,
-      })
-      setIsLoading(false)
-      return
+      });
+      setIsLoading(false);
+      return;
     }
 
     try {
-      // Call the registration service
-      await register(name, email, password, confirmPassword)
+      // Call your registration service (which now returns auth tokens, etc.)
+      await register(name, email, password, confirmPassword);
       toast({
         title: 'Cadastro realizado!',
         description: 'Sua conta foi criada com sucesso.',
         status: 'success',
         duration: 3000,
         isClosable: true,
-      })
-      navigate('/login')
-    } catch (error: any) {
-      // Customize error handling based on your API response
+      });
+      // Optionally store tokens here if your API returns them.
+      // localStorage.setItem('authToken', token);
+      navigate('/dashboard');
+    } catch (error) {
       toast({
         title: 'Erro no cadastro',
-        description: error.response?.data?.errors || 'Ocorreu um erro ao criar sua conta.',
+        description: 'Ocorreu um erro ao criar sua conta.',
         status: 'error',
         duration: 3000,
         isClosable: true,
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
+
 
   return (
     <Box minH="100vh" bg={useColorModeValue('gray.50', 'gray.900')}>

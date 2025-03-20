@@ -8,6 +8,7 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Editor from './pages/Editor'
 import ChatReader from './pages/ChatReader';
+import PrivateRoute from './components/PrivateRoute';
 
 
 function App() {
@@ -17,9 +18,13 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/editor" element={<Editor />} />
-        <Route path="/chat" element={<ChatReader />} />
+
+        <Route element={<PrivateRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/editor" element={<Editor />} />
+          <Route path="/chat" element={<ChatReader />} />
+        </Route>
+        
       </Routes>
     </Layout>
   )
