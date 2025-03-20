@@ -22,9 +22,9 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/editor" element={<Editor />} />
-          <Route path="/chat" element={<ChatReader />} />
         </Route>
-        
+          <Route path="/chat" element={<ChatReader />} />
+
       </Routes>
     </Layout>
   )

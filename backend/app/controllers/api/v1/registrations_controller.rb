@@ -11,6 +11,8 @@ module Api
 
       def respond_with(resource, _opts = {})
         if resource.persisted?
+          token_hash = resource.create_new_auth_token
+          response.headers.merge!(token_hash)
           render json: { status: "success", user: resource }, status: :ok
         else
           render json: { status: "error", errors: resource.errors.full_messages }, status: :unprocessable_entity

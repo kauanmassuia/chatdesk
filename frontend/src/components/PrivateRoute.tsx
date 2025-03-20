@@ -1,38 +1,46 @@
 // src/components/PrivateRoute.tsx
-import React, { useEffect, useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@chakra-ui/react';
 
 const isAuthenticated = () => {
-  // Check for the auth token stored from login
-  return Boolean(localStorage.getItem('access-token'));
+  const token = localStorage.getItem('access-token');
+  const client = localStorage.getItem('client');
+  const uid = localStorage.getItem('uid');
+  console.log('Authentication check:', { token, client, uid });
+  return Boolean(token && client && uid);
 };
 
 const PrivateRoute: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const toast = useToast();
   const [allowed, setAllowed] = useState<boolean | null>(null);
+  const toastShown = useRef(false);
 
   useEffect(() => {
     if (!isAuthenticated()) {
-      toast({
-        title: 'Ação restrita',
-        description: 'Você precisa estar logado para fazer essa ação.',
-        status: 'warning',
-        duration: 3000,
-        isClosable: true,
-      });
-      // Delay redirection so the toast can be visible
-      setTimeout(() => {
-        navigate('/login', { replace: true });
-      }, 100); // Wait a bit longer than the toast duration
+      if (!toastShown.current) {
+        toastShown.current = true;
+        toast({
+          title: 'Ação restrita',
+          description: 'Você precisa estar logado para fazer essa ação.',
+          status: 'warning',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+      if (location.pathname !== '/login') {
+        setTimeout(() => {
+          navigate('/login', { replace: true });
+        }, 150);
+      }
       setAllowed(false);
     } else {
       setAllowed(true);
     }
-  }, [navigate, toast]);
+  }, [navigate, toast, location]);
 
-  // Render nothing while waiting for redirection.
   return allowed ? <Outlet /> : null;
 };
 

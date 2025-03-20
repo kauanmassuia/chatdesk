@@ -8,7 +8,7 @@ class User < ApplicationRecord
   include DeviseTokenAuth::Concerns::User
 
   # Enum for subscription plans
-  enum plan: { free: 0, standard: 1 }
+  enum plan: { free: 0, standard: 1, premium: 2 }
 
   # Validations
   validates :email, presence: true,
