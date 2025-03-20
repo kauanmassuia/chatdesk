@@ -18,7 +18,13 @@ const StartNode = memo(() => {
       <Text fontSize="sm" fontWeight="medium">
         Start
       </Text>
-      <Handle type="source" position={Position.Bottom} />
+      <Handle type="source" position={Position.Bottom}
+      style={{
+        width: 16,        // aumenta a largura
+        height: 16,       // aumenta a altura
+        background: '#353535', // muda a cor para azul (opcional)
+        border: '2px solid white', // borda branca (opcional)
+      }} />
     </Box>
   )
 })
