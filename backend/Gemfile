@@ -25,6 +25,8 @@ gem "bootsnap", require: false
 
 gem "devise"
 gem "devise_token_auth"
+gem "omniauth-google-oauth2"
+
 gem "stripe"
 gem "dotenv-rails", groups: [ :development, :test ]
 
