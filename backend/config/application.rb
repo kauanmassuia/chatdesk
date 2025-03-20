@@ -8,6 +8,16 @@ Bundler.require(*Rails.groups)
 
 module Backend
   class Application < Rails::Application
+    # Ensure you’re still in API-only mode (to keep things lean)
+    config.api_only = true
+
+    # Insert cookies and session middleware early so OmniAuth has access
+    config.middleware.insert_before 0, ActionDispatch::Cookies
+    config.middleware.insert_after ActionDispatch::Cookies, ActionDispatch::Session::CookieStore,
+      key: "_chat_desk_session",              # Unique cookie name (use your app name)
+      secure: Rails.env.production?,            # Use secure cookies in production
+      httponly: true,                           # Disallow JavaScript access for security
+      same_site: :lax                           # Helps mitigate CSRF attacks
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.2
 

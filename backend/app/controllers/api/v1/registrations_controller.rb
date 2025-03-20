@@ -1,10 +1,13 @@
 module Api
   module V1
     class RegistrationsController < Devise::RegistrationsController
-      skip_before_action :verify_authenticity_token
       respond_to :json
 
       private
+
+      def sign_up_params
+        params.permit(:name, :email, :password, :password_confirmation)
+      end
 
       def respond_with(resource, _opts = {})
         if resource.persisted?

@@ -1,3 +1,4 @@
+// src/pages/Register.tsx
 import {
   Box,
   Button,
@@ -14,6 +15,7 @@ import {
 } from '@chakra-ui/react'
 import { useState } from 'react'
 import { useNavigate, Link as RouterLink } from 'react-router-dom'
+import { register, signInWithGoogle } from '../services/authService'
 
 export default function Register() {
   const [name, setName] = useState('')
@@ -44,10 +46,8 @@ export default function Register() {
     }
 
     try {
-      // Aqui você implementará a lógica de registro
-      // Por enquanto, vamos apenas simular um registro bem-sucedido
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      navigate('/login')
+      // Call the registration service
+      await register(name, email, password, confirmPassword)
       toast({
         title: 'Cadastro realizado!',
         description: 'Sua conta foi criada com sucesso.',
@@ -55,10 +55,12 @@ export default function Register() {
         duration: 3000,
         isClosable: true,
       })
-    } catch (error) {
+      navigate('/login')
+    } catch (error: any) {
+      // Customize error handling based on your API response
       toast({
         title: 'Erro no cadastro',
-        description: 'Ocorreu um erro ao criar sua conta.',
+        description: error.response?.data?.errors || 'Ocorreu um erro ao criar sua conta.',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -141,6 +143,16 @@ export default function Register() {
                   isLoading={isLoading}
                 >
                   Criar conta
+                </Button>
+                <Button
+                  variant="outline"
+                  colorScheme="red"
+                  size="lg"
+                  fontSize="md"
+                  onClick={signInWithGoogle}
+                  isLoading={isLoading}
+                >
+                  Cadastro com Google
                 </Button>
               </Stack>
             </form>
