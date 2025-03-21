@@ -1,5 +1,4 @@
 // src/App.tsx
-import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Layout from './pages/Layout'
 import Home from './pages/Home'
@@ -8,14 +7,15 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Editor from './pages/Editor'
 import ChatReader from './pages/ChatReader';
+import GoogleOAuthSuccess from './pages/GoogleOAuthSuccess'
 import PrivateRoute from './components/PrivateRoute';
-
 
 function App() {
   return (
     <Layout>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/googleOauthSuccess" element={<GoogleOAuthSuccess />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 

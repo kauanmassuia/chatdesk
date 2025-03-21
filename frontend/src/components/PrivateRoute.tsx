@@ -7,7 +7,8 @@ const isAuthenticated = () => {
   const token = localStorage.getItem('access-token');
   const client = localStorage.getItem('client');
   const uid = localStorage.getItem('uid');
-  console.log('Authentication check:', { token, client, uid });
+
+  console.log('Authentication check:', { token, client, uid }); // Debug log
   return Boolean(token && client && uid);
 };
 
@@ -20,6 +21,7 @@ const PrivateRoute: React.FC = () => {
 
   useEffect(() => {
     if (!isAuthenticated()) {
+      // Show toast only once
       if (!toastShown.current) {
         toastShown.current = true;
         toast({
@@ -30,11 +32,14 @@ const PrivateRoute: React.FC = () => {
           isClosable: true,
         });
       }
+
+      // Delay redirection if not on login page
       if (location.pathname !== '/login') {
         setTimeout(() => {
           navigate('/login', { replace: true });
-        }, 150);
+        }, 200);
       }
+
       setAllowed(false);
     } else {
       setAllowed(true);

@@ -1,28 +1,37 @@
 # app/controllers/api/v1/omniauth_callbacks_controller.rb
+
 module Api
   module V1
     class OmniauthCallbacksController < DeviseTokenAuth::OmniauthCallbacksController
       def omniauth_success
-        auth_hash = request.env["omniauth.auth"]
-        Rails.logger.debug "Omniauth callback auth_hash: #{auth_hash.inspect}"
+          auth_hash = request.env["omniauth.auth"]
+          @resource = User.find_for_oauth(auth_hash) # your custom method to find/create a Google user
+          unless @resource
+            render_error_not_allowed_auth_origin_url and return
+          end
 
-        @resource = User.find_for_oauth(auth_hash)
-        unless @resource
-          render_error_not_allowed_auth_origin_url and return
+          # Generate a new auth token hash
+          token_hash = @resource.create_new_auth_token
+          @resource.save!
+
+          # Build a query that includes tokens + minimal user data
+          data = {
+            tokens: token_hash,         # e.g. { "access-token" => "xxx", "client" => "yyy", ... }
+            user: {
+              id: @resource.id,
+              email: @resource.email,
+              name: @resource.name
+            }
+          }
+
+          # We recommend redirecting to a route like /googleOauthSuccess instead of /?
+          frontend_url = ENV['FRONTEND_URL'] || 'http://localhost:5173'
+          redirect_to "#{frontend_url}/googleOauthSuccess?#{data.to_query}"
+
+        rescue => e
+          Rails.logger.error "Omniauth error: #{e.message}"
+          render_error_not_allowed_auth_origin_url
         end
-
-        @resource.create_token
-        @resource.save!
-
-        # Option 1: Redirect using a hardcoded frontend URL
-        redirect_to "#{ENV['FRONTEND_URL'] || 'http://localhost:5173'}/dashboard?#{@resource.to_query}"
-
-        # Option 2: Alternatively, you can render a JSON response and let the frontend handle redirection.
-        # render json: { redirect_url: "#{ENV['FRONTEND_URL'] || 'http://localhost:5173'}/dashboard" }
-      rescue => e
-        Rails.logger.error "Omniauth error: #{e.message}"
-        render_error_not_allowed_auth_origin_url
-      end
 
       protected
 
@@ -30,15 +39,12 @@ module Api
         (params[:resource_class].presence || "User").constantize
       end
 
+      # Not strictly needed if you rely on the default get_resource_from_auth_hash
       def get_resource_from_auth_hash
         auth_hash = request.env["omniauth.auth"]
-        if auth_hash.blank?
-          Rails.logger.error "OmniAuth auth hash is missing: #{request.env.inspect}"
-          raise "No auth hash found in request.env['omniauth.auth']"
-        end
+        raise "No auth hash found" unless auth_hash
 
         resource_class = resource_class_from_params
-        Rails.logger.debug "Using resource_class: #{resource_class} with auth_hash: #{auth_hash.inspect}"
         resource_class.find_for_oauth(auth_hash)
       end
     end

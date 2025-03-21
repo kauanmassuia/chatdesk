@@ -12,31 +12,35 @@ import {
   MenuList,
   Text,
   useColorModeValue,
-} from '@chakra-ui/react'
-import { FiPlus, FiSettings, FiChevronDown, FiFolderPlus } from 'react-icons/fi'
-import { useNavigate } from 'react-router-dom' // Updated import
+} from '@chakra-ui/react';
+import { FiPlus, FiSettings, FiChevronDown, FiFolderPlus, FiLogOut } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom'; // Updated import
+import { logout } from '../services/authService'; // Assuming you already have this function in authService.ts
 
 export default function Dashboard() {
-  const navigate = useNavigate() // Changed hook
-  const bgColor = useColorModeValue('gray.50', 'gray.900')
-  const cardBg = useColorModeValue('white', 'gray.800')
-  const borderColor = useColorModeValue('gray.200', 'gray.700')
+  const navigate = useNavigate();
+  const bgColor = useColorModeValue('gray.50', 'gray.900');
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
 
+  // Retrieve the user's name (from Google OAuth or registration)
+  const userName = localStorage.getItem('userName') || 'Guest'; // You should save userName when they log in
+
+  // Handle the "Create Bot" button click
   const handleCreateBot = () => {
-    navigate('/editor') // Updated navigation
-  }
+    navigate('/editor');
+  };
+
+  // Handle Logout
+  const handleLogout = async () => {
+    await logout(); // This function will clear tokens from localStorage and call the logout API
+    navigate('/login'); // Redirect to the login page
+  };
 
   return (
     <Box minH="100vh" bg={bgColor}>
       {/* Header */}
-      <Box
-        w="full"
-        py={4}
-        px={6}
-        borderBottom="1px"
-        borderColor={borderColor}
-        bg={cardBg}
-      >
+      <Box w="full" py={4} px={6} borderBottom="1px" borderColor={borderColor} bg={cardBg}>
         <Container maxW="1440px">
           <Flex justify="space-between" align="center">
             <Box>
@@ -52,7 +56,8 @@ export default function Dashboard() {
               <Button leftIcon={<FiSettings />} variant="ghost" size="sm">
                 Settings & Members
               </Button>
-              <Text>Kauan Massuia&apos;s workspace</Text>
+              {/* Display user name */}
+              <Text>{userName}'s workspace</Text>
               <Menu>
                 <MenuButton as={Button} rightIcon={<FiChevronDown />} variant="ghost" size="sm">
                   Free
@@ -62,6 +67,16 @@ export default function Dashboard() {
                   <MenuItem>Billing</MenuItem>
                 </MenuList>
               </Menu>
+              {/* Logout Button */}
+              <Button
+                leftIcon={<FiLogOut />}
+                variant="ghost"
+                size="sm"
+                colorScheme="red"
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
             </HStack>
           </Flex>
         </Container>
@@ -104,6 +119,5 @@ export default function Dashboard() {
         </Flex>
       </Container>
     </Box>
-  )
+  );
 }
-
