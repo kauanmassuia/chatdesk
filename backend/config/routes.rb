@@ -12,11 +12,10 @@ Rails.application.routes.draw do
     namespace :v1, defaults: { format: :json } do
       mount_devise_token_auth_for "User", at: "auth", controllers: {
         omniauth_callbacks: "api/v1/omniauth_callbacks",
-        registrations: "api/v1/registrations",
+        registrations: "api/v1/registrations"
         # sessions: "api/v1/sessions"
       }
-
-      # Add additional API endpoints here as your project grows.
+      resources :flows, only: [ :index, :show, :create, :update, :destroy ]
     end
   end
 end

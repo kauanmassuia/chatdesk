@@ -10,6 +10,8 @@ class User < ApplicationRecord
   # Enum for subscription plans
   enum plan: { free: 0, standard: 1, premium: 2 }
 
+  has_many :flows, dependent: :destroy
+
   # Validations
   validates :email, presence: true,
                     uniqueness: { case_sensitive: false },

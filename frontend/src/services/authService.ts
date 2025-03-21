@@ -1,7 +1,10 @@
 // src/services/authService.ts
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1/auth';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+
+// Authentication endpoints are under /auth
+const AUTH_URL = `${API_BASE_URL}/auth`;
 
 // src/services/authService.ts
 const storeAuthTokens = (headers: any) => {
@@ -25,7 +28,7 @@ const storeAuthTokens = (headers: any) => {
 export const login = async (email: string, password: string) => {
   try {
     const response = await axios.post(
-      `${API_BASE_URL}/sign_in`,
+      `${AUTH_URL}/sign_in`,
       { email, password },
       { withCredentials: true }
     );
@@ -49,7 +52,7 @@ export const register = async (
 ) => {
   try {
     const response = await axios.post(
-      API_BASE_URL,
+      AUTH_URL,
       { name, email, password, password_confirmation: passwordConfirmation },
       { withCredentials: true }
     );
@@ -69,7 +72,7 @@ export const logout = async () => {
     const uid = localStorage.getItem("uid");
 
     const response = await axios.delete(
-      `${API_BASE_URL}/sign_out`,
+      `${AUTH_URL}/sign_out`,
       {
         headers: {
           'access-token': accessToken,
@@ -95,5 +98,5 @@ export const logout = async () => {
 
 
 export const signInWithGoogle = () => {
-  window.location.href = `${API_BASE_URL}/google_oauth2?auth_origin_url=${window.location.origin}&resource_class=User&namespace_name=api_v1`;
+  window.location.href = `${AUTH_URL}/google_oauth2?auth_origin_url=${window.location.origin}&resource_class=User&namespace_name=api_v1`;
 };
