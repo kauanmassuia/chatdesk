@@ -101,6 +101,17 @@ function getVimeoId(url: string): string {
   return match ? match[2] : ''
 }
 
+export function exportVideoNode(node: any) {
+  return {
+    type: 'video',
+    content: {
+      videoUrl: node.data?.videoUrl || '',
+      // You might also export the media type (youtube, vimeo, direct)
+      mediaType: node.data?.type || 'direct',
+    },
+  };
+}
+
 VideoNode.displayName = 'VideoNode'
 
-export default VideoNode 
+export default VideoNode

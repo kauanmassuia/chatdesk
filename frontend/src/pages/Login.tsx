@@ -11,41 +11,48 @@ import {
   useColorModeValue,
   Link as ChakraLink,
   useToast,
-} from '@chakra-ui/react'
-import { useState } from 'react'
-import { useNavigate, Link as RouterLink } from 'react-router-dom'
+} from '@chakra-ui/react';
+import { useState } from 'react';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { login, signInWithGoogle } from '../services/authService';
 
 export default function Login() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const navigate = useNavigate()
-  const toast = useToast()
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const toast = useToast();
 
-  const bgColor = useColorModeValue('white', 'gray.800')
-  const borderColor = useColorModeValue('gray.200', 'gray.600')
+  const bgColor = useColorModeValue('white', 'gray.800');
+  const borderColor = useColorModeValue('gray.200', 'gray.600');
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
-      // Here you will implement your authentication logic.
-      // For now, simulate a successful login.
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      navigate('/dashboard')
-    } catch (error) {
+      // Call the login service
+      await login(email, password);
+      toast({
+        title: 'Login realizado!',
+        description: 'Você foi autenticado com sucesso.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      navigate('/dashboard'); // Redirect to your dashboard or home page
+    } catch (error: any) {
       toast({
         title: 'Erro ao fazer login',
-        description: 'Verifique suas credenciais e tente novamente.',
+        description: error.response?.data?.errors || 'Verifique suas credenciais e tente novamente.',
         status: 'error',
         duration: 3000,
         isClosable: true,
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Box minH="100vh" bg={useColorModeValue('gray.50', 'gray.900')}>
@@ -101,6 +108,16 @@ export default function Login() {
                 >
                   Entrar
                 </Button>
+                <Button
+                  variant="outline"
+                  colorScheme="red"
+                  size="lg"
+                  fontSize="md"
+                  onClick={signInWithGoogle}
+                  isLoading={isLoading}
+                >
+                  Entrar com Google
+                </Button>
               </Stack>
             </form>
           </Box>
@@ -113,5 +130,5 @@ export default function Login() {
         </Stack>
       </Container>
     </Box>
-  )
+  );
 }

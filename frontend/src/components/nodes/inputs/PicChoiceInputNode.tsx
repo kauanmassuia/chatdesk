@@ -2,6 +2,7 @@ import { Box, Button, HStack, IconButton, Image, Input, VStack, useColorModeValu
 import { HiOutlinePhotograph } from 'react-icons/hi'
 import { BsPlus, BsTrash } from 'react-icons/bs'
 import BaseNode from '../BaseNode'
+import { Handle, Position } from 'reactflow'
 
 interface PicChoice {
   imageUrl: string
@@ -10,8 +11,9 @@ interface PicChoice {
 
 interface PicChoiceInputNodeProps {
   data: {
+    prompt: string  // Prompt for the user
     choices: PicChoice[]
-    onChange: (field: string, value: PicChoice[]) => void
+    onChange: (field: string, value: any) => void
   }
   selected: boolean
 }
@@ -40,35 +42,22 @@ const PicChoiceInputNode = ({ data, selected }: PicChoiceInputNodeProps) => {
     <BaseNode icon={HiOutlinePhotograph} label="Picture Choice" selected={selected}>
       <Box p={2}>
         <VStack spacing={4} align="stretch">
+          {/* Prompt input */}
+          <Input
+            placeholder="Digite a pergunta para a escolha de imagem..."
+            size="sm"
+            value={data.prompt}
+            onChange={(e) => data.onChange('prompt', e.target.value)}
+            bg={inputBg}
+            borderColor={borderColor}
+          />
+
+          {/* Picture choice options */}
           {data.choices.map((choice, index) => (
-            <Box key={index} borderWidth={1} borderColor={borderColor} borderRadius="md" p={3}>
-              <VStack spacing={3}>
-                <Input
-                  value={choice.imageUrl}
-                  onChange={(e) => updateChoice(index, 'imageUrl', e.target.value)}
-                  placeholder="URL da imagem..."
-                  size="sm"
-                  bg={inputBg}
-                  borderColor={borderColor}
-                />
-                {choice.imageUrl && (
-                  <Image
-                    src={choice.imageUrl}
-                    alt={choice.label}
-                    maxH="100px"
-                    objectFit="contain"
-                    borderRadius="md"
-                  />
-                )}
-                <HStack>
-                  <Input
-                    value={choice.label}
-                    onChange={(e) => updateChoice(index, 'label', e.target.value)}
-                    placeholder="Legenda da imagem..."
-                    size="sm"
-                    bg={inputBg}
-                    borderColor={borderColor}
-                  />
+            <Box key={index} borderWidth={1} borderColor={borderColor} borderRadius="md" p={3} position="relative">
+              <VStack spacing={3} align="stretch">
+                {/* Left-side delete button */}
+                <HStack position="absolute" top="0" left="0" spacing={2} zIndex={1}>
                   <IconButton
                     aria-label="Remover opção"
                     icon={<BsTrash />}
@@ -78,9 +67,56 @@ const PicChoiceInputNode = ({ data, selected }: PicChoiceInputNodeProps) => {
                     onClick={() => removeChoice(index)}
                   />
                 </HStack>
+
+                {/* Image URL input */}
+                <Input
+                  value={choice.imageUrl}
+                  onChange={(e) => updateChoice(index, 'imageUrl', e.target.value)}
+                  placeholder="URL da imagem..."
+                  size="sm"
+                  bg={inputBg}
+                  borderColor={borderColor}
+                />
+
+                {/* Display image if the URL is present */}
+                {choice.imageUrl && (
+                  <Image
+                    src={choice.imageUrl}
+                    alt={choice.label}
+                    maxH="100px"
+                    objectFit="contain"
+                    borderRadius="md"
+                  />
+                )}
+
+                {/* Label input */}
+                <Input
+                  value={choice.label}
+                  onChange={(e) => updateChoice(index, 'label', e.target.value)}
+                  placeholder="Legenda da imagem..."
+                  size="sm"
+                  bg={inputBg}
+                  borderColor={borderColor}
+                />
+
+                {/* Right-side handle for connections */}
+                <Handle
+                  type="source"
+                  position={Position.Right}
+                  id={`button-${index}`}  // Unique handle for each button choice
+                  style={{
+                    width: 10,
+                    height: 10,
+                    background: '#555',
+                    top: '50%',
+                    right: -5,
+                  }}
+                />
               </VStack>
             </Box>
           ))}
+
+          {/* Button to add new choice */}
           <Button
             leftIcon={<BsPlus />}
             size="sm"
@@ -96,4 +132,21 @@ const PicChoiceInputNode = ({ data, selected }: PicChoiceInputNodeProps) => {
   )
 }
 
-export default PicChoiceInputNode 
+// Export function for the chat UI.
+export function exportPicChoiceInputNode(node: any) {
+  return {
+    type: 'input_pic_choice',  // This is how the chat UI will know it's a picture choice input
+    content: {
+      prompt: node.data?.prompt || '',
+      choices: (node.data?.choices || []).map((choice: PicChoice) => ({
+        label: choice.label,
+        imageUrl: choice.imageUrl,
+        next: null,  // "next" will be set based on the connections/edges
+      })),
+    },
+  }
+}
+
+PicChoiceInputNode.displayName = 'PicChoiceInputNode'
+
+export default PicChoiceInputNode

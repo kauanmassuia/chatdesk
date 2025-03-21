@@ -1,0 +1,190 @@
+{
+  "version": "1.0",
+  "id": "exported_flow",
+  "name": "Exported Flow",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "start",
+      "content": {},
+      "next": "text-1742409118019"
+    },
+    {
+      "id": "text-1742409118019",
+      "type": "text",
+      "content": {
+        "text": "Hello, this is the ultimate json export test made by Otavio"
+      },
+      "next": "input_pic_choice-1742409154352"
+    },
+    {
+      "id": "input_pic_choice-1742409154352",
+      "type": "input_pic_choice",
+      "content": {
+        "prompt": "Choose",
+        "choices": [
+          {
+            "label": "gato laranja",
+            "imageUrl": "https://media.istockphoto.com/id/1443562748/pt/foto/cute-ginger-cat.jpg?s=612x612&w=0&k=20&c=OqlMF3bysUX6cVux5kKc1gqCGMghQpGc5ukyw1qG82s=",
+            "next": "text-1742409238270"
+          },
+          {
+            "label": "gato anao",
+            "imageUrl": "https://www.petz.com.br/blog/wp-content/uploads/2017/07/gato02.jpg",
+            "next": "text-1742409330439"
+          }
+        ]
+      },
+      "next": null
+    },
+    {
+      "id": "text-1742409238270",
+      "type": "text",
+      "content": {
+        "text": "U choose orange crazy fucking cat"
+      },
+      "next": "input_text-1742409271005"
+    },
+    {
+      "id": "input_text-1742409271005",
+      "type": "text-input",
+      "content": {
+        "prompt": "Why orange cat? (wait 5 seconds is next)"
+      },
+      "next": "input_wait-1742409303687"
+    },
+    {
+      "id": "input_wait-1742409303687",
+      "type": "input_wait",
+      "content": {
+        "waitTime": 5
+      },
+      "next": "image-1742409384422"
+    },
+    {
+      "id": "text-1742409330439",
+      "type": "text",
+      "content": {
+        "text": "U choose baby cat"
+      },
+      "next": "input_text-1742409345122"
+    },
+    {
+      "id": "input_text-1742409345122",
+      "type": "text-input",
+      "content": {
+        "prompt": "Why baby cat?(wait 5)"
+      },
+      "next": "input_wait-1742409359605"
+    },
+    {
+      "id": "input_wait-1742409359605",
+      "type": "input_wait",
+      "content": {
+        "waitTime": 5
+      },
+      "next": "image-1742409414139"
+    },
+    {
+      "id": "image-1742409384422",
+      "type": "image",
+      "content": {
+        "imageUrl": "https://www.petz.com.br/blog/wp-content/uploads/2017/07/gato02.jpg",
+        "alt": "gato anao"
+      },
+      "next": "input_date-1742409499506"
+    },
+    {
+      "id": "image-1742409414139",
+      "type": "image",
+      "content": {
+        "imageUrl": "https://media.istockphoto.com/id/1443562748/pt/foto/cute-ginger-cat.jpg?s=612x612&w=0&k=20&c=OqlMF3bysUX6cVux5kKc1gqCGMghQpGc5ukyw1qG82s=",
+        "alt": "gato laranja"
+      },
+      "next": "input_date-1742409499506"
+    },
+    {
+      "id": "input_date-1742409499506",
+      "type": "input_date",
+      "content": {
+        "prompt": "When u gonna adopt a cat?"
+      },
+      "next": "input_buttons-1742409547540"
+    },
+    {
+      "id": "input_buttons-1742409547540",
+      "type": "input_buttons",
+      "content": {
+        "prompt": "Legal. Vc quer qual?",
+        "choices": [
+          {
+            "label": "Gato laranja",
+            "next": "input_website-1742409667274"
+          },
+          {
+            "label": "Gato bebe",
+            "next": "input_website-1742409684874"
+          }
+        ]
+      },
+      "next": null
+    },
+    {
+      "id": "input_website-1742409667274",
+      "type": "input_website",
+      "content": {
+        "prompt": "Insira seu site de gato laranja",
+        "validation": {
+          "pattern": "https?://.+",
+          "message": "Por favor, digite uma URL válida começando com http:// ou https://"
+        }
+      },
+      "next": "input_phone-1742409809263"
+    },
+    {
+      "id": "input_website-1742409684874",
+      "type": "input_website",
+      "content": {
+        "prompt": "Insira seu site de gato bebe",
+        "validation": {
+          "pattern": "https?://.+",
+          "message": "Por favor, digite uma URL válida começando com http:// ou https://"
+        }
+      },
+      "next": "input_phone-1742409809263"
+    },
+    {
+      "id": "input_phone-1742409809263",
+      "type": "input_phone",
+      "content": {
+        "prompt": "Insira seu telefone",
+        "validation": {
+          "pattern": "\\([0-9]{2}\\) [0-9]{4,5}-[0-9]{4}",
+          "message": "Por favor, digite um telefone no formato (00) 00000-0000"
+        }
+      },
+      "next": "input_email-1742409829209"
+    },
+    {
+      "id": "input_email-1742409829209",
+      "type": "input_email",
+      "content": {
+        "prompt": "Insira seu email",
+        "validation": {
+          "pattern": "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$",
+          "message": "Por favor, digite um email válido"
+        }
+      },
+      "next": "audio-1742409845876"
+    },
+    {
+      "id": "audio-1742409845876",
+      "type": "audio",
+      "content": {
+        "audioUrl": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        "title": "gato miando"
+      },
+      "next": null
+    }
+  ]
+}

@@ -71,9 +71,9 @@ const Sidebar = () => {
         </Box>
 
         <Box>
-          <Text 
-            fontWeight="medium" 
-            fontSize="sm" 
+          <Text
+            fontWeight="medium"
+            fontSize="sm"
             mb={4}
             color={useColorModeValue('gray.600', 'gray.400')}
             px={1}
@@ -90,9 +90,9 @@ const Sidebar = () => {
         </Box>
 
         <Box>
-          <Text 
-            fontWeight="medium" 
-            fontSize="sm" 
+          <Text
+            fontWeight="medium"
+            fontSize="sm"
             mb={4}
             color={useColorModeValue('gray.600', 'gray.400')}
             px={1}
@@ -105,7 +105,7 @@ const Sidebar = () => {
             <DraggableItem icon={MdOutlineEmail} label="Email" type="input_email" />
             <DraggableItem icon={TbWorldWww} label="Website" type="input_website" />
             <DraggableItem icon={BsCalendarDate} label="Date" type="input_date" />
-            <DraggableItem icon={BsClock} label="Time" type="input_time" />
+            <DraggableItem icon={BsClock} label="Wait" type="input_wait" />
             <DraggableItem icon={BsTelephone} label="Phone" type="input_phone" />
             <DraggableItem icon={BsGrid} label="Buttons" type="input_buttons" />
             <DraggableItem icon={HiOutlinePhotograph} label="Pic choice" type="input_pic_choice" />
@@ -117,4 +117,4 @@ const Sidebar = () => {
   )
 }
 
-export default Sidebar 
+export default Sidebar

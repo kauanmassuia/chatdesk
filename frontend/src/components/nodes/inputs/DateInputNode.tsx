@@ -3,23 +3,37 @@ import InputNode from './InputNode'
 
 interface DateInputNodeProps {
   data: {
-    value: string
+    prompt: string // prompt text for what the user sees in the chat UI
     onChange: (field: string, value: string) => void
   }
   selected: boolean
 }
 
 const DateInputNode = ({ data, selected }: DateInputNodeProps) => {
+  // In the editor, use a simple text input to let the user define the prompt.
   return (
     <InputNode
       icon={BsCalendarDate}
       label="Date Input"
       selected={selected}
-      type="date"
-      value={data.value}
-      onChange={(value) => data.onChange('value', value)}
+      placeholder="Digite a pergunta para data..."
+      value={data.prompt}
+      onChange={(value) => data.onChange('prompt', value)}
+      type="text" // Use text input in the editor so you can type the prompt.
     />
   )
 }
 
-export default DateInputNode 
+export function exportDateInputNode(node: any) {
+  // When exporting, we want the chat UI to know that this is a date input.
+  return {
+    type: 'input_date',
+    content: {
+      prompt: node.data?.prompt || '',
+    },
+  }
+}
+
+DateInputNode.displayName = 'DateInputNode'
+
+export default DateInputNode

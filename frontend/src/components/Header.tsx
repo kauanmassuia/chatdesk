@@ -2,8 +2,24 @@ import { HStack, Button, IconButton, useColorModeValue, Divider, Box, Container 
 import { FiChevronLeft, FiLink, FiRefreshCw, FiHelpCircle } from 'react-icons/fi'
 import { BsLightning } from 'react-icons/bs'
 import { RiTestTubeLine } from 'react-icons/ri'
+import { useFlowStore } from '../store/flowStore';
+import { exportFlowAsJson } from '../utils/exportFlowAsJson'; // our central export function
 
-const Header = () => {
+const Header: React.FC = () => {
+  const { nodes, edges } = useFlowStore();
+
+  const handleExport = () => {
+    const flowJson = exportFlowAsJson(nodes, edges);
+    const blob = new Blob([JSON.stringify(flowJson, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'flow.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   const borderColor = useColorModeValue('gray.200', 'gray.700')
   const bgColor = useColorModeValue('white', 'gray.800')
 
@@ -68,8 +84,8 @@ const Header = () => {
             <Button size="sm" variant="ghost">
               Settings
             </Button>
-            <Button size="sm" variant="ghost">
-              Share
+            <Button size="sm" variant="ghost" onClick={handleExport}>
+              Export
             </Button>
             <Button size="sm" variant="ghost">
               Results
@@ -105,4 +121,4 @@ const Header = () => {
   )
 }
 
-export default Header 
+export default Header

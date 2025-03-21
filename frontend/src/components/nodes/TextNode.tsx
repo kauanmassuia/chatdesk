@@ -37,6 +37,16 @@ const TextNode = memo(({ data, selected }: TextNodeProps) => {
   )
 })
 
+export function exportTextNode(node: any) {
+  // node.data.text holds the text
+  return {
+    type: 'text', // final JSON type
+    content: {
+      text: node.data?.text || '',
+    },
+  }
+}
+
 TextNode.displayName = 'TextNode'
 
 export default TextNode

@@ -3,7 +3,7 @@ import InputNode from './InputNode'
 
 interface WebsiteInputNodeProps {
   data: {
-    value: string
+    prompt: string  // Prompt for the user
     onChange: (field: string, value: string) => void
   }
   selected: boolean
@@ -15,16 +15,28 @@ const WebsiteInputNode = ({ data, selected }: WebsiteInputNodeProps) => {
       icon={TbWorldWww}
       label="Website Input"
       selected={selected}
-      type="url"
-      placeholder="Digite a URL do site..."
-      value={data.value}
-      onChange={(value) => data.onChange('value', value)}
-      validation={{
-        pattern: 'https?://.+',
-        message: 'Por favor, digite uma URL válida começando com http:// ou https://'
-      }}
+      type="text"  // Type text in the editor so the user can type the prompt
+      placeholder="Digite a pergunta para URL..."
+      value={data.prompt}  // Use prompt instead of value for the question
+      onChange={(value) => data.onChange('prompt', value)}  // Update the prompt value
     />
   )
 }
 
-export default WebsiteInputNode 
+// Export function for the chat UI.
+export function exportWebsiteInputNode(node: any) {
+  return {
+    type: 'input_website',  // Type for website input
+    content: {
+      prompt: node.data?.prompt || '',  // Include the prompt in the exported content
+      validation: {
+        pattern: 'https?://.+',  // Regex for URL validation
+        message: 'Por favor, digite uma URL válida começando com http:// ou https://'
+      }
+    },
+  }
+}
+
+WebsiteInputNode.displayName = 'WebsiteInputNode'
+
+export default WebsiteInputNode

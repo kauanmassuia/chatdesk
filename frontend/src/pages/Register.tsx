@@ -1,3 +1,4 @@
+// src/pages/Register.tsx
 import {
   Box,
   Button,
@@ -14,6 +15,7 @@ import {
 } from '@chakra-ui/react'
 import { useState } from 'react'
 import { useNavigate, Link as RouterLink } from 'react-router-dom'
+import { register, signInWithGoogle } from '../services/authService'
 
 export default function Register() {
   const [name, setName] = useState('')
@@ -27,9 +29,10 @@ export default function Register() {
   const bgColor = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
 
+  // In your Register.tsx
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     if (password !== confirmPassword) {
       toast({
@@ -38,23 +41,24 @@ export default function Register() {
         status: 'error',
         duration: 3000,
         isClosable: true,
-      })
-      setIsLoading(false)
-      return
+      });
+      setIsLoading(false);
+      return;
     }
 
     try {
-      // Aqui você implementará a lógica de registro
-      // Por enquanto, vamos apenas simular um registro bem-sucedido
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      navigate('/login')
+      // Call your registration service (which now returns auth tokens, etc.)
+      await register(name, email, password, confirmPassword);
       toast({
         title: 'Cadastro realizado!',
         description: 'Sua conta foi criada com sucesso.',
         status: 'success',
         duration: 3000,
         isClosable: true,
-      })
+      });
+      // Optionally store tokens here if your API returns them.
+      // localStorage.setItem('authToken', token);
+      navigate('/dashboard');
     } catch (error) {
       toast({
         title: 'Erro no cadastro',
@@ -62,11 +66,12 @@ export default function Register() {
         status: 'error',
         duration: 3000,
         isClosable: true,
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
+
 
   return (
     <Box minH="100vh" bg={useColorModeValue('gray.50', 'gray.900')}>
@@ -141,6 +146,16 @@ export default function Register() {
                   isLoading={isLoading}
                 >
                   Criar conta
+                </Button>
+                <Button
+                  variant="outline"
+                  colorScheme="red"
+                  size="lg"
+                  fontSize="md"
+                  onClick={signInWithGoogle}
+                  isLoading={isLoading}
+                >
+                  Cadastro com Google
                 </Button>
               </Stack>
             </form>
