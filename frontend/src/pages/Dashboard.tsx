@@ -101,7 +101,6 @@ export default function Dashboard() {
         <Container maxW="1440px">
           <Flex justify="space-between" align="center">
             <Box>
-              {/* Logo placeholder */}
               <Icon boxSize={8} viewBox="0 0 24 24">
                 <path
                   fill="currentColor"
@@ -110,18 +109,18 @@ export default function Dashboard() {
               </Icon>
             </Box>
             <HStack spacing={4}>
-              <Button leftIcon={<FiSettings />} variant="ghost" size="sm">
-                Settings & Members
+              <Button leftIcon={<FiSettings />} variant="ghost" size="sm" onClick={onOpen}>
+                Configurações e Membros
               </Button>
               {/* Display user name */}
               <Text>{userName}'s workspace</Text>
               <Menu>
                 <MenuButton as={Button} rightIcon={<FiChevronDown />} variant="ghost" size="sm">
-                  Free
+                  Gratuito
                 </MenuButton>
                 <MenuList>
-                  <MenuItem>Upgrade Plan</MenuItem>
-                  <MenuItem>Billing</MenuItem>
+                  <MenuItem>Atualizar Plano</MenuItem>
+                  <MenuItem>Faturamento</MenuItem>
                 </MenuList>
               </Menu>
               {/* Logout Button */}
@@ -139,7 +138,7 @@ export default function Dashboard() {
         </Container>
       </Box>
 
-      {/* Main Content */}
+      {/* Conteúdo Principal */}
       <Container maxW="1440px" py={8}>
         <Flex gap={6} wrap="wrap">
           {/* Create Flow Card */}

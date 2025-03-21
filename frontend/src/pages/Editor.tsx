@@ -34,7 +34,7 @@ const nodeTypes = {
   image: ImageNode,
   video: VideoNode,
   audio: AudioNode,
-  start: StartNode,
+  start: StartNode, // Nó "Start"
   input_text: TextInputNode,
   input_number: NumberInputNode,
   input_email: EmailInputNode,
@@ -110,7 +110,7 @@ function EditorContent() {
         type,
         position,
         data: {
-          // Initial data for the node
+          // Dados iniciais para o nó
           text: '',
           imageUrl: '',
           alt: '',
@@ -124,9 +124,12 @@ function EditorContent() {
           amount: '',
           currency: 'BRL',
           description: '',
-          onChange: type === 'text'
-            ? (value: string) => updateNodeData(newNode.id, { text: value })  // For TextNode
-            : (field: string, value: string) => updateNodeData(newNode.id, { [field]: value }) // For all other nodes
+          onChange:
+            type === 'text'
+              ? (value: string) =>
+                  updateNodeData(newNode.id, { text: value }) // Para TextNodes
+              : (field: string, value: string) =>
+                  updateNodeData(newNode.id, { [field]: value }), // Para outros nós
         },
         dragHandle: '.drag',
       }
@@ -161,8 +164,17 @@ function EditorContent() {
             minZoom={0.5}
             maxZoom={2}
             defaultEdgeOptions={{
-              type: 'smoothstep',
-              animated: true,
+              type: 'smoothstep', // Tipo de linha (curva suave)
+              animated: false, // Sem animação
+              style: {
+                strokeWidth: 3, // Espessura maior da linha
+                strokeDasharray: 'none', // Remove pontilhado
+                strokeLinecap: 'round', // Cantos arredondados
+                strokeLinejoin: 'round', // Junções suaves
+                strokeOpacity: '0.9', // Transparência leve
+                stroke:'#4A90E2', // Cor azul clara
+                zIndex: 10, // Garante que as linhas fiquem acima dos nós
+              },
             }}
             connectionRadius={50}
             proOptions={proOptions}
