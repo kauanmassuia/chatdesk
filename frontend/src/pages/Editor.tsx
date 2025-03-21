@@ -49,6 +49,7 @@ const nodeTypes = {
 
 const proOptions = { hideAttribution: true }
 
+
 function EditorContent() {
   const {
     nodes,
@@ -58,6 +59,7 @@ function EditorContent() {
     onConnect,
     addNode,
     setNodes,
+    setEdges,
     updateNodeData,
   } = useFlowStore()
   const { screenToFlowPosition } = useReactFlow()

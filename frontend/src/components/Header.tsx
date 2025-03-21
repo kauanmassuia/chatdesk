@@ -1,12 +1,22 @@
-import { HStack, Button, IconButton, useColorModeValue, Divider, Box, Container } from '@chakra-ui/react'
-import { FiChevronLeft, FiLink, FiRefreshCw, FiHelpCircle } from 'react-icons/fi'
-import { BsLightning } from 'react-icons/bs'
-import { RiTestTubeLine } from 'react-icons/ri'
+import {
+  HStack,
+  Button,
+  IconButton,
+  useColorModeValue,
+  Box,
+  Container,
+  useDisclosure
+} from '@chakra-ui/react';
+import { FiChevronLeft, FiLink, FiRefreshCw, FiHelpCircle } from 'react-icons/fi';
+import { BsLightning } from 'react-icons/bs';
+import { RiTestTubeLine, RiUploadCloudLine } from 'react-icons/ri';
 import { useFlowStore } from '../store/flowStore';
-import { exportFlowAsJson } from '../utils/exportFlowAsJson'; // our central export function
+import { exportFlowAsJson } from '../utils/exportFlowAsJson';
+import ImportFlowModal from './modal/ImportFlowModal';
 
 const Header: React.FC = () => {
   const { nodes, edges } = useFlowStore();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleExport = () => {
     const flowJson = exportFlowAsJson(nodes, edges);
@@ -20,8 +30,8 @@ const Header: React.FC = () => {
     document.body.removeChild(a);
   };
 
-  const borderColor = useColorModeValue('gray.200', 'gray.700')
-  const bgColor = useColorModeValue('white', 'gray.800')
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const bgColor = useColorModeValue('white', 'gray.800');
 
   return (
     <Box
@@ -38,7 +48,7 @@ const Header: React.FC = () => {
     >
       <Container maxW="1440px" h="100%" px={6}>
         <HStack h="100%" spacing={6} align="center">
-          {/* Grupo de navegação - 1/4 do espaço */}
+          {/* Navigation Group */}
           <HStack spacing={3} minW="240px">
             <IconButton
               aria-label="Voltar"
@@ -66,14 +76,14 @@ const Header: React.FC = () => {
             />
           </HStack>
 
-          {/* Nome do projeto - 1/4 do espaço */}
+          {/* Project Name */}
           <Box minW="240px">
             <Button size="sm" variant="ghost">
               ChatDesk
             </Button>
           </Box>
 
-          {/* Menu principal - 1/4 do espaço */}
+          {/* Main Menu */}
           <HStack spacing={6} flex={1} justify="center">
             <Button size="sm" variant="ghost" colorScheme="blue">
               Flow
@@ -87,38 +97,37 @@ const Header: React.FC = () => {
             <Button size="sm" variant="ghost" onClick={handleExport}>
               Export
             </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              leftIcon={<RiUploadCloudLine />}
+              onClick={onOpen}
+            >
+              Import
+            </Button>
             <Button size="sm" variant="ghost">
               Results
             </Button>
           </HStack>
 
-          {/* Ações - 1/4 do espaço */}
+          {/* Actions */}
           <HStack spacing={4} minW="240px" justify="flex-end">
-            <Button
-              size="sm"
-              variant="ghost"
-              leftIcon={<BsLightning />}
-            >
+            <Button size="sm" variant="ghost" leftIcon={<BsLightning />}>
               Share
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              leftIcon={<RiTestTubeLine />}
-            >
+            <Button size="sm" variant="ghost" leftIcon={<RiTestTubeLine />}>
               Test
             </Button>
-            <Button
-              size="sm"
-              colorScheme="orange"
-            >
+            <Button size="sm" colorScheme="orange">
               Publish
             </Button>
           </HStack>
         </HStack>
       </Container>
+      {/* Import Modal */}
+      <ImportFlowModal isOpen={isOpen} onClose={onClose} />
     </Box>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;
