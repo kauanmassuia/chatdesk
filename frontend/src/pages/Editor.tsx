@@ -139,6 +139,24 @@ function EditorContent() {
     [screenToFlowPosition, addNode, updateNodeData]
   )
 
+  // Rehydrate imported nodes by adding missing onChange callbacks.
+  const rehydratedNodes = nodes.map(node => {
+    if (node.data && !node.data.onChange) {
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          onChange:
+            node.type === 'text'
+              ? (value: string) => updateNodeData(node.id, { text: value })
+              : (field: string, value: string) =>
+                  updateNodeData(node.id, { [field]: value }),
+        },
+      }
+    }
+    return node
+  })
+
   return (
     <Flex direction="column" h="100vh">
       <Header />
@@ -151,7 +169,7 @@ function EditorContent() {
           position="relative"
         >
           <ReactFlow
-            nodes={nodes}
+            nodes={rehydratedNodes}
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
