@@ -177,7 +177,7 @@ function EditorContent() {
       } catch (error) {
         // ...handle error if needed...
       }
-      setIsSaving(false)
+      setTimeout(() => setIsSaving(false), 1000)
     }, 2000)
     return () => clearTimeout(timer)
   }, [nodes, edges, uid])
