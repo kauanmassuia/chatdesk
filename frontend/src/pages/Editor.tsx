@@ -4,6 +4,7 @@ import ReactFlow, {
   Controls,
   useReactFlow,
   Node,
+  Edge,
   ReactFlowProvider,
   MiniMap,
   Panel,
@@ -29,8 +30,9 @@ import ButtonsInputNode from '../components/nodes/inputs/ButtonsInputNode'
 import PicChoiceInputNode from '../components/nodes/inputs/PicChoiceInputNode'
 import PaymentInputNode from '../components/nodes/inputs/PaymentInputNode'
 import { useLocation } from 'react-router-dom'
-import { updateFlow } from '../services/flowService'
+import { updateFlow, getFlow } from '../services/flowService'
 import { exportFlowAsJson } from '../utils/exportFlowAsJson'
+import { importFlowFromJson } from '../utils/importFlowFromJson'
 
 const nodeTypes = {
   text: TextNode,
@@ -283,9 +285,53 @@ function EditorContent() {
 }
 
 export default function Editor() {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const flowId = queryParams.get('flow_id');
+  // Remove local state for nodes/edges; use flowStore setters instead.
+  const setNodes = useFlowStore(state => state.setNodes);
+  const setEdges = useFlowStore(state => state.setEdges);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchFlow() {
+      if (flowId) {
+        try {
+          const flowData = await getFlow(flowId);
+          let content;
+          // If the content is a string (with Ruby arrow keys), convert it.
+          if (flowData && flowData.content) {
+            content = typeof flowData.content === 'string'
+              ? JSON.parse(flowData.content.replace(/=>/g, ':'))
+              : flowData.content;
+          } else {
+            content = { nodes: [], edges: [] };
+          }
+          const { nodes, edges } = importFlowFromJson(content);
+          setNodes(nodes);
+          setEdges(edges);
+        } catch (error) {
+          console.error('Error fetching flow:', error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        // No flow found; initialize with empty flow.
+        setNodes([]);
+        setEdges([]);
+        setLoading(false);
+      }
+    }
+    fetchFlow();
+  }, [flowId, setNodes, setEdges]);
+
+  if (loading) return <Spinner />;
+
   return (
-    <ReactFlowProvider>
-      <EditorContent />
-    </ReactFlowProvider>
-  )
+    <Box width="100%" height="100vh">
+      <ReactFlowProvider>
+        <EditorContent />
+      </ReactFlowProvider>
+    </Box>
+  );
 }

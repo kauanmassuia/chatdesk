@@ -51,3 +51,15 @@ export const updateFlow = async (uid: string, content: object) => {
   );
   return response.data;
 };
+
+export const getFlow = async (flowUid: string) => {
+  const accessToken = localStorage.getItem("access-token");
+  const client = localStorage.getItem("client");
+  const uidHeader = localStorage.getItem("uid");
+
+  const response = await axios.get(`${API_BASE_URL}/flows/${flowUid}`, {
+    headers: { 'access-token': accessToken, client, uid: uidHeader },
+    withCredentials: true,
+  });
+  return response.data;
+};
