@@ -25,15 +25,27 @@ export const createFlow = async (title: string, content: object = {}) => {
   const response = await axios.post(
     `${API_BASE_URL}/flows`,
     {
-      flow: {
-        title,
-        content,
-        published: false,
-        metadata: {},
-      },
+      title,
+      content, // flattened data structure
     },
     {
       headers: { 'access-token': accessToken, client, uid },
+      withCredentials: true,
+    }
+  );
+  return response.data;
+};
+
+export const updateFlow = async (uid: string, content: object) => {
+  const accessToken = localStorage.getItem("access-token");
+  const client = localStorage.getItem("client");
+  const uidHeader = localStorage.getItem("uid");
+
+  const response = await axios.put(
+    `${API_BASE_URL}/flows/${uid}`,
+    { content },
+    {
+      headers: { 'access-token': accessToken, client, uid: uidHeader },
       withCredentials: true,
     }
   );

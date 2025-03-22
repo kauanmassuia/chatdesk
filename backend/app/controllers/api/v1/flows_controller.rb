@@ -44,13 +44,18 @@ module Api
       private
 
       def set_flow
-        @flow = current_user.flows.find(params[:id])
+        @flow = current_user.flows.find_by(uid: params[:id])
       rescue ActiveRecord::RecordNotFound
         render json: { error: 'Flow not found' }, status: :not_found
       end
 
       def flow_params
-        params.require(:flow).permit(:title, :content, :published, metadata: {})
+        permitted = [:title, :published, metadata: {}, content: {}]
+        if params[:flow]
+          params.require(:flow).permit(*permitted)
+        else
+          params.permit(*permitted)
+        end
       end
     end
   end

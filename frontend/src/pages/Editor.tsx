@@ -1,4 +1,4 @@
-import { Box, Flex, useColorModeValue } from '@chakra-ui/react'
+import { Box, Flex, Spinner, useColorModeValue } from '@chakra-ui/react'
 import ReactFlow, {
   Background,
   Controls,
@@ -28,6 +28,9 @@ import PhoneInputNode from '../components/nodes/inputs/PhoneInputNode'
 import ButtonsInputNode from '../components/nodes/inputs/ButtonsInputNode'
 import PicChoiceInputNode from '../components/nodes/inputs/PicChoiceInputNode'
 import PaymentInputNode from '../components/nodes/inputs/PaymentInputNode'
+import { useLocation } from 'react-router-dom'
+import { updateFlow } from '../services/flowService'
+import { exportFlowAsJson } from '../utils/exportFlowAsJson'
 
 const nodeTypes = {
   text: TextNode,
@@ -64,6 +67,9 @@ function EditorContent() {
   } = useFlowStore()
   const { screenToFlowPosition } = useReactFlow()
   const [isDragging, setIsDragging] = useState(false)
+  const location = useLocation()
+  const uid = new URLSearchParams(location.search).get('flow_id')
+  const [isSaving, setIsSaving] = useState(false)
 
   const bgColor = useColorModeValue('gray.50', 'gray.900')
   const dropHighlightColor = useColorModeValue('blue.50', 'blue.900')
@@ -157,6 +163,25 @@ function EditorContent() {
     return node
   })
 
+  // Auto-save effect triggered after 2 seconds inactivity (nodes or edges change)
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (!uid) {
+        console.warn('No uid provided. Skipping autosave.')
+        return
+      }
+      setIsSaving(true)
+      try {
+        const exportData = exportFlowAsJson(nodes, edges)
+        await updateFlow(uid, exportData)
+      } catch (error) {
+        // ...handle error if needed...
+      }
+      setIsSaving(false)
+    }, 2000)
+    return () => clearTimeout(timer)
+  }, [nodes, edges, uid])
+
   return (
     <Flex direction="column" h="100vh">
       <Header />
@@ -219,6 +244,21 @@ function EditorContent() {
               <Box bg={bgColor} p={2} borderRadius="md" shadow="sm">
                 Use Ctrl + clique para selecionar múltiplos nós
               </Box>
+            </Panel>
+            <Panel position="top-left">
+              {isSaving && (
+              <Box
+                bg={bgColor}
+                p={2}
+                borderRadius="md"
+                shadow="sm"
+                display="flex"
+                alignItems="center"
+              >
+                <Spinner color="blue.500" speed="1s" mr={2} />
+                Saving...
+              </Box>
+              )}
             </Panel>
           </ReactFlow>
           {isDragging && (

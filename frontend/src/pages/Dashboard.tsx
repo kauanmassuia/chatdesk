@@ -75,7 +75,7 @@ export default function Dashboard() {
       // Refresh the flows list
       fetchFlows();
       // Redirect to the editor with the new flow ID
-      navigate(`/editor?flow_id=${newFlow.id}`);
+      // navigate(`/editor?flow_id=${newFlow.uid}`);
     } catch (error) {
       console.error('Error creating flow:', error);
       toast({
@@ -185,7 +185,7 @@ export default function Dashboard() {
                 transition="transform 0.2s"
                 _hover={{ transform: 'scale(1.02)' }}
                 _active={{ transform: 'scale(0.98)' }}
-                onClick={() => navigate(`/editor?flow_id=${flow.id}`)}
+                onClick={() => navigate(`/editor?flow_id=${flow.uid}`)}
                 cursor="pointer"
               >
                 <Heading size="md" mb={2}>
