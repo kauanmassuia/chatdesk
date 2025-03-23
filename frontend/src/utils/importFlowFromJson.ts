@@ -20,6 +20,20 @@ export function importFlowFromJson(flowJson: any): { nodes: Node[], edges: Edge[
       };
     }
 
+    // Rehydrate text-input nodes: if value is missing, use the prompt as the value.
+    if ((node.type === 'text-input' || typeMapping[node.type] === 'input_text') && data) {
+      if (data.value === undefined || data.value === null) {
+        data.value = data.prompt || '';
+      }
+    }
+
+    // Rehydrate wait input nodes: if value is missing, use waitTime (converted to string) as the value.
+    if (node.type === 'input_wait' && data) {
+      if (data.value === undefined || data.value === null) {
+        data.value = data.waitTime !== undefined ? data.waitTime.toString() : '';
+      }
+    }
+
     const newType = typeMapping[node.type] || node.type;
     return {
       ...node,

@@ -2,7 +2,7 @@ module Api
   module V1
     class FlowsController < BaseController
       before_action :authenticate_user!
-      before_action :set_flow, only: [:show, :update, :destroy]
+      before_action :set_flow, only: [ :show, :update, :destroy ]
 
       # GET /api/v1/flows
       def index
@@ -46,11 +46,11 @@ module Api
       def set_flow
         @flow = current_user.flows.find_by(uid: params[:id])
       rescue ActiveRecord::RecordNotFound
-        render json: { error: 'Flow not found' }, status: :not_found
+        render json: { error: "Flow not found" }, status: :not_found
       end
 
       def flow_params
-        permitted = [:title, :published, metadata: {}, content: {}]
+        permitted = [ :title, :published, metadata: {}, content: {} ]
         if params[:flow]
           params.require(:flow).permit(*permitted)
         else
