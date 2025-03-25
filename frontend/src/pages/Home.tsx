@@ -79,17 +79,18 @@ export default function Home() {
 
   return (
     <div className="landing-page">
-      {/* Header/Navigation */}
       <header className="header">
-        <div className="logo">ChatDesk</div>
-        <nav>
-          <ul>
-            <li><a href="#funcionalidades">Funcionalidades</a></li>
-            <li><a href="#preco">Preço</a></li>
-            <li><button onClick={goToLogin} className="login-btn">Login</button></li>
-          </ul>
-        </nav>
-      </header>
+  <img src="/src/assets/logovendflow.png" alt="ChatDesk Logo" className="logo-img" />
+  <nav className="nav-links">
+    <ul className="nav-list">
+      <li className="nav-item funcionalidades"><a href="#funcionalidades">Funcionalidades</a></li>
+      <li className="nav-item preco"><a href="#preco">Preço</a></li>
+      <li className="nav-item contato"><a href="#contato">Contato</a></li>
+      <li className="nav-item"><button onClick={goToLogin} className="login-btn">Login</button></li>
+    </ul>
+  </nav>
+</header>
+
 
       {/* Hero Section */}
       <section className="hero">
@@ -123,8 +124,11 @@ export default function Home() {
       <section id="funcionalidades" className="features">
         <div className="feature-item">
           <div className="feature-image">
-            {/* Placeholder for image */}
-            <div className="image-placeholder"></div>
+            {/* Substituí a imagem por um vídeo */}
+            <video className="feature-video" autoPlay loop muted playsInline>
+              <source src="/src/assets/videocomofuncionaflow.mp4" type="video/mp4" />
+              Seu navegador não suporta vídeos.
+            </video>
           </div>
           <div className="feature-content">
             <h2>Construa Bots com Simples Arrastar e Soltar</h2>
@@ -161,7 +165,7 @@ export default function Home() {
       {/* More Features Section */}
       <section className="more-features">
         <h2>Mais funcionalidades para facilitar sua vida</h2>
-        <p>Além de gerenciar atendimentos com IA, o ChatDesk oferece:</p>
+        <p>Além de gerenciar criar fluxos, o VendFlow oferece:</p>
         
         <div className="features-grid">
           <div className="feature-card">
@@ -173,38 +177,41 @@ export default function Home() {
             <p>Visualize relatórios de desempenho, tempo de resposta e satisfação do cliente.</p>
           </div>
           <div className="feature-card">
-            <h3>Integração multicanal</h3>
-            <p>Conecte WhatsApp, Facebook, Instagram e outros canais em uma única plataforma.</p>
+            <h3>Importação e Exportação de templates</h3>
+            <p>Importe templates prontos e exporte para compartilhar com usuários da plataforma quando quiser!</p>
           </div>
           <div className="feature-card">
             <h3>Chatbot personalizado</h3>
             <p>Crie fluxos de atendimento automatizados para resolver problemas comuns.</p>
           </div>
           <div className="feature-card">
-            <h3>Assistente com AI</h3>
-            <p>Obtenha sugestões de respostas e análise de sentimento em tempo real.</p>
+            <h3>Suporte 24/7</h3>
+            <p>Obtenha sugestões de respostas e análise de sentimento em tempo real 24/7.</p>
           </div>
           <div className="feature-card">
             <h3>Gestão de equipe</h3>
-            <p>Distribua atendimentos e monitore o desempenho de cada atendente.</p>
+            <p>Distribua atendimentos e monitore o desempenho de cada Flow.</p>
           </div>
         </div>
         
         <p className="more-text">e muito mais...</p>
       </section>
 
-      {/* Integrations Section */}
-      <section className="integrations">
-        <h2>Integração com suas ferramentas favoritas</h2>
-        <p>Conecte facilmente com CRMs, ERPs e outras ferramentas que você já utiliza.</p>
-        <div className="integrations-logos">
-          {/* Placeholder for integration logos */}
-          <div className="logo-placeholder"></div>
-          <div className="logo-placeholder"></div>
-          <div className="logo-placeholder"></div>
-        </div>
-        <p>e mais 30 integrações...</p>
-      </section>
+                {/* Security and Availability Section */}
+<section className="security-availability">
+  <h2>Segurança e Disponibilidade Garantidas</h2>
+  <p>Proteja seus dados com criptografia de ponta e garanta alta disponibilidade para sua operação 24/7.</p>
+  <div className="security-availability-images">
+    {/* Substituindo os ícones por imagens */}
+    <img src="/src/assets/reactlogo.png" alt="Supabase" className="image-security" />
+    <img src="/src/assets/TESTE2.png" alt="PostgreSQL" className="image-security" />
+    <img src="/src/assets/railslogo.png" alt="MongoDB" className="image-security" />
+  </div>
+  <p>Com tecnologia de ponta, você pode contar com segurança e confiabilidade o tempo todo.</p>
+</section>
+
+
+
 
       {/* Testimonials Section */}
       <section className="testimonials">
@@ -212,29 +219,103 @@ export default function Home() {
         <p>Veja alguns de nossos clientes incríveis que estão tendo resultados</p>
         
         <div className="testimonials-container">
-          {/* Testimonial cards would go here */}
-          <div className="testimonial-card">
-            <p>"O ChatDesk revolucionou nosso atendimento ao cliente. Reduzimos o tempo de resposta em 60%."</p>
-            <div className="testimonial-author">
-              <div className="author-avatar"></div>
-              <div className="author-info">
-                <h4>Nome do Cliente</h4>
-                <p>Empresa</p>
-              </div>
-            </div>
-          </div>
-          <div className="testimonial-card">
-            <p>"A integração com IA nos ajudou a escalar o suporte sem precisar contratar mais pessoas."</p>
-            <div className="testimonial-author">
-              <div className="author-avatar"></div>
-              <div className="author-info">
-                <h4>Nome do Cliente</h4>
-                <p>Empresa</p>
-              </div>
-            </div>
-          </div>
+    {/* Testimonial cards */}
+    <div className="testimonial-card">
+      <p>"O VendFlow revolucionou nosso atendimento ao cliente. Reduzimos o tempo de resposta em mais de 90%."</p>
+      <div className="testimonial-author">
+        <div className="author-avatar">
+          <img src="/src/assets/fotodepoimentodani.jpg" alt="Danielle Reis" className="author-image" />
         </div>
-      </section>
+        <div className="author-info">
+          <h4>@daniellecreis</h4>
+          <p>Expert Digital</p>
+        </div>
+      </div>
+    </div>
+    <div className="testimonial-card">
+      <p>"A venda dos nossos produtos físicos aumentou muito com os fluxos criados pela minha equipe, nota 10!"</p>
+      <div className="testimonial-author">
+        <div className="author-avatar">
+          <img src="/src/assets/fotodepoimentopdr.jpg" alt="Pedro Santiago" className="author-image" />
+        </div>
+        <div className="author-info">
+          <h4>@pdrsantiago</h4>
+          <p>Expert Digital</p>
+        </div>
+      </div>
+    </div>
+  </div>
+        </section>
+
+
+<section id="preco" className="pricing">
+  <h2 className="pricing-title">Escolha o plano ideal para você</h2>
+  <p className="pricing-subtitle">Veja nossos planos e comece a usar o VendFlow hoje!</p>
+
+  <div className="pricing-container">
+    {/* Free Plan */}
+    <div className="pricing-card free-plan">
+      <h3 className="plan-title">
+        <span className="highlight-free">Free</span>
+      </h3>
+      <p className="plan-description">Para quem quer começar sem custo.</p>
+      <p className="plan-price">
+        <strong>R$0</strong>/mês
+      </p>
+      <ul className="plan-features">
+        <li>✅ 1 usuário</li>
+        <li>✅ 10 chats/mês</li>
+        <li>✅ Criar pastas</li>
+        <li>❌ Marca d’água</li>
+        <li>❌ Upload de arquivos</li>
+        <li>❌ Suporte prioritário</li>
+      </ul>
+      <button className="pricing-button">Comece agora</button>
+    </div>
+
+    {/* Starter Plan */}
+    <div className="pricing-card pro-plan popular-plan">
+    <span className="popular-label">Mais popular</span>
+      <h3 className="plan-title">
+        Upgrade para <span className="highlight">Básico</span>
+      </h3>
+      <p className="plan-description">Para indivíduos e pequenos negócios.</p>
+      <p className="plan-price">
+        <strong>R$97</strong>/mês
+      </p>
+      <ul className="plan-features">
+        <li>✅ 2 usuários</li>
+        <li>✅ 2000 chats/mês</li>
+        <li>✅ Criar pastas</li>
+        <li>✅ Marca d’água</li>
+        <li>✅ Upload de arquivos</li>
+        <li>✅ Suporte prioritário</li>
+      </ul>
+      <button className="pricing-button">Upgrade</button>
+    </div>
+
+    {/* Pro Plan */}
+    <div className="pricing-card pro-plan ">
+      <h3 className="plan-title">
+        Upgrade para <span className="highlight1">Profissional</span>
+      </h3>
+      <p className="plan-description">Para agências e startups em crescimento.</p>
+      <p className="plan-price">
+        <strong>R$297</strong>/mês
+      </p>
+      <ul className="plan-features">
+        <li>✅ 4 usuário</li>
+        <li>✅ 20.0000 chats/mês</li>
+        <li>✅ Criar pastas</li>
+        <li>✅ Marca d’água</li>
+        <li>✅ Upload de arquivos</li>
+        <li>✅ Suporte prioritário</li>
+      </ul>
+      <button className="pricing-button">Upgrade</button>
+    </div>
+  </div>
+</section>
+
 
       {/* Guarantee Section */}
       <section className="guarantee">
@@ -245,11 +326,11 @@ export default function Home() {
       {/* FAQ Section */}
       <section className="faq">
         <h2>Perguntas frequentes</h2>
-        <p>Tudo que você precisa saber sobre o ChatDesk</p>
+        <p>Tudo que você precisa saber sobre o VendFlow</p>
         
         <div className="faq-item">
-          <h3>O que é o ChatDesk?</h3>
-          <p>O ChatDesk revoluciona a maneira de gerenciar atendimentos ao cliente, utilizando Inteligência Artificial (IA) para uma experiência única e simplificada. Ao contrário de plataformas tradicionais, o ChatDesk elimina a necessidade de alternar entre diferentes canais e ferramentas.</p>
+          <h3>O que é o VendFlow?</h3>
+          <p>O VendFlow revoluciona a maneira de gerenciar atendimentos ao cliente, utilizando bots de criação própria do usuário, ele executa exatamente o que o usuário definir!</p>
         </div>
         
         <div className="faq-item">
@@ -263,43 +344,47 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section className="contact">
-        <h2>Ainda tem dúvidas?</h2>
-        <p>Não consegue encontrar a resposta que procura? Fale com a gente!</p>
-        <button className="contact-button">Entrar em contato</button>
-      </section>
+        {/* Contact Section */}
+<section id="contato" className="contact">
+  <h2>Ainda tem dúvidas?</h2>
+  <p>Não consegue encontrar a resposta que procura? Fale com a gente!</p>
+  <button className="contact-button" onClick={() => window.location.href = 'https://w.app/ylcnew'}>Entrar em contato</button>
+</section>
+
+
 
       {/* Footer */}
-      <footer className="footer">
-        <div className="footer-sections">
-          <div className="footer-section">
-            <h3>Produto</h3>
-            <ul>
-              <li><a href="#funcionalidades">Funcionalidades</a></li>
-              <li><a href="#preco">Preços</a></li>
-              <li><a href="#faq">FAQ</a></li>
-            </ul>
-          </div>
-          <div className="footer-section">
-            <h3>Termos</h3>
-            <ul>
-              <li><a href="#privacy">Privacidade</a></li>
-              <li><a href="#terms">Termos de Uso</a></li>
-            </ul>
-          </div>
-          <div className="footer-section">
-            <h3>Suporte</h3>
-            <ul>
-              <li><a href="#contact">Contato</a></li>
-              <li><a href="#help">Central de Ajuda</a></li>
-            </ul>
-          </div>
-        </div>
-        <div className="copyright">
-          <p>Copyright © 2025 ChatDesk. Todos os direitos reservados.</p>
-        </div>
-      </footer>
+<footer className="footer">
+  <div className="container">
+    <div className="footer-sections">
+      <div className="footer-section">
+        <h3>Produto</h3>
+        <ul>
+          <li><a href="#funcionalidades">Funcionalidades</a></li>
+          <li><a href="#preco">Preços</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div className="footer-section">
+        <h3>Termos</h3>
+        <ul>
+          <li><a href="#privacy">Privacidade</a></li>
+          <li><a href="#terms">Termos de Uso</a></li>
+        </ul>
+      </div>
+      <div className="footer-section">
+        <h3>Suporte</h3>
+        <ul>
+          <li><a href="#contact">Contato</a></li>
+          <li><a href="#help">Central de Ajuda</a></li>
+        </ul>
+      </div>
+    </div>
+    <div className="copyright">
+      <p>Copyright &copy; 2025 VendFlow. Todos os direitos reservados.</p>
+    </div>
+  </div>
+</footer>
     </div>
   )
 }

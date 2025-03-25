@@ -17,13 +17,14 @@ function App() {
         <Route path="/googleOauthSuccess" element={<GoogleOAuthSuccess />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/editor" element={<Editor />} />
+
 
         <Route element={<PrivateRoute />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/editor" element={<Editor />} />
+        <Route path="/chat" element={<ChatReader />} />
         </Route>
           <Route path="/chat" element={<ChatReader />} />
-
       </Routes>
     </Layout>
   )
