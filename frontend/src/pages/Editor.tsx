@@ -137,6 +137,14 @@ function EditorContent() {
     [screenToFlowPosition, addNode, updateNodeData]
   )
 
+  // Adiciona um listener para o evento de arrasto de elementos
+  const onMouseDown = useCallback((event: React.MouseEvent) => {
+    // Verifica se o botão pressionado é o esquerdo (0 é o botão esquerdo do mouse)
+    if (event.button === 0) {
+      event.preventDefault()
+    }
+  }, [])
+
   return (
     <Flex direction="column" h="100vh">
       <Header />
@@ -147,6 +155,7 @@ function EditorContent() {
           bg={isDragging ? dropHighlightColor : bgColor}
           transition="background-color 0.1s ease-out"
           position="relative"
+          onMouseDown={onMouseDown} // Adicionando o listener ao container
         >
           <ReactFlow
             nodes={nodes}

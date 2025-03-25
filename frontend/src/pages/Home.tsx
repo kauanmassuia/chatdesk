@@ -350,7 +350,7 @@ export default function Home() {
   <p>Não consegue encontrar a resposta que procura? Fale com a gente!</p>
   <button className="contact-button" onClick={() => window.location.href = 'https://w.app/ylcnew'}>Entrar em contato</button>
 </section>
-
+    
 
 
       {/* Footer */}
