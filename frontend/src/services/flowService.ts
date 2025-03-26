@@ -61,5 +61,33 @@ export const getFlow = async (flowUid: string) => {
     headers: { 'access-token': accessToken, client, uid: uidHeader },
     withCredentials: true,
   });
+
+  // Convert Ruby arrow syntax to valid JSON if the content is a string
+  if (response.data && response.data.content && typeof response.data.content === 'string') {
+    try {
+      response.data.content = JSON.parse(response.data.content.replace(/=>/g, ':'));
+    } catch (error) {
+      console.error('Error parsing flow content:', error);
+      // Optionally, you can keep the original content or set to a default
+      response.data.content = { nodes: [], edges: [] };
+    }
+  }
+
+  return response.data;
+};
+
+export const publishFlow = async (flowUid: string, flow: object) => {
+  const accessToken = localStorage.getItem("access-token");
+  const client = localStorage.getItem("client");
+  const uid = localStorage.getItem("uid");
+
+  const response = await axios.post(
+    `${API_BASE_URL}/flows/${flowUid}/publish`,
+    { flow },
+    {
+      headers: { 'access-token': accessToken, client, uid },
+      withCredentials: true,
+    }
+  );
   return response.data;
 };

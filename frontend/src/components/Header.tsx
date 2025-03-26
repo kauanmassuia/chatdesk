@@ -13,8 +13,13 @@ import { RiTestTubeLine, RiUploadCloudLine } from 'react-icons/ri';
 import { useFlowStore } from '../store/flowStore';
 import { exportFlowAsJson } from '../utils/exportFlowAsJson';
 import ImportFlowModal from './modal/ImportFlowModal';
+import Publish from './buttons/Publish'; // imported new Publish component
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  flowId: string | null;
+}
+
+const Header: React.FC<HeaderProps> = ({ flowId }) => {
   const { nodes, edges } = useFlowStore();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -118,9 +123,7 @@ const Header: React.FC = () => {
             <Button size="sm" variant="ghost" leftIcon={<RiTestTubeLine />}>
               Test
             </Button>
-            <Button size="sm" colorScheme="orange">
-              Publish
-            </Button>
+            <Publish flowId={flowId} /> {/* new Publish component */}
           </HStack>
         </HStack>
       </Container>

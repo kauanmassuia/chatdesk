@@ -186,7 +186,6 @@ function EditorContent() {
 
   return (
     <Flex direction="column" h="100vh">
-      <Header />
       <Flex flex={1} mt="56px">
         <Sidebar />
         <Box
@@ -298,16 +297,7 @@ export default function Editor() {
       if (flowId) {
         try {
           const flowData = await getFlow(flowId);
-          let content;
-          // If the content is a string (with Ruby arrow keys), convert it.
-          if (flowData && flowData.content) {
-            content = typeof flowData.content === 'string'
-              ? JSON.parse(flowData.content.replace(/=>/g, ':'))
-              : flowData.content;
-          } else {
-            content = { nodes: [], edges: [] };
-          }
-          const { nodes, edges } = importFlowFromJson(content);
+          const { nodes, edges } = importFlowFromJson(flowData.content || { nodes: [], edges: [] });
           setNodes(nodes);
           setEdges(edges);
         } catch (error) {
@@ -330,6 +320,7 @@ export default function Editor() {
   return (
     <Box width="100%" height="100vh">
       <ReactFlowProvider>
+        <Header flowId={flowId} />
         <EditorContent />
       </ReactFlowProvider>
     </Box>

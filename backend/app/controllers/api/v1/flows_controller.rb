@@ -2,11 +2,10 @@ module Api
   module V1
     class FlowsController < BaseController
       before_action :authenticate_user!
-      before_action :set_flow, only: [ :show, :update, :destroy ]
+      before_action :set_flow, only: [:show, :update, :destroy, :publish]
 
       # GET /api/v1/flows
       def index
-        # Only return flows that belong to the current_user
         @flows = current_user.flows.order(created_at: :desc)
         render json: @flows
       end
@@ -41,16 +40,29 @@ module Api
         head :no_content
       end
 
+      # POST /flows/:id/publish
+      def publish
+        @flow.published_content = @flow.content
+        @flow.publish_at = Time.current
+        @flow.published = true
+
+        if @flow.save
+          render json: { message: "Flow published successfully", flow: @flow }, status: :ok
+        else
+          render json: { error: "Failed to publish flow", details: @flow.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
       private
 
       def set_flow
-        @flow = current_user.flows.find_by(uid: params[:id])
+        @flow = current_user.flows.find_by!(uid: params[:id])
       rescue ActiveRecord::RecordNotFound
         render json: { error: "Flow not found" }, status: :not_found
       end
 
       def flow_params
-        permitted = [ :title, :published, metadata: {}, content: {} ]
+        permitted = [:title, :published, :publish_at, :published_content, metadata: {}, content: {}]
         if params[:flow]
           params.require(:flow).permit(*permitted)
         else
