@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  flow: one
+  answer_data: 
+  submitted_at: 2025-03-26 19:17:33
+  additional_metadata: 
+
+two:
+  flow: two
+  answer_data: 
+  submitted_at: 2025-03-26 19:17:33
+  additional_metadata: 

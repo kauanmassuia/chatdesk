@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, Tooltip } from '@chakra-ui/react';
 import { useFlowStore } from '../../store/flowStore';
 import { publishFlow } from '../../services/flowService';
+import { useNavigate } from 'react-router-dom';
 
 interface PublishProps {
   flowId: string | null;
@@ -10,6 +11,7 @@ interface PublishProps {
 const Publish: React.FC<PublishProps> = ({ flowId }) => {
   const { nodes, edges } = useFlowStore();
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const getPublicationTooltip = (publishedAt: string): string => {
     const publishedDate = new Date(publishedAt);
@@ -33,6 +35,8 @@ const Publish: React.FC<PublishProps> = ({ flowId }) => {
       const result = await publishFlow(flowId, flowData);
       console.log('Publish success:', result);
       setPublishedAt(new Date().toISOString());
+      // Redirect to /editor?flow_id=[uid]/published. Assuming flowId is the uid.
+      navigate(`/editor?flow_id=${flowId}/published`);
     } catch (error) {
       console.error('Publish error:', error);
     }

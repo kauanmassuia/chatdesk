@@ -91,3 +91,19 @@ export const publishFlow = async (flowUid: string, flow: object) => {
   );
   return response.data;
 };
+
+export const updateFlowUrl = async (uid: string, url: string) => {
+  const accessToken = localStorage.getItem("access-token");
+  const client = localStorage.getItem("client");
+  const uidHeader = localStorage.getItem("uid");
+
+  const response = await axios.put(
+    `${API_BASE_URL}/flows/${uid}`,
+    { flow: { custom_url: url } },
+    {
+      headers: { 'access-token': accessToken, client, uid: uidHeader },
+      withCredentials: true,
+    }
+  );
+  return response.data;
+};

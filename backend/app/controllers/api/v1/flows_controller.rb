@@ -62,7 +62,7 @@ module Api
       end
 
       def flow_params
-        permitted = [:title, :published, :publish_at, :published_content, metadata: {}, content: {}]
+        permitted = [:title, :published, :publish_at, :published_content, :custom_url, metadata: {}, content: {}]
         if params[:flow]
           params.require(:flow).permit(*permitted)
         else
