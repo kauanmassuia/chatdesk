@@ -6,13 +6,19 @@ import {
   Box,
   Container,
   Image,
+  Spacer,
+  Tooltip,
+  Text,
+  Flex,
 } from '@chakra-ui/react';
-import { FiArrowLeft, FiLink, FiRefreshCw, FiHelpCircle } from 'react-icons/fi';
+import { FiArrowLeft, FiHelpCircle } from 'react-icons/fi';
 import { RiFlaskLine } from 'react-icons/ri';
 import { useFlowStore } from '../store/flowStore';
 import { exportFlowAsJson } from '../utils/exportFlowAsJson'; // Função de exportação central
+import { useNavigate } from 'react-router-dom';
 
 const Header: React.FC = () => {
+  const navigate = useNavigate();
   const { nodes, edges } = useFlowStore();
 
   const handleExport = () => {
@@ -55,46 +61,53 @@ const Header: React.FC = () => {
               variant="ghost"
               size="md"
               _hover={{ color: buttonHoverColor }}
+              onClick={() => navigate("/dashboard")}
             />
-            <IconButton
-              aria-label="Link"
-              icon={<FiLink />}
-              variant="ghost"
-              size="md"
-              _hover={{ color: buttonHoverColor }}
-            />
-            <IconButton
-              aria-label="Atualizar"
-              icon={<FiRefreshCw />}
-              variant="ghost"
-              size="md"
-              _hover={{ color: buttonHoverColor }}
-            />
-            <IconButton
-              aria-label="Ajuda"
-              icon={<FiHelpCircle />}
-              variant="ghost"
-              size="md"
-              _hover={{ color: buttonHoverColor }}
-            />
+
+            {/* Botão de Ajuda com Tooltip */}
+            <HStack spacing={2} position="relative">
+              <Tooltip label="Precisa de ajuda?" placement="top" hasArrow>
+                <IconButton
+                  aria-label="Ajuda"
+                  icon={<FiHelpCircle />}
+                  variant="ghost"
+                  size="md"
+                  _hover={{ color: buttonHoverColor }}
+                  onClick={() => navigate("/ajuda-docs")}
+                />
+              </Tooltip>
+
+              {/* Mensagem que aparece ao lado do botão */}
+              <Text
+                display="none"
+                position="absolute"
+                left="100%"
+                ml={2} // Espaçamento entre o botão e a mensagem
+                fontSize="sm"
+                color="gray.600"
+                whiteSpace="nowrap"
+                className="help-message"
+              >
+                Precisa de ajuda?
+              </Text>
+            </HStack>
           </HStack>
 
           {/* Logo do Projeto */}
-          <Box flex={1} textAlign="center">
+          <Box position="absolute" left="220px">
             <Image
               src="/src/assets/logovendflow.png" // Substitua pelo caminho da sua logo
               alt="Logo do Projeto"
-              width="150px" // Largura desejada
-              height="auto" // Mantém a proporção da altura
-              mx="auto" // Centraliza horizontalmente
+              width="150px"
+              height="auto"
             />
           </Box>
 
+          {/* Espaço ajustável */}
+          <Spacer />
+
           {/* Menu principal */}
-          <HStack spacing={4} justifyContent="flex-end">
-            <Button size="sm" colorScheme="blue" variant="solid">
-              Flow
-            </Button>
+          <HStack spacing={4}>
             <Button size="sm" colorScheme="blue" variant="outline">
               Tema
             </Button>
@@ -108,11 +121,7 @@ const Header: React.FC = () => {
 
           {/* Ações à direita */}
           <HStack spacing={4} minW="200px">
-            <Button
-              size="sm"
-              colorScheme="orange"
-              leftIcon={<RiFlaskLine />}
-            >
+            <Button size="sm" colorScheme="orange" leftIcon={<RiFlaskLine />}>
               Testar
             </Button>
             <Button

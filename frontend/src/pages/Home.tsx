@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import "../styles/chat.css";
+import "../styles/lp.css";
+
 
 export default function Home() {
   const navigate = useNavigate()
@@ -123,7 +124,7 @@ export default function Home() {
       {/* Features Section */}
       <section id="funcionalidades" className="features">
         <div className="feature-item">
-          <div className="feature-image">
+          <div className="feature-image hover:scale-105 transition-transform duration-300">
             {/* Substituí a imagem por um vídeo */}
             <video className="feature-video" autoPlay loop muted playsInline>
               <source src="/src/assets/videocomofuncionaflow.mp4" type="video/mp4" />
@@ -143,14 +144,14 @@ export default function Home() {
             <p>Acelere o seu processo de criação com templates prontos! Importe e exporte facilmente funis de vendas, respostas automáticas e fluxos de atendimento já validados no mercado. Economize tempo e use modelos que já foram testados e aprovados, garantindo resultados eficazes desde o primeiro momento.</p>
             <button onClick={goToLogin} className="feature-cta">Leia o Docs →</button>
           </div>
-          <div className="feature-image">
+          <div className="feature-image feature-image hover:scale-105 transition-transform duration-300">
             {/* Placeholder for image */}
             <div className="image-placeholder"></div>
           </div>
         </div>
 
         <div className="feature-item">
-          <div className="feature-image">
+          <div className="feature-image feature-image hover:scale-105 transition-transform duration-300">
             {/* Placeholder for image */}
             <div className="image-placeholder"></div>
           </div>
@@ -168,27 +169,27 @@ export default function Home() {
         <p>Além de gerenciar criar fluxos, o VendFlow oferece:</p>
         
         <div className="features-grid">
-          <div className="feature-card">
+          <div className="feature-card hover:scale-105 transition-transform duration-300">
             <h3>Automação de respostas</h3>
             <p>Configure respostas automáticas para perguntas frequentes e economize tempo da sua equipe.</p>
           </div>
-          <div className="feature-card">
+          <div className="feature-card hover:scale-105 transition-transform duration-300">
             <h3>Relatórios detalhados</h3>
             <p>Visualize relatórios de desempenho, tempo de resposta e satisfação do cliente.</p>
           </div>
-          <div className="feature-card">
+          <div className="feature-card hover:scale-105 transition-transform duration-300">
             <h3>Importação e Exportação de templates</h3>
             <p>Importe templates prontos e exporte para compartilhar com usuários da plataforma quando quiser!</p>
           </div>
-          <div className="feature-card">
+          <div className="feature-card hover:scale-105 transition-transform duration-300">
             <h3>Chatbot personalizado</h3>
             <p>Crie fluxos de atendimento automatizados para resolver problemas comuns.</p>
           </div>
-          <div className="feature-card">
+          <div className="feature-card hover:scale-105 transition-transform duration-300">
             <h3>Suporte 24/7</h3>
             <p>Obtenha sugestões de respostas e análise de sentimento em tempo real 24/7.</p>
           </div>
-          <div className="feature-card">
+          <div className="feature-card hover:scale-105 transition-transform duration-300">
             <h3>Gestão de equipe</h3>
             <p>Distribua atendimentos e monitore o desempenho de cada Flow.</p>
           </div>
@@ -196,21 +197,6 @@ export default function Home() {
         
         <p className="more-text">e muito mais...</p>
       </section>
-
-                {/* Security and Availability Section */}
-<section className="security-availability">
-  <h2>Segurança e Disponibilidade Garantidas</h2>
-  <p>Proteja seus dados com criptografia de ponta e garanta alta disponibilidade para sua operação 24/7.</p>
-  <div className="security-availability-images">
-    {/* Substituindo os ícones por imagens */}
-    <img src="/src/assets/reactlogo.png" alt="Supabase" className="image-security" />
-    <img src="/src/assets/TESTE2.png" alt="PostgreSQL" className="image-security" />
-    <img src="/src/assets/railslogo.png" alt="MongoDB" className="image-security" />
-  </div>
-  <p>Com tecnologia de ponta, você pode contar com segurança e confiabilidade o tempo todo.</p>
-</section>
-
-
 
 
       {/* Testimonials Section */}

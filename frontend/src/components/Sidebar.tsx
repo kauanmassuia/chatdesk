@@ -164,7 +164,7 @@ const Sidebar = () => {
             <DraggableItem icon={MdOutlineEmail} label="E-mail" type="input_email" colorScheme="orange" />
             <DraggableItem icon={TbWorldWww} label="Website" type="input_website" colorScheme="orange" />
             <DraggableItem icon={BsCalendarDate} label="Data" type="input_date" colorScheme="orange" />
-            <DraggableItem icon={BsClock} label="Delay" type="input_wait" colorScheme="orange" />
+            <DraggableItem icon={BsClock} label="Atraso" type="input_wait" colorScheme="orange" />
             <DraggableItem icon={BsTelephone} label="Telefone" type="input_phone" colorScheme="orange" />
             <DraggableItem icon={BsGrid} label="Botões" type="input_buttons" colorScheme="orange" />
             <DraggableItem icon={HiOutlinePhotograph} label="Imagem" type="input_pic_choice" colorScheme="orange" />
