@@ -107,3 +107,16 @@ export const updateFlowUrl = async (uid: string, url: string) => {
   );
   return response.data;
 };
+
+export const fetchPublishedFlow = async (customUrl: string) => {
+  const response = await axios.get(`${API_BASE_URL}/flows/published/${customUrl}`);
+  if (response.data && response.data.published_content && typeof response.data.published_content === 'string') {
+    try {
+      response.data.published_content = JSON.parse(response.data.published_content.replace(/=>/g, ':'));
+    } catch (error) {
+      console.error('Error parsing published flow content:', error);
+      response.data.published_content = { nodes: [], edges: [] };
+    }
+  }
+  return response.data;
+};

@@ -3,6 +3,7 @@ module Api
     class FlowsController < BaseController
       before_action :authenticate_user!
       before_action :set_flow, only: [:show, :update, :destroy, :publish]
+      skip_before_action :authenticate_user!, only: [:show_by_custom_url]
 
       # GET /api/v1/flows
       def index
@@ -51,6 +52,14 @@ module Api
         else
           render json: { error: "Failed to publish flow", details: @flow.errors.full_messages }, status: :unprocessable_entity
         end
+      end
+
+      # GET /api/v1/flows/published/:custom_url
+      def show_by_custom_url
+        @flow = Flow.find_by!(custom_url: params[:custom_url], published: true)
+        render json: { published_content: @flow.published_content }, status: :ok
+      rescue ActiveRecord::RecordNotFound
+        render json: { error: "Flow not found" }, status: :not_found
       end
 
       private

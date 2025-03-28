@@ -19,6 +19,9 @@ Rails.application.routes.draw do
         member do
           post :publish
         end
+        collection do
+          get 'published/:custom_url', to: 'flows#show_by_custom_url', as: :published
+        end
       end
     end
   end
