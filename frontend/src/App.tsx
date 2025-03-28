@@ -36,7 +36,6 @@ function App() {
 
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          {/* Updated /editor route */}
           <Route path="/editor" element={<EditorRouter />} />
         </Route>
         <Route path="/chat" element={<ChatReader />} />
