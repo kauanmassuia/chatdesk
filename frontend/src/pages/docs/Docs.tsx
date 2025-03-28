@@ -1,30 +1,117 @@
+import { useState } from "react";
 import { Box, Flex, Heading, Text } from "@chakra-ui/react";
 import SidebarDocs from "../../components/docs/SidebarDocs";
-import HeaderDocs from "../../components/docs/HeaderDocs";  
-import "../../styles/docs.css"; // Mantendo o estilo externo
+import HeaderDocs from "../../components/docs/HeaderDocs";
+import BotaoBemVindoDocs from "../../components/docs/BotaoBemVindoDocs";
+import BotaoCriandoFlowDocs from "../../components/docs/BotaoCriandoFlowDocs";
+import BotaoBlocosDocs from "../../components/docs/BotaoBlocosDocs";
+import BotaoVisaoGeralDocs from "../../components/docs/BotaoVisaoGeralDocs";
+import BotaoBubblesDocs from "../../components/docs/BotaoBubblesDocs";
+import BotaoTextoDocs from "../../components/docs/BotaoTextoDocs";
+import BotaoImagemDocs from "../../components/docs/BotaoImagemDocs";
+import BotaoVideoDocs from "../../components/docs/BotaoVideoDocs";
+import BotaoIncorporarDocs from "../../components/docs/BotaoIncorporarDocs";
+import BotaoAudioDocs from "../../components/docs/BotaoAudioDocs";
+import BotaoInputsDocs from "../../components/docs/BotaoInputsDocs";
+import BotaoNumeroDocs from "../../components/docs/BotaoNumeroDocs";
+import BotaoEmailDocs from "../../components/docs/BotaoEmailDocs";
+import BotaoWebsiteDocs from "../../components/docs/BotaoWebsiteDocs";
+import BotaoDataDocs from "../../components/docs/BotaoDataDocs";
+import BotaoAtrasoDocs from "../../components/docs/BotaoAtrasoDocs";
+import BotaoTelefoneDocs from "../../components/docs/BotaoTelefoneDocs";
+import BotaoBotoesDocs from "../../components/docs/BotaoBotoesDocs";
+import BotaoImagemInputsDocs from "../../components/docs/BotaoImagemInputsDocs";
+import BotaoPagamentoDocs from "../../components/docs/BotaoPagamentoDocs";
 
 function Docs() {
+  const [content, setContent] = useState("Selecione uma opção no menu...");
+
+  const handleButtonClick = (buttonContent: string) => {
+    setContent(buttonContent);
+  };
+
+  const renderContent = () => {
+    switch (content) {
+      case "Bem-vindo":
+        return <BotaoBemVindoDocs onClick={() => console.log("Bem-vindo button clicked")} />;
+      case "Criando um Flow":
+        return <BotaoCriandoFlowDocs />;
+      case "Blocos":
+        return <BotaoBlocosDocs />;
+      case "Visão Geral":
+        return <BotaoVisaoGeralDocs />;
+      case "Bubbles":
+        return <BotaoBubblesDocs />;
+      case "Texto":
+        return <BotaoTextoDocs />;
+      case "Imagem":
+        return <BotaoImagemDocs />;
+      case "Vídeo":
+        return <BotaoVideoDocs />;
+      case "Incorporar":
+        return <BotaoIncorporarDocs />;
+      case "Áudio":
+        return <BotaoAudioDocs />;
+      case "Inputs":
+        return <BotaoInputsDocs />;
+      case "Número":
+        return <BotaoNumeroDocs />;
+      case "E-mail":
+        return <BotaoEmailDocs />;
+      case "Website":
+        return <BotaoWebsiteDocs />;
+      case "Data":
+        return <BotaoDataDocs />;
+      case "Atraso":
+        return <BotaoAtrasoDocs />;
+      case "Telefone":
+        return <BotaoTelefoneDocs />;
+      case "Botões":
+        return <BotaoBotoesDocs />;
+      case "Imagem Inputs":
+        return <BotaoImagemInputsDocs />;
+      case "Pagamento":
+        return <BotaoPagamentoDocs />;
+      default:
+        return (
+          <Text fontSize="lg" mb={6}>
+            Selecione uma opção no menu para visualizar o conteúdo.
+          </Text>
+        );
+    }
+  };
+
   return (
-    <Flex direction="column" h="100vh" bg="#f1f1f1"> {/* Adicionado bg="#f1f1f1" */}
-      {/* Header */}
+    <Flex direction="column" h="100vh" bg="#f1f1f1">
       <HeaderDocs />
 
-      {/* Main Flex container for Sidebar and Content */}
-      <Flex direction="row" flex="1">
-        {/* Sidebar */}
-        <SidebarDocs />
+      <Flex direction="row" flex="1" mt="115px" position="relative">
+        <Box
+          as="aside"
+          position="fixed"
+          top="80px"
+          left="0"
+          height="calc(100vh - 80px)"
+          zIndex="1"
+          bg="#fff"
+          width="250px"
+        >
+          <SidebarDocs setContent={handleButtonClick} />
+        </Box>
 
-        {/* Main Content */}
-        <Box className="main-content" flex={1} p={8} overflowY="auto" borderLeft="2px solid #E2E8F0" bg="#f1f1f1"> {/* Fundo igual ao header/sidebar */}
+        <Box 
+          className="main-content" 
+          flex={1} 
+          p={8} 
+          ml="250px" 
+          overflowY="auto" 
+          borderLeft="2px solid #E2E8F0" 
+          bg="#f1f1f1"
+        >
           <Heading as="h1" size="xl" mb={6} className="main-title">
-            Welcome to the Documentation!
+            {content}
           </Heading>
-          <Text fontSize="lg" mb={6} className="main-description">
-            This is the place where you can find all the necessary information about the system. Use the sidebar to navigate through the documentation. Here is a general overview:
-          </Text>
-          <Text fontSize="md" mb={6}>
-            The documentation is divided into several sections to help you get started with the project, understand the API, and troubleshoot any issues that might arise. You can also use the search bar in the header to quickly find topics or keywords you're interested in.
-          </Text>
+          {renderContent()}
         </Box>
       </Flex>
     </Flex>

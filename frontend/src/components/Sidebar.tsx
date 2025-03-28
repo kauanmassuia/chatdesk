@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import {
   VStack,
   Box,
@@ -42,8 +43,8 @@ const DraggableItem = ({
   type: string;
   colorScheme?: string;
 }) => {
-  const bgColor = useColorModeValue('white', '#2D3748'); // Branco no modo claro, cinza escuro no modo escuro
-  const hoverBg = useColorModeValue('#f5f5f5', '#4A5568'); // Cinza claro no modo claro, cinza médio no escuro
+  const bgColor = useColorModeValue('white', '#2D3748');
+  const hoverBg = useColorModeValue('#f5f5f5', '#4A5568');
 
   const onDragStart = (event: React.DragEvent, nodeType: string) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
@@ -64,11 +65,17 @@ const DraggableItem = ({
       _hover={{
         bg: hoverBg,
         borderColor: colorScheme === 'orange' ? '#e68a00' : colorScheme === 'blue' ? '#1a63d8' : 'gray.300',
-        color: colorScheme === 'orange' ? '#e68a00' : colorScheme === 'blue' ? '#1a63d8' : undefined, // Hover mais escuro
+        color: colorScheme === 'orange' ? '#e68a00' : colorScheme === 'blue' ? '#1a63d8' : undefined,
+        transform: 'scale(1.05)',
+      }}
+      _active={{
+        transform: 'scale(1)',
       }}
       size="sm"
       h="40px"
-      borderRadius="md" // Bordas arredondadas
+      borderRadius="md"
+      transition="transform 0.3s ease"
+      fontFamily="Poppins, sans-serif"
     >
       {label}
     </Button>
@@ -76,8 +83,36 @@ const DraggableItem = ({
 };
 
 const Sidebar = () => {
-  const bgColor = useColorModeValue('white', '#1A202C'); // Fundo branco no modo claro, cinza escuro no modo escuro
+  const [searchQuery, setSearchQuery] = useState('');
+  const bgColor = useColorModeValue('white', '#1A202C');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
+
+  // Dados de Bubbles e Inputs
+  const bubbles = [
+    { icon: FiMessageSquare, label: 'Texto', type: 'text', colorScheme: 'blue' },
+    { icon: FiImage, label: 'Imagem', type: 'image', colorScheme: 'blue' },
+    { icon: FiVideo, label: 'Vídeo', type: 'video', colorScheme: 'blue' },
+    { icon: FiCode, label: 'Incorporar', type: 'embed', colorScheme: 'blue' },
+    { icon: FiHeadphones, label: 'Áudio', type: 'audio', colorScheme: 'blue' },
+  ];
+
+  const inputs = [
+    { icon: BsTextParagraph, label: 'Texto', type: 'input_text', colorScheme: 'orange' },
+    { icon: MdOutlineNumbers, label: 'Número', type: 'input_number', colorScheme: 'orange' },
+    { icon: MdOutlineEmail, label: 'E-mail', type: 'input_email', colorScheme: 'orange' },
+    { icon: TbWorldWww, label: 'Website', type: 'input_website', colorScheme: 'orange' },
+    { icon: BsCalendarDate, label: 'Data', type: 'input_date', colorScheme: 'orange' },
+    { icon: BsClock, label: 'Atraso', type: 'input_wait', colorScheme: 'orange' },
+    { icon: BsTelephone, label: 'Telefone', type: 'input_phone', colorScheme: 'orange' },
+    { icon: BsGrid, label: 'Botões', type: 'input_buttons', colorScheme: 'orange' },
+    { icon: HiOutlinePhotograph, label: 'Imagem', type: 'input_pic_choice', colorScheme: 'orange' },
+    { icon: MdPayment, label: 'Pagamento', type: 'input_payment', colorScheme: 'orange' },
+  ];
+
+  // Função para filtrar itens conforme a pesquisa
+  const filterItems = (items: { label: string }[]) => {
+    return items.filter(item => item.label.toLowerCase().includes(searchQuery.toLowerCase()));
+  };
 
   return (
     <Box
@@ -89,16 +124,16 @@ const Sidebar = () => {
       py={6}
       px={4}
       overflowY="auto"
-      boxShadow="lg" // Sombra na sidebar
+      boxShadow="lg"
       css={{
         '&::-webkit-scrollbar': {
           width: '6px',
         },
         '&::-webkit-scrollbar-track': {
-          background: useColorModeValue('#EDF2F7', '#2D3748'), // Fundo do scroll
+          background: useColorModeValue('#EDF2F7', '#2D3748'),
         },
         '&::-webkit-scrollbar-thumb': {
-          background: useColorModeValue('#A0AEC0', '#4A5568'), // Cor do scroll
+          background: useColorModeValue('#A0AEC0', '#4A5568'),
           borderRadius: '24px',
         },
       }}
@@ -111,11 +146,14 @@ const Sidebar = () => {
             size="md"
             bg={useColorModeValue('white', 'gray.800')}
             borderColor={borderColor}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             _placeholder={{ color: useColorModeValue('gray.400', 'gray.500') }}
             _focus={{
-              borderColor: useColorModeValue('#2575fc', '#ff9800'), // Azul ou laranja ao focar
-              boxShadow: '0px 0px 4px rgba(37,117,252,0.5)', // Sombra ao focar
+              borderColor: useColorModeValue('#2575fc', '#ff9800'),
+              boxShadow: '0px 0px 4px rgba(37,117,252,0.5)',
             }}
+            fontFamily="Outfit, sans-serif"
           />
           <IconButton
             aria-label="Ícone de Busca"
@@ -135,16 +173,21 @@ const Sidebar = () => {
             fontWeight="bold"
             fontSize="sm"
             mb={3}
-            color="#2575fc" // Azul para título da seção Bubbles
+            color="#2575fc"
+            fontFamily="Poppins, sans-serif"
           >
             Bubbles
           </Text>
           <SimpleGrid columns={2} spacing={3}>
-            <DraggableItem icon={FiMessageSquare} label="Texto" type="text" colorScheme="blue" />
-            <DraggableItem icon={FiImage} label="Imagem" type="image" colorScheme="blue" />
-            <DraggableItem icon={FiVideo} label="Vídeo" type="video" colorScheme="blue" />
-            <DraggableItem icon={FiCode} label="Incorporar" type="embed" colorScheme="blue" />
-            <DraggableItem icon={FiHeadphones} label="Áudio" type="audio" colorScheme="blue" />
+            {filterItems(bubbles).map((item) => (
+              <DraggableItem
+                key={item.label}
+                icon={item.icon}
+                label={item.label}
+                type={item.type}
+                colorScheme="blue"
+              />
+            ))}
           </SimpleGrid>
         </Box>
 
@@ -154,21 +197,21 @@ const Sidebar = () => {
             fontWeight="bold"
             fontSize="sm"
             mb={3}
-            color="#ff9800" // Laranja para título da seção Inputs
+            color="#ff9800"
+            fontFamily="Poppins, sans-serif"
           >
             Inputs
           </Text>
           <SimpleGrid columns={2} spacing={3}>
-            <DraggableItem icon={BsTextParagraph} label="Texto" type="input_text" colorScheme="orange" />
-            <DraggableItem icon={MdOutlineNumbers} label="Número" type="input_number" colorScheme="orange" />
-            <DraggableItem icon={MdOutlineEmail} label="E-mail" type="input_email" colorScheme="orange" />
-            <DraggableItem icon={TbWorldWww} label="Website" type="input_website" colorScheme="orange" />
-            <DraggableItem icon={BsCalendarDate} label="Data" type="input_date" colorScheme="orange" />
-            <DraggableItem icon={BsClock} label="Atraso" type="input_wait" colorScheme="orange" />
-            <DraggableItem icon={BsTelephone} label="Telefone" type="input_phone" colorScheme="orange" />
-            <DraggableItem icon={BsGrid} label="Botões" type="input_buttons" colorScheme="orange" />
-            <DraggableItem icon={HiOutlinePhotograph} label="Imagem" type="input_pic_choice" colorScheme="orange" />
-            <DraggableItem icon={MdPayment} label="Pagamento" type="input_payment" colorScheme="orange" />
+            {filterItems(inputs).map((item) => (
+              <DraggableItem
+                key={item.label}
+                icon={item.icon}
+                label={item.label}
+                type={item.type}
+                colorScheme="orange"
+              />
+            ))}
           </SimpleGrid>
         </Box>
       </VStack>

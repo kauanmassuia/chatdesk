@@ -9,6 +9,10 @@
   --chat-padding: 1rem;
 }
 
+.react-flow__node {
+  background: transparent !important;
+  box-shadow: none !important;
+}
 
 
 /* Reset básico */

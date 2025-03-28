@@ -169,7 +169,7 @@ function EditorContent() {
             onDragLeave={onDragLeave}
             fitView
             minZoom={0.5}
-            maxZoom={2}
+            maxZoom={0.8}
             defaultEdgeOptions={{
               type: 'smoothstep', // Tipo de linha (curva suave)
               animated: false, // Sem animação
@@ -192,7 +192,7 @@ function EditorContent() {
             nodesDraggable={true}
             elementsSelectable={true}
             selectNodesOnDrag={false}
-            panOnDrag={[1, 2]}
+            panOnDrag={[0, 1]}
             zoomOnScroll={true}
             zoomOnPinch={true}
             preventScrolling={true}

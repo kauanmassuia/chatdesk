@@ -1,3 +1,4 @@
+// components/Docs/HeaderDocs.tsx
 import { Flex, Image, Input, Button } from "@chakra-ui/react";
 
 const HeaderDocs = () => {
@@ -11,6 +12,10 @@ const HeaderDocs = () => {
       justify="space-between"
       w="100%" 
       borderBottom="2px solid #E2E8F0" // Borda inferior entre o header e os outros elementos
+      position="fixed" // Tornando o header fixo
+      top={0} // Colocando no topo da página
+      left={0}
+      zIndex={10} // Para garantir que fique acima do conteúdo
     >
       <Image 
         src="../src/assets/logovendflow.png" 

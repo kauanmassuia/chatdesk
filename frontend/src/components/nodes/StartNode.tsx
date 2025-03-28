@@ -5,37 +5,37 @@ import { memo } from 'react'
 const StartNode = memo(() => {
   return (
     <Box
-      p={2}
-      borderRadius="full"
+      p={4}  // Aumentei o padding para ficar mais próximo do tamanho dos outros blocos
+      borderRadius="md"  // Deixei o borderRadius como 'md' para alinhar com o estilo dos outros nós
       bg="white"
-      border="2px"
+      border="1px"
       borderColor="gray.200"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      w="100px"
+      minW={200}  // Defini um tamanho mínimo para ficar semelhante aos outros blocos
     >
-      <Text fontSize="sm" fontWeight="medium">
+      <Text fontSize="lg" fontWeight="bold" textAlign="center">  {/* Texto centralizado e com tamanho ajustado */}
         Start
       </Text>
-      <Handle type="source" position={Position.Bottom}
-      style={{
-        width: 16,        // aumenta a largura
-        height: 16,       // aumenta a altura
-        background: '#353535', // muda a cor para azul (opcional)
-        border: '2px solid white', // borda branca (opcional)
-      }} />
+      <Handle 
+        type="source" 
+        position={Position.Right}  // Mudei a posição da handle para a direita, como solicitado
+        style={{
+          width: 16,   // Aumentei a largura
+          height: 16,  // Aumentei a altura
+          background: '#353535', // Cor de fundo da handle
+          border: '2px solid white', // Borda branca
+        }} 
+      />
     </Box>
   )
 })
 
 StartNode.displayName = 'StartNode'
 
-// Exporter function for StartNode:
+// Exporter function for StartNode
 export function exportStartNode(node: any) {
   return {
-    type: "start",
-    content: {},  // No message; just a marker.
+    type: "start",  // Tipo do nó
+    content: {},    // Contente vazio, apenas um marcador
   }
 }
 
