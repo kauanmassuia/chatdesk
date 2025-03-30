@@ -7,9 +7,8 @@ import Dashboard from './pages/Dashboard'
 import Editor from './pages/Editor'
 import Published from './pages/Published'
 import ChatReader from './pages/ChatReader';
-import GoogleOAuthSuccess from './pages/GoogleOAuthSuccess';
+import GoogleOAuthSuccess from './pages/GoogleOAuthSuccess'
 import PrivateRoute from './components/PrivateRoute';
-import Docs from './pages/docs/Docs'; // Importando a nova página
 
 // New generalistic component for /editor routes.
 const EditorRouter: React.FC = () => {
@@ -34,10 +33,7 @@ function App() {
         <Route path="/googleOauthSuccess" element={<GoogleOAuthSuccess />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/editor" element={<Editor />} />
-        <Route path="/docs" element={<Docs />} />
-        
+
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/editor" element={<EditorRouter />} />
@@ -45,7 +41,7 @@ function App() {
         <Route path="/chat/:custom_url" element={<ChatReader />} />
       </Routes>
     </Layout>
-  );
+  )
 }
 
-export default App;
+export default App
