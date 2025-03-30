@@ -6,6 +6,7 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Editor from './pages/Editor'
 import Published from './pages/Published'
+import Results from './pages/Results'
 import ChatReader from './pages/ChatReader';
 import GoogleOAuthSuccess from './pages/GoogleOAuthSuccess'
 import PrivateRoute from './components/PrivateRoute';
@@ -20,6 +21,8 @@ const EditorRouter: React.FC = () => {
 
   if(subRoute === 'published') {
     return <Published />;
+  } else if(subRoute === 'results') {
+    return <Results />;
   }
   // Future cases for other subroutes can be handled here.
   return <Editor />;

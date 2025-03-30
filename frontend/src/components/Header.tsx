@@ -14,6 +14,7 @@ import { useFlowStore } from '../store/flowStore';
 import { exportFlowAsJson } from '../utils/exportFlowAsJson';
 import ImportFlowModal from './modal/ImportFlowModal';
 import Publish from './buttons/Publish'; // imported new Publish component
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   flowId: string | null;
@@ -22,6 +23,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ flowId }) => {
   const { nodes, edges } = useFlowStore();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const navigate = useNavigate();
 
   const handleExport = () => {
     const flowJson = exportFlowAsJson(nodes, edges);
@@ -110,7 +112,11 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
             >
               Import
             </Button>
-            <Button size="sm" variant="ghost">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => flowId && navigate(`/editor?flow_id=${flowId}/results`)}
+            >
               Results
             </Button>
           </HStack>

@@ -20,3 +20,14 @@ export const saveAnswer = async (customUrl: string, answerData: object) => {
   );
   return response.data;
 };
+
+export const getAnswers = async () => {
+  const accessToken = localStorage.getItem("access-token");
+  const client = localStorage.getItem("client");
+  const uid = localStorage.getItem("uid");
+  const response = await axios.get(`${API_BASE_URL}/answers`, {
+    headers: { 'access-token': accessToken, client, uid },
+    withCredentials: true,
+  });
+  return response.data;
+};

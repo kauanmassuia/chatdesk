@@ -29,6 +29,7 @@ module Api
         else
           @answer = Answer.create!(
             flow: @flow,
+            user: @flow.user,  # Set owner as the flow's owner
             answer_data: new_answer_data,
             submitted_at: Time.current
           )

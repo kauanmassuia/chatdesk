@@ -11,6 +11,7 @@ class User < ApplicationRecord
   enum plan: { free: 0, standard: 1, premium: 2 }
 
   has_many :flows, dependent: :destroy
+  has_many :answers
 
   # Validations
   validates :email, presence: true,
