@@ -147,6 +147,13 @@ function EditorContent() {
     [screenToFlowPosition, addNode, updateNodeData]
   )
 
+  // Adiciona um listener para o evento de arrasto de elementos
+  const onMouseDown = useCallback((event: React.MouseEvent) => {
+    // Verifica se o botão pressionado é o esquerdo (0 é o botão esquerdo do mouse)
+    if (event.button === 0) {
+      event.preventDefault()
+    }
+  }, [])
   // Rehydrate imported nodes by adding missing onChange callbacks.
   const rehydratedNodes = nodes.map(node => {
     if (node.data && !node.data.onChange) {
@@ -193,6 +200,7 @@ function EditorContent() {
           bg={isDragging ? dropHighlightColor : bgColor}
           transition="background-color 0.1s ease-out"
           position="relative"
+          onMouseDown={onMouseDown} // Adicionando o listener ao container
         >
           <ReactFlow
             nodes={rehydratedNodes}
@@ -206,7 +214,7 @@ function EditorContent() {
             onDragLeave={onDragLeave}
             fitView
             minZoom={0.5}
-            maxZoom={2}
+            maxZoom={0.8}
             defaultEdgeOptions={{
               type: 'smoothstep', // Tipo de linha (curva suave)
               animated: false, // Sem animação
@@ -229,7 +237,7 @@ function EditorContent() {
             nodesDraggable={true}
             elementsSelectable={true}
             selectNodesOnDrag={false}
-            panOnDrag={[1, 2]}
+            panOnDrag={[0, 1]}
             zoomOnScroll={true}
             zoomOnPinch={true}
             preventScrolling={true}
