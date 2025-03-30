@@ -3,8 +3,16 @@ module Api
     class AnswersController < BaseController
       before_action :authenticate_user!, except: [:save_answer]
 
+      def index
+        # This action is for authenticated users only.
+        @answers = current_user.answers.includes(:flow).order(created_at: :desc)
+        render json: @answers, include: :flow
+      rescue ActiveRecord::RecordNotFound => e
+        render json: { error: e.message }, status: :not_found
+      end
+
       def save_answer
-        @flow = Flow.find(params[:flow_id])
+        @flow = Flow.find_by!(custom_url: params[:custom_url])
         new_answer_data = answer_params[:answer_data] || {}
 
         # Use session to track answer per flow for guest users.

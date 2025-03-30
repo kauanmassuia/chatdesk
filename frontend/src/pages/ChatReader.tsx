@@ -3,6 +3,7 @@ import { Box, Text, Input, Button, VStack, HStack } from '@chakra-ui/react';
 import '../styles/chat.css';
 import { getYoutubeEmbedUrl } from '../utils/getYoutubeEmbedUrl.ts';
 import { fetchPublishedFlow } from '../services/flowService';
+import { saveAnswer } from '../services/answerService';
 import { useParams } from 'react-router-dom';
 
 interface FlowNode {
@@ -114,6 +115,13 @@ const ChatReader: React.FC = () => {
       content: { text: inputValue },
     };
     setConversation((prev) => [...prev, userBubble]);
+
+    // Save answer via saveAnswer
+    if (custom_url && currentNodeId) {
+      saveAnswer(custom_url, { [currentNodeId]: inputValue })
+        .catch((error) => console.error("Error saving answer:", error));
+    }
+
     setTimeout(() => {
       const node = chatFlow ? getNodeById(chatFlow, currentNodeId) : null;
       if (node) {

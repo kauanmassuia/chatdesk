@@ -23,6 +23,11 @@ Rails.application.routes.draw do
           get 'published/:custom_url', to: 'flows#show_by_custom_url', as: :published
         end
       end
+      resources :answers, only: [ :index ] do
+        collection do
+          post :save_answer
+        end
+      end
     end
   end
 end
