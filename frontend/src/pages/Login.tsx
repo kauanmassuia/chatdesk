@@ -59,17 +59,17 @@ export default function Login() {
       justify="center"
       align="center"
       minH="100vh"
-      bg="#f1f1f1" // Cor de fundo alterada
+      bg="#f1f1f1"
+      p={4} // Adiciona espaçamento para melhor responsividade
     >
       {/* Logo no centro */}
-      <Box mb={8}>
-        <Image src={logo} alt="Logo" width="200px" />
+      <Box mb={8} textAlign="center">
+        <Image src={logo} alt="Logo" width={['150px', '200px']} />
       </Box>
 
       {/* Formulário de login sem container */}
       <Box
-        width="100%"
-        maxWidth="400px"
+        width={['90%', '400px']}
         bg={useColorModeValue('white', 'gray.800')}
         p={6}
         borderRadius="lg"
@@ -120,35 +120,34 @@ export default function Login() {
             </FormControl>
 
             <Button
-  bg={"#1a63d8"}
-  type="submit"
-  color="white"
-  isLoading={isLoading}
-  width="100%"
-  height="40px"  // Tamanho da altura
-  fontSize="14px"  // Tamanho da fonte
-  padding="8px"  // Ajuste o preenchimento interno, se necessário
-  border="1px solid transparent"  // Borda inicial transparente
-  _hover={{
-    bg: 'white',
-    color: '#1a63d8',
-    borderColor: '#1a63d8',  // Borda visível no hover
-  }}
->
-  Entrar
-</Button>
-
+              bg={'#1a63d8'}
+              type="submit"
+              color="white"
+              isLoading={isLoading}
+              width="100%"
+              height="40px"
+              fontSize="14px"
+              padding="8px"
+              border="1px solid transparent"
+              _hover={{
+                bg: 'white',
+                color: '#1a63d8',
+                borderColor: '#1a63d8',
+              }}
+            >
+              Entrar
+            </Button>
 
             {/* Botão de login com Google */}
             <Button
-              bg={"#FF9E2C"}
+              bg={'#FF9E2C'}
               variant="outline"
               color="white"
               isLoading={isLoading}
               width="100%"
-              height="40px"  // Tamanho da altura
-              fontSize="14px"  // Tamanho da fonte
-              padding="8px"  // Ajuste o preenchimento interno, se necessário
+              height="40px"
+              fontSize="14px"
+              padding="8px"
               onClick={signInWithGoogle}
               _hover={{
                 bg: 'white',
