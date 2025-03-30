@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Container,
   FormControl,
   FormLabel,
   Heading,
@@ -11,10 +10,13 @@ import {
   useColorModeValue,
   Link as ChakraLink,
   useToast,
+  Flex,
+  Image,
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { login, signInWithGoogle } from '../services/authService';
+import logo from '../assets/logovendflow.png'; // Ajuste o caminho conforme necessário
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -23,15 +25,12 @@ export default function Login() {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Call the login service
+      // Chama o serviço de login
       await login(email, password);
       toast({
         title: 'Login realizado!',
@@ -40,7 +39,7 @@ export default function Login() {
         duration: 3000,
         isClosable: true,
       });
-      navigate('/dashboard'); // Redirect to your dashboard or home page
+      navigate('/dashboard'); // Redireciona para o painel ou página inicial
     } catch (error: any) {
       toast({
         title: 'Erro ao fazer login',
@@ -55,80 +54,121 @@ export default function Login() {
   };
 
   return (
-    <Box minH="100vh" bg={useColorModeValue('gray.50', 'gray.900')}>
-      <Container maxW="lg" py={{ base: '12', md: '24' }} px={{ base: '0', sm: '8' }}>
-        <Stack spacing="8">
-          <Stack spacing="6" textAlign="center">
-            <Heading size="xl" fontWeight="bold">
-              ChatDesk
-            </Heading>
-            <Text color={useColorModeValue('gray.600', 'gray.400')}>
-              Faça login para acessar sua conta
-            </Text>
+    <Flex
+      direction="column"
+      justify="center"
+      align="center"
+      minH="100vh"
+      bg="#f1f1f1" // Cor de fundo alterada
+    >
+      {/* Logo no centro */}
+      <Box mb={8}>
+        <Image src={logo} alt="Logo" width="200px" />
+      </Box>
+
+      {/* Formulário de login sem container */}
+      <Box
+        width="100%"
+        maxWidth="400px"
+        bg={useColorModeValue('white', 'gray.800')}
+        p={6}
+        borderRadius="lg"
+        boxShadow="lg"
+      >
+        <form onSubmit={handleLogin}>
+          <Stack spacing={4}>
+            {/* Campo de email */}
+            <FormControl>
+              <FormLabel htmlFor="email" fontSize="sm">
+                Email
+              </FormLabel>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                border="none"
+                borderBottom="2px solid"
+                borderColor={useColorModeValue('gray.300', 'gray.500')}
+                focusBorderColor="blue.500"
+                _focus={{ borderBottom: '2px solid' }}
+                placeholder="Digite seu email"
+                _placeholder={{ color: useColorModeValue('gray.500', 'gray.400') }}
+              />
+            </FormControl>
+
+            {/* Campo de senha */}
+            <FormControl>
+              <FormLabel htmlFor="password" fontSize="sm">
+                Senha
+              </FormLabel>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                border="none"
+                borderBottom="2px solid"
+                borderColor={useColorModeValue('gray.300', 'gray.500')}
+                focusBorderColor="blue.500"
+                _focus={{ borderBottom: '2px solid' }}
+                placeholder="Digite sua senha"
+                _placeholder={{ color: useColorModeValue('gray.500', 'gray.400') }}
+              />
+            </FormControl>
+
+            <Button
+  bg={"#1a63d8"}
+  type="submit"
+  color="white"
+  isLoading={isLoading}
+  width="100%"
+  height="40px"  // Tamanho da altura
+  fontSize="14px"  // Tamanho da fonte
+  padding="8px"  // Ajuste o preenchimento interno, se necessário
+  border="1px solid transparent"  // Borda inicial transparente
+  _hover={{
+    bg: 'white',
+    color: '#1a63d8',
+    borderColor: '#1a63d8',  // Borda visível no hover
+  }}
+>
+  Entrar
+</Button>
+
+
+            {/* Botão de login com Google */}
+            <Button
+              bg={"#FF9E2C"}
+              variant="outline"
+              color="white"
+              isLoading={isLoading}
+              width="100%"
+              height="40px"  // Tamanho da altura
+              fontSize="14px"  // Tamanho da fonte
+              padding="8px"  // Ajuste o preenchimento interno, se necessário
+              onClick={signInWithGoogle}
+              _hover={{
+                bg: 'white',
+                color: '#FF9E2C',
+                borderColor: '#FF9E2C',
+              }}
+            >
+              Entrar com Google
+            </Button>
           </Stack>
-          <Box
-            py={{ base: '0', sm: '8' }}
-            px={{ base: '4', sm: '10' }}
-            bg={bgColor}
-            boxShadow={{ base: 'none', sm: 'md' }}
-            borderRadius={{ base: 'none', sm: 'xl' }}
-            borderWidth={1}
-            borderColor={borderColor}
-          >
-            <form onSubmit={handleLogin}>
-              <Stack spacing="6">
-                <Stack spacing="5">
-                  <FormControl>
-                    <FormLabel htmlFor="email">Email</FormLabel>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel htmlFor="password">Senha</FormLabel>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </FormControl>
-                </Stack>
-                <Button
-                  type="submit"
-                  colorScheme="blue"
-                  size="lg"
-                  fontSize="md"
-                  isLoading={isLoading}
-                >
-                  Entrar
-                </Button>
-                <Button
-                  variant="outline"
-                  colorScheme="red"
-                  size="lg"
-                  fontSize="md"
-                  onClick={signInWithGoogle}
-                  isLoading={isLoading}
-                >
-                  Entrar com Google
-                </Button>
-              </Stack>
-            </form>
-          </Box>
-          <Text textAlign="center">
-            Não tem uma conta?{' '}
-            <ChakraLink as={RouterLink} to="/register" color="blue.500">
-              Registre-se
-            </ChakraLink>
-          </Text>
-        </Stack>
-      </Container>
-    </Box>
+        </form>
+      </Box>
+
+      {/* Link para cadastro */}
+      <Text mt={4} textAlign="center" fontSize="sm">
+        Não tem uma conta?{' '}
+        <ChakraLink as={RouterLink} to="/register" color="blue.500">
+          Registre-se
+        </ChakraLink>
+      </Text>
+    </Flex>
   );
 }
