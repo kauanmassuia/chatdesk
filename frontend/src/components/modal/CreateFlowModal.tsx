@@ -27,6 +27,7 @@ const CreateFlowModal: React.FC<CreateFlowModalProps> = ({ isOpen, onClose, onCr
     if (title.trim() !== '') {
       onCreate(title);
       setTitle(''); // reset for next time
+      onClose();    // close modal after creation
     }
   };
 
@@ -43,6 +44,7 @@ const CreateFlowModal: React.FC<CreateFlowModalProps> = ({ isOpen, onClose, onCr
               placeholder="Enter flow title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSubmit(); } }}
             />
           </FormControl>
         </ModalBody>
