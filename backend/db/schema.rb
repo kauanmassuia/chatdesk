@@ -10,9 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_03_21_121357) do
+ActiveRecord::Schema[7.2].define(version: 2025_03_26_222921) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "answers", force: :cascade do |t|
+    t.bigint "flow_id", null: false
+    t.json "answer_data"
+    t.datetime "submitted_at"
+    t.json "additional_metadata"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["flow_id"], name: "index_answers_on_flow_id"
+  end
 
   create_table "flows", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -22,6 +32,11 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_21_121357) do
     t.jsonb "metadata"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "uid"
+    t.jsonb "published_content", default: {}
+    t.datetime "publish_at"
+    t.string "custom_url"
+    t.index ["custom_url"], name: "index_flows_on_custom_url", unique: true
     t.index ["user_id"], name: "index_flows_on_user_id"
   end
 
@@ -45,5 +60,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_21_121357) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "answers", "flows"
   add_foreign_key "flows", "users"
 end

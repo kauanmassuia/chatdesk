@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Text, Input, Button, VStack, HStack } from '@chakra-ui/react';
 import '../styles/chat.css';
-import { getYoutubeEmbedUrl } from '../utils/getYoutubeEmbedUrl.ts'; // assume you have a helper for YouTube URLs
+import { getYoutubeEmbedUrl } from '../utils/getYoutubeEmbedUrl.ts';
+import { fetchPublishedFlow } from '../services/flowService';
+import { useParams } from 'react-router-dom';
 
-// Import the exported flow JSON – replace this with your actual JSON import or assignment.
-import chatFlowData from '../data/ultimateflowtest.json';
-
-// Type for a node in the exported flow.
 interface FlowNode {
   id: string;
   type: string;
@@ -14,16 +12,6 @@ interface FlowNode {
   next: string | null;
 }
 
-// Our exported flow:
-const chatFlow: { nodes: FlowNode[] } = chatFlowData;
-
-// --- Helper functions ---
-function getNodeById(flow: { nodes: FlowNode[] }, id: string | null): FlowNode | null {
-  if (!id) return null;
-  return flow.nodes.find((n) => n.id === id) || null;
-}
-
-// Updated interactive and auto node type lists to match exported JSON.
 const interactiveTypes: string[] = [
   "text-input",
   "input_date",
@@ -36,63 +24,66 @@ const interactiveTypes: string[] = [
 ];
 const autoTypes: string[] = ["start", "text", "image", "video", "audio"];
 
-// Mapping from interactive node type to HTML input type.
 const inputTypeMapping: Record<string, string> = {
   "text-input": "text",
   "input_date": "date",
   "input_website": "url",
   "input_phone": "tel",
   "input_email": "email",
-  // for numeric inputs if any:
   "input_number": "number",
-  // others default to text.
 };
 
-// Helper: Determine if a bubble is right-aligned (user responses).
 function isRightAligned(nodeType: string): boolean {
   return nodeType === "user";
 }
 
-// --- ChatReader Component ---
 const ChatReader: React.FC = () => {
-  // currentNodeId: id of the next node to be processed.
+  const { custom_url } = useParams<{ custom_url: string }>();
+  const [chatFlow, setChatFlow] = useState<{ nodes: FlowNode[] } | null>(null);
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
-  // conversation: array of nodes (and user responses) that have been rendered.
   const [conversation, setConversation] = useState<any[]>([]);
-  // inputValue: for interactive text inputs.
   const [inputValue, setInputValue] = useState("");
   const chatHistoryRef = useRef<HTMLDivElement>(null);
 
-  // 1. Initialize conversation with the start node.
+  function getNodeById(flow: { nodes: FlowNode[] }, id: string | null): FlowNode | null {
+    if (!id) return null;
+    return flow.nodes.find((n) => n.id === id) || null;
+  }
+
   useEffect(() => {
+    if (!custom_url) return;
+    fetchPublishedFlow(custom_url).then((data) => {
+      if (data && data.published_content) {
+        setChatFlow(data.published_content);
+      }
+    });
+  }, [custom_url]);
+
+  useEffect(() => {
+    if (!chatFlow) return;
     const startNode = getNodeById(chatFlow, "start");
     if (startNode) {
-      // For auto nodes, add them immediately.
       if (autoTypes.includes(startNode.type)) {
         setConversation([startNode]);
       }
       setCurrentNodeId(startNode.next ?? null);
     }
-  }, []);
+  }, [chatFlow]);
 
-  // 2. Auto-scroll chat history.
   useEffect(() => {
     if (chatHistoryRef.current) {
       chatHistoryRef.current.scrollTop = chatHistoryRef.current.scrollHeight;
     }
   }, [conversation]);
 
-  // 3. Process new node arrival.
   useEffect(() => {
-    if (!currentNodeId) return;
+    if (!chatFlow || !currentNodeId) return;
     const node = getNodeById(chatFlow, currentNodeId);
     if (!node) return;
 
     if (node.type === "input_wait") {
-      // For wait nodes, delay according to waitTime.
       const seconds = node.content?.waitTime || 1;
       const timer = setTimeout(() => {
-        // Append the wait node (optional) and move on.
         setConversation((prev) => [...prev, node]);
         setCurrentNodeId(node.next ?? null);
       }, seconds * 1000);
@@ -100,7 +91,6 @@ const ChatReader: React.FC = () => {
     }
 
     if (autoTypes.includes(node.type)) {
-      // Auto nodes: append after a short delay.
       const timer = setTimeout(() => {
         setConversation((prev) => [...prev, node]);
         setCurrentNodeId(node.next ?? null);
@@ -108,16 +98,14 @@ const ChatReader: React.FC = () => {
       return () => clearTimeout(timer);
     }
 
-    // Interactive nodes: if not already in conversation, append them.
     if (interactiveTypes.includes(node.type)) {
       const alreadyInHistory = conversation.some((c) => c.id === node.id);
       if (!alreadyInHistory) {
         setConversation((prev) => [...prev, node]);
       }
     }
-  }, [currentNodeId, conversation]);
+  }, [currentNodeId, conversation, chatFlow]);
 
-  // 4. Handle interactive input submission (for text-input, input_date, etc.).
   function handleInputSubmit() {
     if (!inputValue.trim()) return;
     const userBubble = {
@@ -126,9 +114,8 @@ const ChatReader: React.FC = () => {
       content: { text: inputValue },
     };
     setConversation((prev) => [...prev, userBubble]);
-    // After submission, auto-advance to next node.
     setTimeout(() => {
-      const node = getNodeById(chatFlow, currentNodeId);
+      const node = chatFlow ? getNodeById(chatFlow, currentNodeId) : null;
       if (node) {
         setCurrentNodeId(node.next ?? null);
       }
@@ -142,12 +129,11 @@ const ChatReader: React.FC = () => {
     }
   }
 
-  // 5. Handle choice selection for buttons and picture choices.
   function handleChoiceSelect(choice: any) {
     const userBubble = {
       id: `user_${Date.now()}`,
       type: "user",
-      content: { text: choice.label }, // use the label as the user's choice
+      content: { text: choice.label },
     };
     setConversation((prev) => [...prev, userBubble]);
     setTimeout(() => {
@@ -155,9 +141,7 @@ const ChatReader: React.FC = () => {
     }, 500);
   }
 
-  // 6. Render node content based on type.
   function renderNode(node: FlowNode) {
-    // --- Interactive Nodes (excluding wait) ---
     if (interactiveTypes.includes(node.type) && node.type !== "input_buttons" && node.type !== "input_pic_choice" && node.type !== "input_wait") {
       const htmlInputType = inputTypeMapping[node.type] || "text";
       return (
@@ -181,7 +165,6 @@ const ChatReader: React.FC = () => {
         </VStack>
       );
     }
-    // --- Choice Nodes ---
     if (node.type === "input_buttons") {
       return (
         <VStack spacing={3} align="stretch">
@@ -219,12 +202,9 @@ const ChatReader: React.FC = () => {
         </VStack>
       );
     }
-    // --- Wait Node ---
     if (node.type === "input_wait") {
-      // Wait nodes do not display any UI.
       return null;
     }
-    // --- Auto Nodes ---
     if (autoTypes.includes(node.type)) {
       if (node.type === "text") {
         return <Box><Text>{node.content.text}</Text></Box>;
@@ -261,16 +241,13 @@ const ChatReader: React.FC = () => {
         );
       }
       if (node.type === "start") {
-        return null; // Start node might not render anything.
+        return null;
       }
     }
-    // --- Fallback ---
     return <Box><Text>{node.content?.text || ""}</Text></Box>;
   }
 
-  // --- Main Render ---
-  // Get the current node (if exists).
-  const currentNode = getNodeById(chatFlow, currentNodeId);
+  const currentNode = chatFlow ? getNodeById(chatFlow, currentNodeId) : null;
 
   return (
     <div className="flex flex-col h-screen">
@@ -292,7 +269,6 @@ const ChatReader: React.FC = () => {
             </div>
           );
         })}
-        {/* Render current interactive prompt if not already in conversation */}
         {currentNode &&
           interactiveTypes.includes(currentNode.type) &&
           !conversation.some((c) => c.id === currentNode.id) && (

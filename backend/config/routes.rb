@@ -15,7 +15,14 @@ Rails.application.routes.draw do
         registrations: "api/v1/registrations"
         # sessions: "api/v1/sessions"
       }
-      resources :flows, only: [ :index, :show, :create, :update, :destroy ]
+      resources :flows, only: [ :index, :show, :create, :update, :destroy ] do
+        member do
+          post :publish
+        end
+        collection do
+          get 'published/:custom_url', to: 'flows#show_by_custom_url', as: :published
+        end
+      end
     end
   end
 end

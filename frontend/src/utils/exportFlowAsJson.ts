@@ -1,4 +1,3 @@
-// exportFlowAsJson.ts
 import { Node, Edge } from 'reactflow'
 import { nodeExporters } from './nodeExporters'
 
@@ -11,8 +10,10 @@ export function exportFlowAsJson(nodes: Node[], edges: Edge[]) {
     const partial = exporter ? exporter(node) : { type: node.type, content: {} }
     exportedMap[node.id] = {
       id: node.id,
-      ...partial,
+      type: partial.type,
+      content: partial.content,
       next: null, // default
+      position: node.position // <-- added position export here
     }
   }
 
@@ -32,9 +33,11 @@ export function exportFlowAsJson(nodes: Node[], edges: Edge[]) {
         }
       }
     } else if (nodeEntry.type === 'input_pic_choice') {
-      // If it's a PicChoice node, connect the choices with their next nodes
+      // For PicChoice nodes, connect each choice's "next" pointer
       nodeEntry.content.choices.forEach((choice: any, index: number) => {
-        const matchingEdge = edges.find((edge) => edge.source === nodeEntry.id && edge.sourceHandle === `button-${index}`)
+        const matchingEdge = edges.find(
+          (edge) => edge.source === nodeEntry.id && edge.sourceHandle === `button-${index}`
+        )
         if (matchingEdge) {
           choice.next = matchingEdge.target
         }

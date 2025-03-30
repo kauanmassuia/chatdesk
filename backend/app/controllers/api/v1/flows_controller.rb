@@ -2,11 +2,11 @@ module Api
   module V1
     class FlowsController < BaseController
       before_action :authenticate_user!
-      before_action :set_flow, only: [:show, :update, :destroy]
+      before_action :set_flow, only: [:show, :update, :destroy, :publish]
+      skip_before_action :authenticate_user!, only: [:show_by_custom_url]
 
       # GET /api/v1/flows
       def index
-        # Only return flows that belong to the current_user
         @flows = current_user.flows.order(created_at: :desc)
         render json: @flows
       end
@@ -41,16 +41,42 @@ module Api
         head :no_content
       end
 
+      # POST /flows/:id/publish
+      def publish
+        @flow.published_content = @flow.content
+        @flow.publish_at = Time.current
+        @flow.published = true
+
+        if @flow.save
+          render json: { message: "Flow published successfully", flow: @flow }, status: :ok
+        else
+          render json: { error: "Failed to publish flow", details: @flow.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
+      # GET /api/v1/flows/published/:custom_url
+      def show_by_custom_url
+        @flow = Flow.find_by!(custom_url: params[:custom_url], published: true)
+        render json: { published_content: @flow.published_content }, status: :ok
+      rescue ActiveRecord::RecordNotFound
+        render json: { error: "Flow not found" }, status: :not_found
+      end
+
       private
 
       def set_flow
-        @flow = current_user.flows.find(params[:id])
+        @flow = current_user.flows.find_by!(uid: params[:id])
       rescue ActiveRecord::RecordNotFound
-        render json: { error: 'Flow not found' }, status: :not_found
+        render json: { error: "Flow not found" }, status: :not_found
       end
 
       def flow_params
-        params.require(:flow).permit(:title, :content, :published, metadata: {})
+        permitted = [:title, :published, :publish_at, :published_content, :custom_url, metadata: {}, content: {}]
+        if params[:flow]
+          params.require(:flow).permit(*permitted)
+        else
+          params.permit(*permitted)
+        end
       end
     end
   end
