@@ -110,7 +110,7 @@ const Sidebar = () => {
   ];
 
   // Função para filtrar itens conforme a pesquisa
-  const filterItems = (items: { label: string }[]) => {
+  const filterItems = (items: { label: string; type: string; colorScheme?: string; icon?: any }[]) => {
     return items.filter(item => item.label.toLowerCase().includes(searchQuery.toLowerCase()));
   };
 

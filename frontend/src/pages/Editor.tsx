@@ -80,7 +80,7 @@ function EditorContent() {
       setNodes([{
         id: 'start',
         type: 'start',
-        position: { x: 800, y: 400 },
+        position: { x: 200, y: 200 },
         data: {},
       }])
     }
@@ -200,7 +200,7 @@ function EditorContent() {
             fitView={false}  // Desabilitar fitView para evitar ajuste automático
             minZoom={0.5}  // Zoom mínimo
             maxZoom={1.5}  // Zoom máximo
-            defaultViewport={{ x: 0, y: 0, zoom: 0.5 }} // Ajuste de zoom inicial
+            defaultViewport={{ x: 0, y: 0, zoom: 0.8 }} // Ajuste de zoom inicial
           >
             <Background gap={16} size={1} />
             <Controls showInteractive={false} />

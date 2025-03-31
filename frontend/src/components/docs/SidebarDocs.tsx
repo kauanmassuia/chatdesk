@@ -15,7 +15,11 @@ import {
   FaChevronUp 
 } from "react-icons/fa"; // Ícones de setas adicionados
 
-function SidebarDocs({ setContent }) {
+interface SidebarDocsProps {
+  setContent: (content: string) => void;
+}
+
+function SidebarDocs({ setContent }: SidebarDocsProps) {
   const [openFluxo, setOpenFluxo] = useState(false);  // Controla a exibição do Fluxo
   const [openBubbles, setOpenBubbles] = useState(false);  // Controla a exibição das Bubbles
   const [openInputs, setOpenInputs] = useState(false);  // Controla a exibição dos Inputs

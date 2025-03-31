@@ -16,8 +16,16 @@ import {
   useColorModeValue,
   useToast,
   useDisclosure,
+  Image,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
 } from '@chakra-ui/react';
-import { FiPlus, FiSettings, FiChevronDown, FiFolderPlus, FiLogOut } from 'react-icons/fi';
+import { FiPlus, FiSettings, FiChevronDown, FiLogOut } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../services/authService';
 import { getFlows, createFlow } from '../services/flowService';
@@ -30,11 +38,9 @@ export default function Dashboard() {
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isSettingsOpen, onOpen: onSettingsOpen, onClose: onSettingsClose } = useDisclosure();
 
-  // Retrieve the user's name (from Google OAuth or registration)
   const userName = localStorage.getItem('userName') || 'Guest';
-
-  // Flows state & loading state
   const [flows, setFlows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -61,7 +67,6 @@ export default function Dashboard() {
     fetchFlows();
   }, []);
 
-  // Create flow using the modal input
   const handleCreateFlow = async (title: string) => {
     try {
       const newFlow = await createFlow(title, {});
@@ -72,10 +77,7 @@ export default function Dashboard() {
         duration: 3000,
         isClosable: true,
       });
-      // Refresh the flows list
       fetchFlows();
-      // Redirect to the editor with the new flow ID
-      // navigate(`/editor?flow_id=${newFlow.uid}`);
     } catch (error) {
       console.error('Error creating flow:', error);
       toast({
@@ -88,7 +90,6 @@ export default function Dashboard() {
     }
   };
 
-  // Handle Logout
   const handleLogout = async () => {
     await logout();
     navigate('/login');
@@ -100,30 +101,34 @@ export default function Dashboard() {
       <Box w="full" py={4} px={6} borderBottom="1px" borderColor={borderColor} bg={cardBg}>
         <Container maxW="1440px">
           <Flex justify="space-between" align="center">
-            <Box>
-              <Icon boxSize={8} viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"
-                />
-              </Icon>
-            </Box>
+          <Box>
+          {/* Substituindo o ícone pela logo */}
+          <Image 
+            src="../src/assets/logovendflow.png" 
+            alt="Logo" 
+            width={{ base: "40%", md: "20%", lg: "55%" }}  // Tamanhos diferentes para cada tamanho de tela
+            height="auto"  // Manter a proporção da imagem
+            align={"left"} // Alinhando à esquerda
+            marginTop={2} // Margem superior para espaçamento
+            marginBottom={2} // Margem inferior para espaçamento
+            marginLeft={-14} // Margem esquerda para espaçamento
+
+          />
+        </Box>
             <HStack spacing={4}>
-              <Button leftIcon={<FiSettings />} variant="ghost" size="sm" onClick={onOpen}>
+              <Button leftIcon={<FiSettings />} variant="ghost" size="sm" onClick={onSettingsOpen}>
                 Configurações e Membros
               </Button>
-              {/* Display user name */}
               <Text>{userName}'s workspace</Text>
               <Menu>
                 <MenuButton as={Button} rightIcon={<FiChevronDown />} variant="ghost" size="sm">
-                  Gratuito
+                  Área de trabalho
                 </MenuButton>
                 <MenuList>
-                  <MenuItem>Atualizar Plano</MenuItem>
-                  <MenuItem>Faturamento</MenuItem>
+                  <MenuItem>Perfil Kauan Massuia</MenuItem>
+                  <MenuItem>Criar perfil</MenuItem>
                 </MenuList>
               </Menu>
-              {/* Logout Button */}
               <Button
                 leftIcon={<FiLogOut />}
                 variant="ghost"
@@ -141,13 +146,12 @@ export default function Dashboard() {
       {/* Conteúdo Principal */}
       <Container maxW="1440px" py={8}>
         <Flex gap={6} wrap="wrap" justify="flex-start">
-          {/* Create Flow Card */}
           <Box
             as="button"
             onClick={onOpen}
-            w={{ base: "100%", md: "300px" }} // Responsividade
+            w={{ base: "100%", md: "300px" }}
             h="200px"
-            bg="orange.500"
+            bg="#ff9e2c"
             color="white"
             borderRadius="lg"
             p={6}
@@ -163,14 +167,13 @@ export default function Dashboard() {
             <Heading size="md">Create a Flow</Heading>
           </Box>
 
-          {/* List existing flows */}
           {loading ? (
             <Spinner size="xl" />
           ) : (
             flows.map((flow) => (
               <Box
                 key={flow.id}
-                w={{ base: "100%", sm: "48%", md: "300px" }} // Responsividade
+                w={{ base: "100%", sm: "48%", md: "300px" }}
                 h="200px"
                 bg={cardBg}
                 border="1px"
@@ -198,7 +201,24 @@ export default function Dashboard() {
         </Flex>
       </Container>
 
-      {/* Modal to enter the flow title */}
+      {/* Modal de Configurações */}
+      <Modal isOpen={isSettingsOpen} onClose={onSettingsClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Configurações e Membros</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text>Perfil: Kauan Massuia</Text>
+            <Text mt={4}>Aqui você pode editar seu perfil e configurar sua conta.</Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" onClick={onSettingsClose}>
+              Fechar
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
       <CreateFlowModal isOpen={isOpen} onClose={onClose} onCreate={handleCreateFlow} />
     </Box>
   );
