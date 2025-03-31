@@ -140,12 +140,12 @@ export default function Dashboard() {
 
       {/* Conteúdo Principal */}
       <Container maxW="1440px" py={8}>
-        <Flex gap={6} wrap="wrap">
+        <Flex gap={6} wrap="wrap" justify="flex-start">
           {/* Create Flow Card */}
           <Box
             as="button"
             onClick={onOpen}
-            w="300px"
+            w={{ base: "100%", md: "300px" }} // Responsividade
             h="200px"
             bg="orange.500"
             color="white"
@@ -170,7 +170,7 @@ export default function Dashboard() {
             flows.map((flow) => (
               <Box
                 key={flow.id}
-                w="300px"
+                w={{ base: "100%", sm: "48%", md: "300px" }} // Responsividade
                 h="200px"
                 bg={cardBg}
                 border="1px"
@@ -197,6 +197,7 @@ export default function Dashboard() {
           )}
         </Flex>
       </Container>
+
       {/* Modal to enter the flow title */}
       <CreateFlowModal isOpen={isOpen} onClose={onClose} onCreate={handleCreateFlow} />
     </Box>
