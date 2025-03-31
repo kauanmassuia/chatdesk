@@ -54,7 +54,6 @@ const nodeTypes = {
 
 const proOptions = { hideAttribution: true }
 
-
 function EditorContent() {
   const {
     nodes,
@@ -78,14 +77,12 @@ function EditorContent() {
 
   useEffect(() => {
     if (nodes.length === 0) {
-      setNodes([
-        {
-          id: 'start',
-          type: 'start',
-          position: { x: 400, y: 100 },
-          data: {},
-        },
-      ])
+      setNodes([{
+        id: 'start',
+        type: 'start',
+        position: { x: 800, y: 400 },
+        data: {},
+      }])
     }
   }, [nodes.length, setNodes])
 
@@ -107,7 +104,6 @@ function EditorContent() {
       const type = event.dataTransfer.getData('application/reactflow')
       if (!type) return
 
-      // Use screenToFlowPosition without manual offset adjustments
       const position = screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
@@ -118,7 +114,6 @@ function EditorContent() {
         type,
         position,
         data: {
-          // Dados iniciais para o nó
           text: '',
           imageUrl: '',
           alt: '',
@@ -135,9 +130,9 @@ function EditorContent() {
           onChange:
             type === 'text'
               ? (value: string) =>
-                  updateNodeData(newNode.id, { text: value }) // Para TextNodes
+                  updateNodeData(newNode.id, { text: value }) 
               : (field: string, value: string) =>
-                  updateNodeData(newNode.id, { [field]: value }), // Para outros nós
+                  updateNodeData(newNode.id, { [field]: value }),
         },
         dragHandle: '.drag',
       }
@@ -147,7 +142,6 @@ function EditorContent() {
     [screenToFlowPosition, addNode, updateNodeData]
   )
 
-  // Rehydrate imported nodes by adding missing onChange callbacks.
   const rehydratedNodes = nodes.map(node => {
     if (node.data && !node.data.onChange) {
       return {
@@ -165,7 +159,6 @@ function EditorContent() {
     return node
   })
 
-  // Auto-save effect triggered after 2 seconds inactivity (nodes or edges change)
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (!uid) {
@@ -177,7 +170,7 @@ function EditorContent() {
         const exportData = exportFlowAsJson(nodes, edges)
         await updateFlow(uid, exportData)
       } catch (error) {
-        // ...handle error if needed...
+        console.error('Error saving flow:', error)
       }
       setTimeout(() => setIsSaving(false), 1000)
     }, 2000)
@@ -204,36 +197,10 @@ function EditorContent() {
             onDragOver={onDragOver}
             onDrop={onDrop}
             onDragLeave={onDragLeave}
-            fitView
-            minZoom={0.5}
-            maxZoom={2}
-            defaultEdgeOptions={{
-              type: 'smoothstep', // Tipo de linha (curva suave)
-              animated: false, // Sem animação
-              style: {
-                strokeWidth: 3, // Espessura maior da linha
-                strokeDasharray: 'none', // Remove pontilhado
-                strokeLinecap: 'round', // Cantos arredondados
-                strokeLinejoin: 'round', // Junções suaves
-                strokeOpacity: '0.9', // Transparência leve
-                stroke:'#4A90E2', // Cor azul clara
-                zIndex: 10, // Garante que as linhas fiquem acima dos nós
-              },
-            }}
-            connectionRadius={50}
-            proOptions={proOptions}
-            deleteKeyCode={['Backspace', 'Delete']}
-            multiSelectionKeyCode={['Control', 'Meta']}
-            selectionKeyCode={null}
-            snapToGrid={false}
-            nodesDraggable={true}
-            elementsSelectable={true}
-            selectNodesOnDrag={false}
-            panOnDrag={[1, 2]}
-            zoomOnScroll={true}
-            zoomOnPinch={true}
-            preventScrolling={true}
-            defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+            fitView={false}  // Desabilitar fitView para evitar ajuste automático
+            minZoom={0.5}  // Zoom mínimo
+            maxZoom={1.5}  // Zoom máximo
+            defaultViewport={{ x: 0, y: 0, zoom: 0.5 }} // Ajuste de zoom inicial
           >
             <Background gap={16} size={1} />
             <Controls showInteractive={false} />
@@ -248,17 +215,17 @@ function EditorContent() {
             </Panel>
             <Panel position="top-left">
               {isSaving && (
-              <Box
-                bg={bgColor}
-                p={2}
-                borderRadius="md"
-                shadow="sm"
-                display="flex"
-                alignItems="center"
-              >
-                <Spinner color="blue.500" speed="1s" mr={2} />
-                Saving...
-              </Box>
+                <Box
+                  bg={bgColor}
+                  p={2}
+                  borderRadius="md"
+                  shadow="sm"
+                  display="flex"
+                  alignItems="center"
+                >
+                  <Spinner color="blue.500" speed="1s" mr={2} />
+                  Saving...
+                </Box>
               )}
             </Panel>
           </ReactFlow>
@@ -287,7 +254,6 @@ export default function Editor() {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const flowId = queryParams.get('flow_id');
-  // Remove local state for nodes/edges; use flowStore setters instead.
   const setNodes = useFlowStore(state => state.setNodes);
   const setEdges = useFlowStore(state => state.setEdges);
   const [loading, setLoading] = useState(true);
@@ -306,7 +272,6 @@ export default function Editor() {
           setLoading(false);
         }
       } else {
-        // No flow found; initialize with empty flow.
         setNodes([]);
         setEdges([]);
         setLoading(false);
@@ -315,14 +280,10 @@ export default function Editor() {
     fetchFlow();
   }, [flowId, setNodes, setEdges]);
 
-  if (loading) return <Spinner />;
-
   return (
-    <Box width="100%" height="100vh">
-      <ReactFlowProvider>
-        <Header flowId={flowId} />
-        <EditorContent />
-      </ReactFlowProvider>
-    </Box>
-  );
+    <ReactFlowProvider>
+      <Header />
+      {loading ? <Spinner size="xl" color="blue.500" /> : <EditorContent />}
+    </ReactFlowProvider>
+  )
 }

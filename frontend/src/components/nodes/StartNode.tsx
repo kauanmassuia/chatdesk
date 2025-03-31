@@ -1,30 +1,43 @@
 import { Handle, Position } from 'reactflow'
-import { Box, Text } from '@chakra-ui/react'
+import { Box, Text, Flex } from '@chakra-ui/react'
 import { memo } from 'react'
 
 const StartNode = memo(() => {
   return (
     <Box
-      p={2}
-      borderRadius="full"
+      p={4}
+      borderRadius="lg"  // Borda mais arredondada
       bg="white"
       border="2px"
       borderColor="gray.200"
+      boxShadow="lg"  // Adiciona sombra suave
+      w="200px"
+      h="auto"
       display="flex"
-      alignItems="center"
+      flexDirection="column"
       justifyContent="center"
-      w="100px"
+      alignItems="center"
+      position="relative"
     >
-      <Text fontSize="sm" fontWeight="medium">
-        Start
+      <Text fontSize="md" fontWeight="bold" color="gray.700">
+        Start Node
       </Text>
-      <Handle type="source" position={Position.Bottom}
-      style={{
-        width: 16,        // aumenta a largura
-        height: 16,       // aumenta a altura
-        background: '#353535', // muda a cor para azul (opcional)
-        border: '2px solid white', // borda branca (opcional)
-      }} />
+      <Text fontSize="sm" fontWeight="medium" color="gray.500" mt={2}>
+        Initialize Flow
+      </Text>
+      <Handle
+        type="source"
+        position={Position.Right}
+        style={{
+          width: 20,
+          height: 20,
+          background: '#4A90E2',  // Cor mais visível
+          border: '2px solid white',
+          borderRadius: '50%',
+          position: 'absolute',
+          right: -10,  // Ajuste a posição para ficar abaixo
+        }}
+      />
     </Box>
   )
 })

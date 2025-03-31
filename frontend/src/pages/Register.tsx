@@ -8,32 +8,29 @@ import {
   Input,
   Stack,
   Text,
-  useColorModeValue,
-  Link as ChakraLink,
   useToast,
   Flex,
   Image,
-} from '@chakra-ui/react'
-import { useState } from 'react'
-import { useNavigate, Link as RouterLink } from 'react-router-dom'
-import { register, signInWithGoogle } from '../services/authService'
-import logo from '../assets/logovendflow.png'  // Ajuste o caminho conforme a estrutura do seu projeto
+} from '@chakra-ui/react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { register, signInWithGoogle } from '../services/authService';
+import logo from '../assets/logovendflow.png';
+import googleLogo from '../assets/logogoogleauth.png';
+import videolp from '../assets/videocomofuncionaflow.mp4';
 
 export default function Register() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const navigate = useNavigate()
-  const toast = useToast()
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const toast = useToast();
 
-  const bgColor = useColorModeValue('white', 'gray.800')
-  const borderColor = useColorModeValue('gray.200', 'gray.600')
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
     if (password !== confirmPassword) {
       toast({
@@ -42,21 +39,21 @@ export default function Register() {
         status: 'error',
         duration: 3000,
         isClosable: true,
-      })
-      setIsLoading(false)
-      return
+      });
+      setIsLoading(false);
+      return;
     }
 
     try {
-      await register(name, email, password, confirmPassword)
+      await register(name, email, password, confirmPassword);
       toast({
         title: 'Cadastro realizado!',
         description: 'Sua conta foi criada com sucesso.',
         status: 'success',
         duration: 3000,
         isClosable: true,
-      })
-      navigate('/dashboard')
+      });
+      navigate('/dashboard');
     } catch (error) {
       toast({
         title: 'Erro no cadastro',
@@ -64,225 +61,112 @@ export default function Register() {
         status: 'error',
         duration: 3000,
         isClosable: true,
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <Flex direction={{ base: 'column', lg: 'row' }} minH="100vh">
-      {/* Left Side with background or image */}
-      <Box
-        flex="1"
-        bgColor="#f1f1f1"
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        color="white"
-        borderTopLeftRadius="xl"
-        borderBottomLeftRadius="xl"
-        d={{ base: 'none', lg: 'block' }} // Hide on small screens
-        height="100vh"
-        position="relative"
-      >
-        <Box position="absolute" top="5" left="0" fontSize="xl" fontWeight="bold">
-          <Image
-            src={logo}
-            alt="Logo"
-            width="200px" // Ajuste a largura conforme necessário
-            objectFit="contain" // Mantém a proporção original da imagem
-          />
+    <Box minH="100vh" bg="#f1f1f1">
+      <Flex direction={{ base: 'column', lg: 'row' }} minH="100vh">
+        {/* Left Container - Escondido no Mobile */}
+        <Box 
+          flex={{ base: 'none', lg: '1' }}
+          p={{ base: '4%', lg: '5%' }}
+          display={{ base: 'none', lg: 'flex' }}
+          flexDirection="column"
+          alignItems="center"
+        >
+          {/* Logo */}
+          <Image src={logo} alt="Logo" width="50%" mb="4%" mt={{ lg: '-6%' }} />
+
+          {/* Texto e Vídeo */}
+          <Box textAlign="center" width="100%">
+            <Text fontSize="xl" fontWeight="bold" color="black" mb="4">
+              Crie Chatbots personalizados e automatize seu atendimento
+            </Text>
+          </Box>
+
+          <Box
+            borderRadius="20px"
+            boxShadow="md"
+            overflow="hidden"
+            width="85%"
+            height="auto"
+            mt="4%"
+            transition="transform 0.3s ease-in-out"
+            _hover={{ transform: 'scale(1.1)' }}
+            maxWidth="100%"
+            position="relative"
+          >
+            <video width="100%" height="100%" autoPlay loop muted playsInline>
+              <source src={videolp} type="video/mp4" />
+              Seu navegador não suporta vídeos.
+            </video>
+          </Box>
         </Box>
 
-        {/* Frase sobre o produto */}
-        <Box
-          position="absolute"
-          top="6%" // Ajustado para posicionar mais para cima
-          left="50%"
-          transform="translateX(-50%)"
-          textAlign="center"
-          color="black"
-          fontSize="xl"
-          fontWeight="bold"
-          maxWidth="80%" // Limita o tamanho da frase
-        >
-          <Text>
-            Crie Chatbots personalizados e automatize seu atendimento
-          </Text>
-        </Box>
+        {/* Divider - Somente para telas grandes */}
+        <Box width=".2%" bgColor="gray.400" height="100%" display={{ base: 'none', lg: 'block' }} />
 
-        {/* Video in the middle with rounded borders and shadow */}
-        <Box
-          position="absolute"
-          top="50%" // Centraliza verticalmente
-          left="50%" // Centraliza horizontalmente
-          transform="translate(-50%, -50%)"
-          borderRadius="xl"
-          boxShadow="md"
-          overflow="hidden"
-          width="80%" // Ajuste a largura conforme necessário
-          height="50%" // Ajuste a altura conforme necessário
-        >
-          <iframe
-            src="https://www.youtube.com/embed/your_video_id" // Substitua com o seu link de vídeo
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </Box>
-      </Box>
-
-      {/* Divider line */}
-      <Box width="1px" bgColor="#f1f1f1" height="100vh" />
-
-      {/* Right Side with form */}
-      <Box
-        flex="1"
-        py={{ base: '6', md: '12' }}
-        px={{ base: '4', sm: '6' }}
-        bg="#f1f1f1"
-        boxShadow={{ base: 'none', sm: 'md' }}
-        borderRadius={{ base: 'none', sm: 'lg' }}
-        borderWidth={1}
-        borderColor={borderColor}
-        height="100vh"
-        overflow="hidden"
-      >
-        {/* Wrap the form inside a Container with white background */}
-        <Container
-          maxW="lg"
-          bg="white"
-          p="8"
-          borderRadius="lg"
-          boxShadow="lg"
-          height="auto"
-        >
-          <Stack spacing="5">
-            <Stack spacing="4" textAlign="center">
-              <Heading size="md" fontWeight="bold" fontSize="lg">
+        {/* Right Container (Form) */}
+        <Box flex="1" display="flex" alignItems="center" justifyContent="center" p={{ base: '6%', lg: '4%' }}>
+          <Container maxW="md" bg="white" p={6} borderRadius="lg" boxShadow="lg">
+            <Stack spacing={3}>
+              {/* Logo no Mobile */}
+              <Image src={logo} alt="Logo" width="40%" mx="auto" display={{ base: 'block', lg: 'none' }} mb={4} />
+              
+              <Heading size="md" textAlign="center">
                 Criar conta no VendFlow
               </Heading>
-              <Text color={useColorModeValue('gray.600', 'gray.400')} fontSize="sm">
+              <Text textAlign="center" color="gray.600">
                 Preencha os dados abaixo para se registrar
               </Text>
-            </Stack>
-            <Box>
               <form onSubmit={handleRegister}>
-                <Stack spacing="4">
+                <Stack spacing={4}>
                   <FormControl>
-                    <FormLabel htmlFor="name" fontSize="sm">
-                      Nome
-                    </FormLabel>
-                    <Input
-                      id="name"
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                      fontSize="sm"
-                      size="sm"
-                      placeholder="Digite seu nome"
-                    />
+                    <FormLabel>Nome</FormLabel>
+                    <Input value={name} onChange={(e) => setName(e.target.value)} required />
                   </FormControl>
                   <FormControl>
-                    <FormLabel htmlFor="email" fontSize="sm">
-                      Email
-                    </FormLabel>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      fontSize="sm"
-                      size="sm"
-                      placeholder="Digite seu email"
-                    />
+                    <FormLabel>Email</FormLabel>
+                    <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                   </FormControl>
                   <FormControl>
-                    <FormLabel htmlFor="password" fontSize="sm">
-                      Senha
-                    </FormLabel>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      fontSize="sm"
-                      size="sm"
-                      placeholder="Digite sua senha"
-                    />
+                    <FormLabel>Senha</FormLabel>
+                    <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                   </FormControl>
                   <FormControl>
-                    <FormLabel htmlFor="confirmPassword" fontSize="sm">
-                      Confirmar Senha
-                    </FormLabel>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      fontSize="sm"
-                      size="sm"
-                      placeholder="Confirme sua senha"
-                    />
+                    <FormLabel>Confirmar Senha</FormLabel>
+                    <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
                   </FormControl>
-                  <Stack spacing="3">
-                    <Button
-                      type="submit"
-                      color="white"
-                      size="sm"
-                      isLoading={isLoading}
-                      width="full"
-                      fontSize="sm"
-                      bg="#1a63d8"
-                      borderColor="#1a63d8"
-                      variant={"outline"}
-                      _hover={{
-                        bg: 'white',
-                        color: '#1a63d8',
-                        borderColor: '#1a63d8',
-                      }}
-                    >
-                      Criar conta
-                    </Button>
-                    <Button
-                      bg={"#FF9E2C"}
-                      variant="outline"
-                      color="#FF9E2C"
-                      size="sm"
-                      fontSize="sm"
-                      onClick={signInWithGoogle}
-                      isLoading={isLoading}
-                      width="full"
-                      borderColor="#FF9E2C"
-                      textColor={"White"}
-                      _hover={{
-                        bg: 'white',
-                        color: '#FF9E2C',
-                        borderColor: '#FF9E2C',
-                      }}
-                    >
-                      Cadastro com Google
-                    </Button>
-                  </Stack>
+                  <Button
+                    type="submit"
+                    colorScheme="blue"
+                    isLoading={isLoading}
+                    width="100%"
+                    bg="#2575fc"
+                    color="white"
+                    _hover={{ bg: 'white', color: '#2575fc', border: '2px solid #2575fc' }}
+                  >
+                    Criar conta
+                  </Button>
+                  <Button
+                    onClick={signInWithGoogle}
+                    bg="#ff9e2c"
+                    color="white"
+                    _hover={{ bg: 'white', color: '#ff9e2c', border: '2px solid #ff9e2c' }}
+                    width="100%"
+                  >
+                    <Image src={googleLogo} alt="Google" boxSize="20px" mr={2} /> Cadastro com Google
+                  </Button>
                 </Stack>
               </form>
-            </Box>
-            <Text textAlign="center" fontSize="sm">
-              Já tem uma conta?{' '}
-              <ChakraLink as={RouterLink} to="/login" color="blue.500">
-                Faça login
-              </ChakraLink>
-            </Text>
-          </Stack>
-        </Container>
-      </Box>
-    </Flex>
-  )
+            </Stack>
+          </Container>
+        </Box>
+      </Flex>
+    </Box>
+  );
 }
