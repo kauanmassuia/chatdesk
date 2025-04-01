@@ -171,7 +171,7 @@ export default function Dashboard() {
             <Spinner size="xl" />
           ) : (
             flows.map((flow) => (
-              <Box
+                <Box
                 key={flow.id}
                 w={{ base: "100%", sm: "48%", md: "300px" }}
                 h="200px"
@@ -185,129 +185,72 @@ export default function Dashboard() {
                 justifyContent="center"
                 alignItems="center"
                 boxShadow="md"
+                position="relative"
                 transition="transform 0.2s"
                 _hover={{ transform: 'scale(1.02)' }}
                 _active={{ transform: 'scale(0.98)' }}
                 onClick={() => navigate(`/editor?flow_id=${flow.uid}`)}
                 cursor="pointer"
-              >
+                >
+                {/* Menu in the top-right corner */}
+                <Menu>
+                  <MenuButton
+                  as={Button}
+                  size="sm"
+                  position="absolute"
+                  top="8px"
+                  right="8px"
+                  variant="ghost"
+                  >
+                  <FiChevronDown />
+                  </MenuButton>
+                  <MenuList>
+                    <MenuItem onClick={() => console.log('Deletar flow', flow.id)}>Deletar</MenuItem>
+                    <MenuItem onClick={() => console.log('Duplicar flow', flow.id)}>Duplicar</MenuItem>
+                    <MenuItem onClick={() => console.log('Não publicar flow', flow.id)}>Despublicar</MenuItem>
+                  </MenuList>
+                </Menu>
+
                 <Heading size="md" mb={2}>
                   {flow.title}
                 </Heading>
                 <Text>{flow.published ? 'Publicado' : 'Rascunho'}</Text>
-              </Box>
+                </Box>
             ))
           )}
         </Flex>
       </Container>
 
       {/* Modal de Configurações */}
-<Modal isOpen={isSettingsOpen} onClose={onSettingsClose} size="xl">
+<Modal isOpen={isSettingsOpen} onClose={onSettingsClose}>
   <ModalOverlay />
   <ModalContent>
-    <ModalHeader>Billing & Usage</ModalHeader>
+    <ModalHeader>Configurações e Membros</ModalHeader>
     <ModalCloseButton />
     <ModalBody>
-      {/* Seção de Uso */}
-      <Box mb={6}>
-        <Heading size="sm" mb={2}>Usage</Heading>
-        <Text fontSize="sm">Chats <Text as="span" fontWeight="bold">Resets on 30/04/2025</Text></Text>
-        <Text fontSize="lg" fontWeight="bold">0 / 200</Text>
-      </Box>
-
-      {/* Seção de Assinatura */}
-      <Box mb={6}>
-        <Heading size="sm" mb={2}>Subscription</Heading>
-        <Text fontSize="sm">Current workspace subscription: <Text as="span" fontWeight="bold">Free</Text></Text>
-        <Text fontSize="xs" mt={2}>
-          Typebot is contributing 1% of your subscription to remove CO₂ from the atmosphere.{' '}
-          <Text as="a" href="#" color="blue.500" textDecoration="underline">Learn more</Text>
-        </Text>
-      </Box>
-
-      {/* Planos de Assinatura */}
-      <Flex gap={4}>
-        {/* Plano Starter */}
-        <Box
-          borderWidth="1px"
-          borderRadius="md"
-          p={4}
-          flex={1}
-          bg="gray.50"
-          borderColor="gray.200"
-        >
-          <Heading size="md" color="#ff9e2c">Upgrade to Starter</Heading>
-          <Text mt={2} fontSize="sm">For individuals & small businesses.</Text>
-          <Heading size="lg" mt={4}>$39/month</Heading>
-          <Box mt={4}>
-            <Text fontSize="sm">✔ 2 seats included</Text>
-            <Text fontSize="sm">✔ 2,000 chats/mo</Text>
-            <Text fontSize="xs">(Extra chats: $10 per 500)</Text>
-            <Text fontSize="sm">✔ Branding removed</Text>
-            <Text fontSize="sm">✔ File upload input block</Text>
-            <Text fontSize="sm">✔ Create folders</Text>
-            <Text fontSize="sm">✔ Direct priority support</Text>
-          </Box>
-          <Button mt={4} colorScheme="orange" width="full">
-            Upgrade
-          </Button>
+      {/* Conteúdo atualizado */}
+      <Text fontWeight="bold">Current date:</Text>
+      <Text mt={2}>Tuesday, April 01, 2025, 1:32 PM -03</Text>
+      <Box mt={4}>
+        <Text fontWeight="bold">Search results:</Text>
+        <Box mt={2}>
+          <Image
+            src="https://pplx-res.cloudinary.com/image/upload/v1743525057/user_uploads/uWGlroqHNLWHuEu/image.jpg"
+            alt="Attached image"
+            borderRadius="md"
+            boxShadow="md"
+          />
+          <Text mt={2}>File name: image.jpg</Text>
         </Box>
-
-        {/* Plano Pro */}
-        <Box
-          borderWidth="1px"
-          borderRadius="md"
-          p={4}
-          flex={1}
-          bg="#f9f5ff"
-          borderColor="#d6bbfc"
-        >
-          <Flex justifyContent="space-between">
-            <Heading size="md" color="#6b46c1">Upgrade to Pro</Heading>
-            <Box bg="#6b46c1" color="white" px={2} py={1} borderRadius="md">
-              Most popular
-            </Box>
-          </Flex>
-          <Text mt={2} fontSize="sm">For agencies & growing startups.</Text>
-          <Heading size="lg" mt={4}>$89/month</Heading>
-          <Box mt={4}>
-            <Text fontSize="sm">✔ Everything in Starter, plus:</Text>
-            <Text fontSize="sm">✔ 5 seats included</Text>
-            <Text fontSize="sm">✔ 10,000 chats/mo</Text>
-            <Text fontSize="xs">(Extra chats: See tiers)</Text>
-            <Text fontSize="sm">✔ WhatsApp integration</Text>
-            <Text fontSize="sm">✔ Custom domains</Text>
-            <Text fontSize="sm">✔ In-depth analytics</Text>
-          </Box>
-          <Button mt={4} colorScheme="purple" width="full">
-            Upgrade
-          </Button>
-        </Box>
-      </Flex>
-
-      {/* Link para customização */}
-      <Box textAlign="center" mt={6}>
-        Need custom limits? Specific features?{' '}
-        <Text as="a" href="#" color="blue.500" textDecoration="underline">
-          Let's chat!
-        </Text>
-      </Box>
-
-      {/* Versão do sistema */}
-      <Box textAlign="right" mt={6}>
-        Version: 3.8.0
       </Box>
     </ModalBody>
-
-    {/* Botão de Fechar */}
-    <ModalFooter justifyContent={"flex-end"}>
-      <Button variant={"ghost"} onClick={onSettingsClose}>
+    <ModalFooter>
+      <Button variant="ghost" onClick={onSettingsClose}>
         Fechar
       </Button>
     </ModalFooter>
   </ModalContent>
 </Modal>
-
 
       <CreateFlowModal isOpen={isOpen} onClose={onClose} onCreate={handleCreateFlow} />
     </Box>
