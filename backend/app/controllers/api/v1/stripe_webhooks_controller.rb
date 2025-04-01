@@ -1,10 +1,8 @@
 module Api
   module V1
     class StripeWebhooksController < ActionController::API
-      # Disable CSRF protection for webhooks
-      skip_before_action :verify_authenticity_token
+      # In API-only controllers, CSRF protection isn’t enabled so no need to skip it
 
-      # Main webhook endpoint
       def receive
         payload = request.body.read
         sig_header = request.env['HTTP_STRIPE_SIGNATURE']
@@ -20,7 +18,6 @@ module Api
           return render json: { error: 'Invalid signature' }, status: 400
         end
 
-        # Handle various event types
         case event['type']
         when 'checkout.session.completed'
           process_checkout_session(event['data']['object'])
@@ -39,11 +36,12 @@ module Api
 
       private
 
-      # Process the initial checkout session completion
+      # For checkout.session.completed, the event data is a Stripe::Checkout::Session object.
       def process_checkout_session(session)
-        customer_id = session['customer']
-        stripe_subscription_id = session['subscription']
-        plan_type = session['metadata'] && session['metadata']['plan_type']
+        # Use accessor methods provided by the Stripe object.
+        customer_id = session.customer
+        stripe_subscription_id = session.subscription
+        plan_type = session.metadata["plan_type"]  # Instead of session.dig("metadata", "plan_type")
 
         user = User.find_by(stripe_customer_id: customer_id)
         unless user
@@ -51,7 +49,6 @@ module Api
           return
         end
 
-        # Create or update the user's subscription
         subscription = user.subscription || user.build_subscription
         subscription.assign_attributes(
           stripe_subscription_id: stripe_subscription_id,
@@ -65,13 +62,13 @@ module Api
         end
       end
 
-      # Process a subscription.created event from Stripe
+      # For customer.subscription.created, the event data is a Stripe::Subscription object.
       def process_subscription_created(subscription_data)
-        customer_id = subscription_data['customer']
-        stripe_subscription_id = subscription_data['id']
-        status = subscription_data['status']
-        # You might extract plan details differently; using metadata from checkout is preferred.
-        plan_type = subscription_data.dig('metadata', 'plan_type') || subscription_data.dig('plan', 'nickname')
+        customer_id = subscription_data.customer
+        stripe_subscription_id = subscription_data.id
+        status = subscription_data.status
+        # Access metadata from the subscription object
+        plan_type = subscription_data.metadata["plan_type"] || (subscription_data.plan && subscription_data.plan.nickname)
 
         user = User.find_by(stripe_customer_id: customer_id)
         unless user
@@ -92,15 +89,15 @@ module Api
         end
       end
 
-      # Process a subscription.updated event from Stripe
+      # For customer.subscription.updated, update the subscription status.
       def process_subscription_updated(subscription_data)
-        customer_id = subscription_data['customer']
-        stripe_subscription_id = subscription_data['id']
-        status = subscription_data['status']
+        customer_id = subscription_data.customer
+        stripe_subscription_id = subscription_data.id
+        status = subscription_data.status
 
         user = User.find_by(stripe_customer_id: customer_id)
         unless user && user.subscription && user.subscription.stripe_subscription_id == stripe_subscription_id
-          Rails.logger.error "Subscription not found or mismatch for user with customer id: #{customer_id} in subscription.updated"
+          Rails.logger.error "Subscription not found or mismatch for customer id: #{customer_id} in subscription.updated"
           return
         end
 
@@ -111,14 +108,14 @@ module Api
         end
       end
 
-      # Process a subscription.deleted event from Stripe (e.g., cancellation)
+      # For customer.subscription.deleted, mark the subscription as canceled.
       def process_subscription_deleted(subscription_data)
-        customer_id = subscription_data['customer']
-        stripe_subscription_id = subscription_data['id']
+        customer_id = subscription_data.customer
+        stripe_subscription_id = subscription_data.id
 
         user = User.find_by(stripe_customer_id: customer_id)
         unless user && user.subscription && user.subscription.stripe_subscription_id == stripe_subscription_id
-          Rails.logger.error "Subscription not found or mismatch for user with customer id: #{customer_id} in subscription.deleted"
+          Rails.logger.error "Subscription not found or mismatch for customer id: #{customer_id} in subscription.deleted"
           return
         end
 

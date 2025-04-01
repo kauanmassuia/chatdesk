@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { createCheckoutSession } from '../services/paymentService';
 import { loadStripe } from '@stripe/stripe-js';
+import { useToast } from '@chakra-ui/react';
 
 export const useHandleUpgrade = () => {
 	// Read the publishable key from env
 	const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 	const stripePromise = loadStripe(stripePublishableKey || '');
+
+	// Initialize Chakra UI toast
+	const toast = useToast();
 
 	// Local authentication check
 	const isAuthenticated = (): boolean => {
@@ -27,7 +31,17 @@ export const useHandleUpgrade = () => {
 			return;
 		}
 		try {
-			const { sessionId: newSessionId } = await createCheckoutSession(plan);
+			const response = await createCheckoutSession(plan);
+			if ('message' in response && response.message) {
+				toast({
+					title: String(response.message), // Essa message vem do backend
+					status: 'info',
+					duration: 3000,
+					isClosable: true,
+				});
+				return;
+			}
+			const { sessionId: newSessionId } = response;
 			const stripe = await stripePromise;
 			if (stripe) {
 				const { error } = await stripe.redirectToCheckout({ sessionId: newSessionId });
