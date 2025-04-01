@@ -24,9 +24,10 @@ import logo from '../../assets/logovendflow.png';
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onLoginSuccess?: () => void; // New callback when login is successful
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
+const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -45,8 +46,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         duration: 3000,
         isClosable: true,
       });
+      if (onLoginSuccess) onLoginSuccess(); // Invoke onLoginSuccess if provided
       onClose();
-      navigate('/dashboard');
     } catch (error: any) {
       toast({
         title: 'Erro ao fazer login',
@@ -83,7 +84,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           >
             <form onSubmit={handleLogin}>
               <Stack spacing={4}>
-                // ...existing: Campo de email...
                 <FormControl>
                   <FormLabel htmlFor="email" fontSize="sm">
                     Email
@@ -103,7 +103,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                     _placeholder={{ color: useColorModeValue('gray.500', 'gray.400') }}
                   />
                 </FormControl>
-                // ...existing: Campo de senha...
                 <FormControl>
                   <FormLabel htmlFor="password" fontSize="sm">
                     Senha
@@ -123,7 +122,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                     _placeholder={{ color: useColorModeValue('gray.500', 'gray.400') }}
                   />
                 </FormControl>
-                // ...existing: Botão de login...
                 <Button
                   bg={"#1a63d8"}
                   type="submit"
@@ -142,7 +140,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                 >
                   Entrar
                 </Button>
-                // ...existing: Botão de login com Google...
                 <Button
                   bg={"#FF9E2C"}
                   variant="outline"

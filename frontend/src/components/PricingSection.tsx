@@ -1,42 +1,12 @@
 // components/PricingSection.tsx
-import React, { useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
-import { createCheckoutSession } from '../services/paymentService';
+import React from 'react';
 import LoginModal from './modal/LoginModal';
-
-const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-const stripePromise = loadStripe(stripePublishableKey || '');
+import UpgradeStandard from './buttons/UpgradeStandard';
+import UpgradePremium from './buttons/UpgradePremium';
+import { useHandleUpgrade } from '../hooks/useHandleUpgrade';
 
 const PricingSection: React.FC = () => {
-  const [showLoginModal, setShowLoginModal] = useState(false);
-
-  const isAuthenticated = () => {
-    const token = localStorage.getItem('access-token');
-    const client = localStorage.getItem('client');
-    const uid = localStorage.getItem('uid');
-    return Boolean(token && client && uid);
-  };
-
-  // Now the handler accepts a plan parameter
-  const handleUpgrade = async (plan: 'standard' | 'premium') => {
-    if (!isAuthenticated()) {
-      setShowLoginModal(true);
-      return;
-    }
-    try {
-      // Pass the selected plan to the API
-      const { sessionId } = await createCheckoutSession(plan);
-      const stripe = await stripePromise;
-      if (stripe) {
-        const { error } = await stripe.redirectToCheckout({ sessionId });
-        if (error) {
-          console.error('Stripe redirect error', error);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to create checkout session', error);
-    }
-  };
+  const { handleUpgrade, showLoginModal, handleLoginSuccess } = useHandleUpgrade();
 
   return (
     <>
@@ -94,12 +64,7 @@ const PricingSection: React.FC = () => {
                 </ul>
               </div>
               <div className="p-6">
-                <button
-                  onClick={() => handleUpgrade('standard')}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition duration-300"
-                >
-                  Upgrade
-                </button>
+                <UpgradeStandard handleUpgrade={handleUpgrade} />
               </div>
             </div>
 
@@ -121,18 +86,17 @@ const PricingSection: React.FC = () => {
                 </ul>
               </div>
               <div className="p-6">
-                <button
-                  onClick={() => handleUpgrade('premium')}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition duration-300"
-                >
-                  Upgrade
-                </button>
+                <UpgradePremium handleUpgrade={handleUpgrade} />
               </div>
             </div>
           </div>
         </div>
       </section>
-      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => {}}
+        onLoginSuccess={handleLoginSuccess}
+      />
     </>
   );
 };

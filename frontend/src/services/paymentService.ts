@@ -1,4 +1,4 @@
-// services/paymentsService.ts
+// src/services/paymentService.ts
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
@@ -7,7 +7,7 @@ export const createCheckoutSession = async (plan: 'standard' | 'premium'): Promi
   const accessToken = localStorage.getItem("access-token");
   const client = localStorage.getItem("client");
   const uid = localStorage.getItem("uid");
-  console.log('Payment servicek:', { accessToken, client, uid }); // Debug log
+  console.log('Payment service:', { accessToken, client, uid }); // Debug log
   try {
     const response = await axios.post(
       `${API_BASE_URL}/create_checkout_session`,
