@@ -11,6 +11,8 @@ import ChatReader from './pages/ChatReader';
 import GoogleOAuthSuccess from './pages/GoogleOAuthSuccess'
 import Docs from './pages/docs/docs'
 import PrivateRoute from './components/PrivateRoute';
+import SubscriptionSuccess from './pages/SubscriptionSuccess';
+
 
 // New generalistic component for /editor routes.
 const EditorRouter: React.FC = () => {
@@ -35,15 +37,14 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/googleOauthSuccess" element={<GoogleOAuthSuccess />} />
+
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/subscription/success" element={<SubscriptionSuccess />} />
         <Route path="/docs" element={<Docs />} />
-        
-
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/editor" element={<EditorRouter />} />
-          
         </Route>
         <Route path="/chat/:custom_url" element={<ChatReader />} />
       </Routes>
