@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import "../styles/lp.css";
+import PricingSection from '../components/PricingSection';
 
 
 export default function Home() {
@@ -234,73 +235,9 @@ export default function Home() {
         </section>
 
 
-<section id="preco" className="pricing">
-  <h2 className="pricing-title">Escolha o plano ideal para você</h2>
-  <p className="pricing-subtitle">Veja nossos planos e comece a usar o VendFlow hoje!</p>
+      {/* Pricing Section */}
+      <PricingSection />
 
-  <div className="pricing-container">
-    {/* Free Plan */}
-    <div className="pricing-card free-plan">
-      <h3 className="plan-title">
-        <span className="highlight-free">Free</span>
-      </h3>
-      <p className="plan-description">Para quem quer começar sem custo.</p>
-      <p className="plan-price">
-        <strong>R$0</strong>/mês
-      </p>
-      <ul className="plan-features">
-        <li>✅ 1 usuário</li>
-        <li>✅ 10 chats/mês</li>
-        <li>✅ Criar pastas</li>
-        <li>❌ Marca d’água</li>
-        <li>❌ Upload de arquivos</li>
-        <li>❌ Suporte prioritário</li>
-      </ul>
-      <button className="pricing-button">Comece agora</button>
-    </div>
-
-    {/* Starter Plan */}
-    <div className="pricing-card pro-plan popular-plan">
-    <span className="popular-label">Mais popular</span>
-      <h3 className="plan-title">
-        Upgrade para <span className="highlight">Básico</span>
-      </h3>
-      <p className="plan-description">Para indivíduos e pequenos negócios.</p>
-      <p className="plan-price">
-        <strong>R$97</strong>/mês
-      </p>
-      <ul className="plan-features">
-        <li>✅ 2 usuários</li>
-        <li>✅ 2000 chats/mês</li>
-        <li>✅ Criar pastas</li>
-        <li>✅ Marca d’água</li>
-        <li>✅ Upload de arquivos</li>
-        <li>✅ Suporte prioritário</li>
-      </ul>
-      <button className="pricing-button">Upgrade</button>
-    </div>
-
-    {/* Pro Plan */}
-    <div className="pricing-card pro-plan ">
-      <h3 className="plan-title">
-        Upgrade para <span className="highlight1">Profissional</span>
-      </h3>
-      <p className="plan-description">Para agências e startups em crescimento.</p>
-      <p className="plan-price">
-        <strong>R$297</strong>/mês
-      </p>
-      <ul className="plan-features">
-        <li>✅ 4 usuário</li>
-        <li>✅ 20.0000 chats/mês</li>
-        <li>✅ Criar pastas</li>
-        <li>✅ Marca d’água</li>
-        <li>✅ Upload de arquivos</li>
-        <li>✅ Suporte prioritário</li>
-      </ul>
-      <button className="pricing-button">Upgrade</button>
-    </div>
-  </div>
-</section>
 
 
       {/* Guarantee Section */}

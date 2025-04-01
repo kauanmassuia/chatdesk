@@ -15,6 +15,12 @@ Rails.application.routes.draw do
         registrations: "api/v1/registrations"
         # sessions: "api/v1/sessions"
       }
+
+      post 'create_checkout_session', to: 'subscriptions#create_checkout_session'
+      get  'subscription/success',   to: 'subscriptions#success'
+      get  'subscription/cancel',    to: 'subscriptions#cancel'
+      post 'webhooks/stripe',        to: 'stripe_webhooks#receive'
+
       resources :flows, only: [ :index, :show, :create, :update, :destroy ] do
         member do
           post :publish

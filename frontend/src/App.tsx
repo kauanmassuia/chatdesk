@@ -43,6 +43,7 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/editor" element={<EditorRouter />} />
+          
         </Route>
         <Route path="/chat/:custom_url" element={<ChatReader />} />
       </Routes>
