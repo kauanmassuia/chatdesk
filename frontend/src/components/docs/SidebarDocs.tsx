@@ -30,18 +30,18 @@ function SidebarDocs({ setContent }: SidebarDocsProps) {
     <Box
       as="nav"
       position="fixed"
-      top="0"
       left="0"
-      height="100vh"
+      height="100%"
       width={sidebarWidth}
-      bg="#f1f1f1" // Cor de fundo alterada
+      bg="#f8f9fa" // Cor de fundo alterada
       boxShadow="sm"
       overflowY="auto"
       zIndex="10" // Garante que a sidebar fique acima de outros elementos
       transition="all 0.3s ease" // Para transições suaves
       display={{ base: isOpen ? "block" : "none", md: "block" }} // Controla visibilidade em telas pequenas
+      flexDirection={"column"}   
     >
-      <VStack align="start" spacing={4} p={4}>
+      <VStack align="start" spacing={4} p={4} marginTop={"24px"} maxH={"100%"} overflowY={"auto"} flexGrow={1} marginBottom={"80px"}>
         {/* Título Começar */}
         <Button 
           variant="ghost" 
@@ -53,6 +53,7 @@ function SidebarDocs({ setContent }: SidebarDocsProps) {
           fontWeight="normal"
           fontSize="md"
           w="full"
+          
         >
           Bem-vindo
         </Button>

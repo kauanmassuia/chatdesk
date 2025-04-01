@@ -202,22 +202,112 @@ export default function Dashboard() {
       </Container>
 
       {/* Modal de Configurações */}
-      <Modal isOpen={isSettingsOpen} onClose={onSettingsClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Configurações e Membros</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Text>Perfil: Kauan Massuia</Text>
-            <Text mt={4}>Aqui você pode editar seu perfil e configurar sua conta.</Text>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" onClick={onSettingsClose}>
-              Fechar
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+<Modal isOpen={isSettingsOpen} onClose={onSettingsClose} size="xl">
+  <ModalOverlay />
+  <ModalContent>
+    <ModalHeader>Billing & Usage</ModalHeader>
+    <ModalCloseButton />
+    <ModalBody>
+      {/* Seção de Uso */}
+      <Box mb={6}>
+        <Heading size="sm" mb={2}>Usage</Heading>
+        <Text fontSize="sm">Chats <Text as="span" fontWeight="bold">Resets on 30/04/2025</Text></Text>
+        <Text fontSize="lg" fontWeight="bold">0 / 200</Text>
+      </Box>
+
+      {/* Seção de Assinatura */}
+      <Box mb={6}>
+        <Heading size="sm" mb={2}>Subscription</Heading>
+        <Text fontSize="sm">Current workspace subscription: <Text as="span" fontWeight="bold">Free</Text></Text>
+        <Text fontSize="xs" mt={2}>
+          Typebot is contributing 1% of your subscription to remove CO₂ from the atmosphere.{' '}
+          <Text as="a" href="#" color="blue.500" textDecoration="underline">Learn more</Text>
+        </Text>
+      </Box>
+
+      {/* Planos de Assinatura */}
+      <Flex gap={4}>
+        {/* Plano Starter */}
+        <Box
+          borderWidth="1px"
+          borderRadius="md"
+          p={4}
+          flex={1}
+          bg="gray.50"
+          borderColor="gray.200"
+        >
+          <Heading size="md" color="#ff9e2c">Upgrade to Starter</Heading>
+          <Text mt={2} fontSize="sm">For individuals & small businesses.</Text>
+          <Heading size="lg" mt={4}>$39/month</Heading>
+          <Box mt={4}>
+            <Text fontSize="sm">✔ 2 seats included</Text>
+            <Text fontSize="sm">✔ 2,000 chats/mo</Text>
+            <Text fontSize="xs">(Extra chats: $10 per 500)</Text>
+            <Text fontSize="sm">✔ Branding removed</Text>
+            <Text fontSize="sm">✔ File upload input block</Text>
+            <Text fontSize="sm">✔ Create folders</Text>
+            <Text fontSize="sm">✔ Direct priority support</Text>
+          </Box>
+          <Button mt={4} colorScheme="orange" width="full">
+            Upgrade
+          </Button>
+        </Box>
+
+        {/* Plano Pro */}
+        <Box
+          borderWidth="1px"
+          borderRadius="md"
+          p={4}
+          flex={1}
+          bg="#f9f5ff"
+          borderColor="#d6bbfc"
+        >
+          <Flex justifyContent="space-between">
+            <Heading size="md" color="#6b46c1">Upgrade to Pro</Heading>
+            <Box bg="#6b46c1" color="white" px={2} py={1} borderRadius="md">
+              Most popular
+            </Box>
+          </Flex>
+          <Text mt={2} fontSize="sm">For agencies & growing startups.</Text>
+          <Heading size="lg" mt={4}>$89/month</Heading>
+          <Box mt={4}>
+            <Text fontSize="sm">✔ Everything in Starter, plus:</Text>
+            <Text fontSize="sm">✔ 5 seats included</Text>
+            <Text fontSize="sm">✔ 10,000 chats/mo</Text>
+            <Text fontSize="xs">(Extra chats: See tiers)</Text>
+            <Text fontSize="sm">✔ WhatsApp integration</Text>
+            <Text fontSize="sm">✔ Custom domains</Text>
+            <Text fontSize="sm">✔ In-depth analytics</Text>
+          </Box>
+          <Button mt={4} colorScheme="purple" width="full">
+            Upgrade
+          </Button>
+        </Box>
+      </Flex>
+
+      {/* Link para customização */}
+      <Box textAlign="center" mt={6}>
+        Need custom limits? Specific features?{' '}
+        <Text as="a" href="#" color="blue.500" textDecoration="underline">
+          Let's chat!
+        </Text>
+      </Box>
+
+      {/* Versão do sistema */}
+      <Box textAlign="right" mt={6}>
+        Version: 3.8.0
+      </Box>
+    </ModalBody>
+
+    {/* Botão de Fechar */}
+    <ModalFooter justifyContent={"flex-end"}>
+      <Button variant={"ghost"} onClick={onSettingsClose}>
+        Fechar
+      </Button>
+    </ModalFooter>
+  </ModalContent>
+</Modal>
+
 
       <CreateFlowModal isOpen={isOpen} onClose={onClose} onCreate={handleCreateFlow} />
     </Box>

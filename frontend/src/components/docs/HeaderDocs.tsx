@@ -5,7 +5,7 @@ const HeaderDocs = () => {
   return (
     <Flex 
       as="header" 
-      bg="#f1f1f1"  // Fundo do header
+      bg="#f8f9fa"  // Fundo do header
       color="black" 
       p={4} 
       align="center" 
@@ -53,15 +53,13 @@ const HeaderDocs = () => {
         bg="#FF9E2C"  // Cor do botão
         color="white"  // Cor da fonte
         size="sm"
-        w="150px"  // Largura do botão
-        h="50px"   // Altura do botão
         borderRadius="md"  // Bordas arredondadas
         fontSize="md"  // Tamanho de fonte
         sx={{
-          width: "130px", // Personalizando largura
-          height: "50px", // Personalizando altura
+          width: "11%", // Personalizando largura
+          height: "100%", // Personalizando altura
           fontSize: "16px", // Personalizando tamanho de fonte
-        }}
+        }}  
         _hover={{
           bg: "#FF7F00",  // Cor de fundo no hover
           transform: "scale(1.05)",  // Aumenta o botão no hover
