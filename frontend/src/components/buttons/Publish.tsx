@@ -49,10 +49,24 @@ const Publish: React.FC<PublishProps> = ({ flowId }) => {
       hasArrow>
       <Button
         size="sm"
-        colorScheme="orange"
+        variant="outline" // Borda visível e transparente por padrão
+        color="white" // Cor do texto laranja
+        border="1px solid #ff9800" // Borda laranja
+        bg={'#ff9800'}
+        _hover={{
+          bg: 'transparent', // Fundo transparente no hover
+          color: '#ff9800', // Cor do texto laranja
+          border: '1px solid #ff9800', // Borda laranja no hover
+        }}
+        _active={{
+          bg: '#ff9800', // Fundo laranja quando ativo
+          color: 'white', // Texto branco quando ativo
+          border: '1px solid #ff9800', // Borda laranja quando ativo
+        }}
+        transition="all 0.3s ease" // Transição suave
         onClick={handlePublish}
       >
-        Publish
+        Publicar
       </Button>
     </Tooltip>
   );

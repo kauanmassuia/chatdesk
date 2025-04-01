@@ -9,6 +9,7 @@ import Published from './pages/Published'
 import Results from './pages/Results'
 import ChatReader from './pages/ChatReader';
 import GoogleOAuthSuccess from './pages/GoogleOAuthSuccess'
+import Docs from './pages/docs/docs'
 import PrivateRoute from './components/PrivateRoute';
 
 // New generalistic component for /editor routes.
@@ -36,6 +37,8 @@ function App() {
         <Route path="/googleOauthSuccess" element={<GoogleOAuthSuccess />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/docs" element={<Docs />} />
+        
 
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />

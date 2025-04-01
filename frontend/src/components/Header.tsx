@@ -5,9 +5,15 @@ import {
   useColorModeValue,
   Box,
   Container,
-  useDisclosure
+  useDisclosure,
+  Text,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  useBreakpointValue
 } from '@chakra-ui/react';
-import { FiChevronLeft, FiLink, FiRefreshCw, FiHelpCircle } from 'react-icons/fi';
+import { FiChevronLeft, FiHelpCircle, FiMoreHorizontal } from 'react-icons/fi';
 import { BsLightning } from 'react-icons/bs';
 import { RiTestTubeLine, RiUploadCloudLine } from 'react-icons/ri';
 import { useFlowStore } from '../store/flowStore';
@@ -40,6 +46,8 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const bgColor = useColorModeValue('white', 'gray.800');
 
+  const menuVariant = useBreakpointValue({ base: 'solid', md: 'ghost' });
+
   return (
     <Box
       position="fixed"
@@ -54,7 +62,7 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
       boxShadow="sm"
     >
       <Container maxW="1440px" h="100%" px={6}>
-        <HStack h="100%" spacing={6} align="center">
+        <HStack h="100%" spacing={6} align="center" justify="space-between">
           {/* Navigation Group */}
           <HStack spacing={3} minW="240px">
             <IconButton
@@ -62,72 +70,149 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
               icon={<FiChevronLeft />}
               variant="ghost"
               size="sm"
+              onClick={() => navigate('/dashboard')} // Redirecionando para /dashboard
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave e texto cinza
+              _active={{ bg: '#ff9800', color: 'white' }} // Fundo laranja quando ativo
+              transition="all 0.3s ease"
             />
-            <IconButton
-              aria-label="Link"
-              icon={<FiLink />}
-              variant="ghost"
-              size="sm"
-            />
-            <IconButton
-              aria-label="Atualizar"
-              icon={<FiRefreshCw />}
-              variant="ghost"
-              size="sm"
-            />
+            
+            {/* Funnel Name (Hypothetical) */}
+            <Text fontSize="sm" fontWeight="semibold" color="gray.600">
+              Funil de Vendas {/* Placeholder name */}
+            </Text>
+
             <IconButton
               aria-label="Ajuda"
               icon={<FiHelpCircle />}
               variant="ghost"
               size="sm"
+              onClick={() => navigate('/docs')} // Redirecionando para /docs
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave e texto cinza
+              _active={{ bg: '#ff9800', color: 'white' }} // Fundo laranja quando ativo
+              transition="all 0.3s ease"
             />
           </HStack>
 
-          {/* Project Name */}
-          <Box minW="240px">
-            <Button size="sm" variant="ghost">
-              ChatDesk
-            </Button>
-          </Box>
-
-          {/* Main Menu */}
-          <HStack spacing={6} flex={1} justify="center">
-            <Button size="sm" variant="ghost" colorScheme="blue">
+          {/* Main Menu (Centralizado) */}
+          <HStack spacing={6} flex={1} justify="center" display={{ base: 'none', md: 'flex' }}>
+            <Button
+              size="sm"
+              variant="outline" // Botão com fundo transparente
+              color="#6c757d" // Texto cinza
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave
+              _active={{
+                bg: 'white',
+                color: '#ff9800',
+                border: '1px solid #ff9800' // Borda laranja quando selecionado
+              }} // Seleção com fundo branco e borda laranja
+              transition="all 0.3s ease"
+            >
               Flow
             </Button>
-            <Button size="sm" variant="ghost">
-              Theme
-            </Button>
-            <Button size="sm" variant="ghost">
-              Settings
-            </Button>
-            <Button size="sm" variant="ghost" onClick={handleExport}>
-              Export
-            </Button>
             <Button
               size="sm"
-              variant="ghost"
-              leftIcon={<RiUploadCloudLine />}
-              onClick={onOpen}
+              variant="outline" // Botão com fundo transparente
+              color="#6c757d" // Texto cinza
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave
+              _active={{
+                bg: 'white',
+                color: '#ff9800',
+                border: '1px solid #ff9800' // Borda laranja quando selecionado
+              }} // Seleção com fundo branco e borda laranja
+              transition="all 0.3s ease"
             >
-              Import
+              Tema
             </Button>
             <Button
               size="sm"
-              variant="ghost"
+              variant="outline" // Botão com fundo transparente
+              color="#6c757d" // Texto cinza
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave
+              _active={{
+                bg: 'white',
+                color: '#ff9800',
+                border: '1px solid #ff9800' // Borda laranja quando selecionado
+              }} // Seleção com fundo branco e borda laranja
+              transition="all 0.3s ease"
+            >
+              Configurações
+            </Button>
+            <Button
+              size="sm"
+              variant="outline" // Botão com fundo transparente
+              color="#6c757d" // Texto cinza
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave
+              _active={{
+                bg: 'white',
+                color: '#ff9800',
+                border: '1px solid #ff9800' // Borda laranja quando selecionado
+              }} // Seleção com fundo branco e borda laranja
               onClick={() => flowId && navigate(`/editor?flow_id=${flowId}/results`)}
+              transition="all 0.3s ease"
             >
-              Results
+              Resultados
             </Button>
           </HStack>
 
-          {/* Actions */}
+          {/* More Options (Import and Export) */}
           <HStack spacing={4} minW="240px" justify="flex-end">
-            <Button size="sm" variant="ghost" leftIcon={<BsLightning />}>
-              Share
+            <Menu>
+              <MenuButton
+                as={IconButton}
+                icon={<FiMoreHorizontal />}
+                variant="ghost"
+                aria-label="Mais opções"
+                size="sm"
+                _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave e texto cinza
+                _active={{ bg: '#ff9800', color: 'white' }} // Fundo laranja quando ativo
+                transition="all 0.3s ease"
+              />
+              <MenuList>
+                <MenuItem
+                  onClick={handleExport}
+                  _hover={{ bg: '#ff9800', color: 'white' }}
+                >
+                  <RiUploadCloudLine style={{ marginRight: '8px' }} />
+                  Exportar Flow
+                </MenuItem>
+                <MenuItem
+                  onClick={onOpen}
+                  _hover={{ bg: '#ff9800', color: 'white' }}
+                >
+                  <RiUploadCloudLine style={{ marginRight: '8px' }} />
+                  Importar Flow
+                </MenuItem>
+              </MenuList>
+            </Menu>
+            <Button
+              size="sm"
+              variant="outline" // Botão com fundo transparente
+              color="#6c757d" // Texto cinza
+              leftIcon={<BsLightning />}
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave
+              _active={{
+                bg: 'white',
+                color: '#ff9800',
+                border: '1px solid #ff9800' // Borda laranja quando selecionado
+              }} // Seleção com fundo branco e borda laranja
+              transition="all 0.3s ease"
+            >
+              Compartilhar
             </Button>
-            <Button size="sm" variant="ghost" leftIcon={<RiTestTubeLine />}>
-              Test
+            <Button
+              size="sm"
+              variant="outline" // Botão com fundo transparente
+              color="#6c757d" // Texto cinza
+              leftIcon={<RiTestTubeLine />}
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave
+              _active={{
+                bg: 'white',
+                color: '#ff9800',
+                border: '1px solid #ff9800' // Borda laranja quando selecionado
+              }} // Seleção com fundo branco e borda laranja
+              transition="all 0.3s ease"
+            >
+              Testar
             </Button>
             <Publish flowId={flowId} /> {/* new Publish component */}
           </HStack>
