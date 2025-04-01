@@ -101,20 +101,20 @@ export default function Dashboard() {
       <Box w="full" py={4} px={6} borderBottom="1px" borderColor={borderColor} bg={cardBg}>
         <Container maxW="1440px">
           <Flex justify="space-between" align="center">
-          <Box>
-          {/* Substituindo o ícone pela logo */}
-          <Image 
-            src="../src/assets/logovendflow.png" 
-            alt="Logo" 
-            width={{ base: "40%", md: "20%", lg: "55%" }}  // Tamanhos diferentes para cada tamanho de tela
-            height="auto"  // Manter a proporção da imagem
-            align={"left"} // Alinhando à esquerda
-            marginTop={2} // Margem superior para espaçamento
-            marginBottom={2} // Margem inferior para espaçamento
-            marginLeft={-14} // Margem esquerda para espaçamento
+            <Box>
+              {/* Substituindo o ícone pela logo */}
+              <Image
+                src="../src/assets/logovendflow.png"
+                alt="Logo"
+                width={{ base: "40%", md: "20%", lg: "55%" }}  // Tamanhos diferentes para cada tamanho de tela
+                height="auto"  // Manter a proporção da imagem
+                align={"left"} // Alinhando à esquerda
+                marginTop={2} // Margem superior para espaçamento
+                marginBottom={2} // Margem inferior para espaçamento
+                marginLeft={-14} // Margem esquerda para espaçamento
 
-          />
-        </Box>
+              />
+            </Box>
             <HStack spacing={4}>
               <Button leftIcon={<FiSettings />} variant="ghost" size="sm" onClick={onSettingsOpen}>
                 Configurações e Membros
@@ -171,7 +171,7 @@ export default function Dashboard() {
             <Spinner size="xl" />
           ) : (
             flows.map((flow) => (
-                <Box
+              <Box
                 key={flow.id}
                 w={{ base: "100%", sm: "48%", md: "300px" }}
                 h="200px"
@@ -191,18 +191,19 @@ export default function Dashboard() {
                 _active={{ transform: 'scale(0.98)' }}
                 onClick={() => navigate(`/editor?flow_id=${flow.uid}`)}
                 cursor="pointer"
-                >
+              >
                 {/* Menu in the top-right corner */}
                 <Menu>
                   <MenuButton
-                  as={Button}
-                  size="sm"
-                  position="absolute"
-                  top="8px"
-                  right="8px"
-                  variant="ghost"
+                    as={Button}
+                    size="sm"
+                    position="absolute"
+                    top="8px"
+                    right="8px"
+                    variant="ghost"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                  <FiChevronDown />
+                    <FiChevronDown />
                   </MenuButton>
                   <MenuList>
                     <MenuItem onClick={() => console.log('Deletar flow', flow.id)}>Deletar</MenuItem>
@@ -215,42 +216,42 @@ export default function Dashboard() {
                   {flow.title}
                 </Heading>
                 <Text>{flow.published ? 'Publicado' : 'Rascunho'}</Text>
-                </Box>
+              </Box>
             ))
           )}
         </Flex>
       </Container>
 
       {/* Modal de Configurações */}
-<Modal isOpen={isSettingsOpen} onClose={onSettingsClose}>
-  <ModalOverlay />
-  <ModalContent>
-    <ModalHeader>Configurações e Membros</ModalHeader>
-    <ModalCloseButton />
-    <ModalBody>
-      {/* Conteúdo atualizado */}
-      <Text fontWeight="bold">Current date:</Text>
-      <Text mt={2}>Tuesday, April 01, 2025, 1:32 PM -03</Text>
-      <Box mt={4}>
-        <Text fontWeight="bold">Search results:</Text>
-        <Box mt={2}>
-          <Image
-            src="https://pplx-res.cloudinary.com/image/upload/v1743525057/user_uploads/uWGlroqHNLWHuEu/image.jpg"
-            alt="Attached image"
-            borderRadius="md"
-            boxShadow="md"
-          />
-          <Text mt={2}>File name: image.jpg</Text>
-        </Box>
-      </Box>
-    </ModalBody>
-    <ModalFooter>
-      <Button variant="ghost" onClick={onSettingsClose}>
-        Fechar
-      </Button>
-    </ModalFooter>
-  </ModalContent>
-</Modal>
+      <Modal isOpen={isSettingsOpen} onClose={onSettingsClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Configurações e Membros</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {/* Conteúdo atualizado */}
+            <Text fontWeight="bold">Current date:</Text>
+            <Text mt={2}>Tuesday, April 01, 2025, 1:32 PM -03</Text>
+            <Box mt={4}>
+              <Text fontWeight="bold">Search results:</Text>
+              <Box mt={2}>
+                <Image
+                  src="https://pplx-res.cloudinary.com/image/upload/v1743525057/user_uploads/uWGlroqHNLWHuEu/image.jpg"
+                  alt="Attached image"
+                  borderRadius="md"
+                  boxShadow="md"
+                />
+                <Text mt={2}>File name: image.jpg</Text>
+              </Box>
+            </Box>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" onClick={onSettingsClose}>
+              Fechar
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
       <CreateFlowModal isOpen={isOpen} onClose={onClose} onCreate={handleCreateFlow} />
     </Box>

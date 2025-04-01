@@ -130,7 +130,7 @@ function EditorContent() {
           onChange:
             type === 'text'
               ? (value: string) =>
-                  updateNodeData(newNode.id, { text: value }) 
+                  updateNodeData(newNode.id, { text: value })
               : (field: string, value: string) =>
                   updateNodeData(newNode.id, { [field]: value }),
         },
@@ -282,7 +282,7 @@ export default function Editor() {
 
   return (
     <ReactFlowProvider>
-      <Header />
+      <Header flowId={flowId} />
       {loading ? <Spinner size="xl" color="blue.500" /> : <EditorContent />}
     </ReactFlowProvider>
   )

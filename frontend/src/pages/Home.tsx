@@ -11,6 +11,10 @@ export default function Home() {
     navigate('/login')
   }
 
+  const goToDashboard = () => {
+    navigate('/dashboard')
+  }
+
 
   useEffect(() => {
     const counters = document.querySelectorAll('.count');
@@ -88,7 +92,7 @@ export default function Home() {
       <li className="nav-item funcionalidades"><a href="#funcionalidades">Funcionalidades</a></li>
       <li className="nav-item preco"><a href="#preco">Preço</a></li>
       <li className="nav-item contato"><a href="#contato">Contato</a></li>
-      <li className="nav-item"><button onClick={goToLogin} className="login-btn">Login</button></li>
+      <li className="nav-item"><button onClick={goToDashboard} className="login-btn">Acessar Dashboard</button></li>
     </ul>
   </nav>
 </header>
