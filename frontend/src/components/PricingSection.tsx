@@ -1,12 +1,14 @@
 // components/PricingSection.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import LoginModal from './modal/LoginModal';
+import RegisterModal from './modal/RegisterModal';
 import UpgradeStandard from './buttons/UpgradeStandard';
 import UpgradePremium from './buttons/UpgradePremium';
 import { useHandleUpgrade } from '../hooks/useHandleUpgrade';
 
 const PricingSection: React.FC = () => {
   const { handleUpgrade, showLoginModal, handleLoginSuccess } = useHandleUpgrade();
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   return (
     <>
@@ -96,6 +98,19 @@ const PricingSection: React.FC = () => {
         isOpen={showLoginModal}
         onClose={() => {}}
         onLoginSuccess={handleLoginSuccess}
+        onRegisterClick={() => {
+          // Trigger the register modal
+          setShowRegisterModal(true);
+        }}
+      />
+      <RegisterModal
+        isOpen={showRegisterModal}
+        onClose={() => setShowRegisterModal(false)}
+        onRegisterSuccess={() => {
+          setShowRegisterModal(false);
+          // Continue pending purchase after a successful registration
+          handleLoginSuccess();
+        }}
       />
     </>
   );

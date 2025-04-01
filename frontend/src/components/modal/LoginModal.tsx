@@ -17,7 +17,7 @@ import {
   Link as ChakraLink,
   useToast
 } from '@chakra-ui/react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { login, signInWithGoogle } from '../../services/authService';
 import logo from '../../assets/logovendflow.png';
 
@@ -25,9 +25,10 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onLoginSuccess?: () => void; // New callback when login is successful
+  onRegisterClick?: () => void; // New callback to trigger register modal
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
+const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess, onRegisterClick }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -163,7 +164,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess
           </Box>
           <Text mt={4} textAlign="center" fontSize="sm">
             Não tem uma conta?{' '}
-            <ChakraLink as={RouterLink} to="/register" color="blue.500" onClick={onClose}>
+            <ChakraLink color="blue.500" onClick={onRegisterClick}>
               Registre-se
             </ChakraLink>
           </Text>
