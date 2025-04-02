@@ -24,7 +24,7 @@ const TextInputNode = ({ data, selected }: TextInputNodeProps) => {
 
 export function exportTextInputNode(node: any) {
   return {
-    type: 'text-input', // or "input_text" if you prefer
+    type: 'input_text', // or "input_text" if you prefer
     content: {
       prompt: node.data?.value || '',
     },

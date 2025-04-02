@@ -14,7 +14,7 @@ interface FlowNode {
 }
 
 const interactiveTypes: string[] = [
-  "text-input",
+  "input-text",
   "input_date",
   "input_buttons",
   "input_website",
@@ -26,7 +26,7 @@ const interactiveTypes: string[] = [
 const autoTypes: string[] = ["start", "text", "image", "video", "audio"];
 
 const inputTypeMapping: Record<string, string> = {
-  "text-input": "text",
+  "input-text": "text",
   "input_date": "date",
   "input_website": "url",
   "input_phone": "tel",

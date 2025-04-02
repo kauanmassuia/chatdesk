@@ -1,11 +1,5 @@
 import { Node, Edge } from 'reactflow';
 
-// Mapping exported node types to editor node types.
-const typeMapping: Record<string, string> = {
-  'text-input': 'input_text',
-  // Add other mappings as needed.
-};
-
 export function importFlowFromJson(flowJson: any): { nodes: Node[], edges: Edge[] } {
   const nodes = flowJson.nodes.map((node: any) => {
     let data = node.content;
@@ -20,8 +14,8 @@ export function importFlowFromJson(flowJson: any): { nodes: Node[], edges: Edge[
       };
     }
 
-    // Rehydrate text-input nodes: if value is missing, use the prompt as the value.
-    if ((node.type === 'text-input' || typeMapping[node.type] === 'input_text') && data) {
+    // Rehydrate input_text nodes: if value is missing, use the prompt as the value.
+    if (node.type === 'input_text' && data) {
       if (data.value === undefined || data.value === null) {
         data.value = data.prompt || '';
       }
@@ -34,7 +28,7 @@ export function importFlowFromJson(flowJson: any): { nodes: Node[], edges: Edge[
       }
     }
 
-    const newType = typeMapping[node.type] || node.type;
+    const newType = node.type;
     return {
       ...node,
       type: newType,
