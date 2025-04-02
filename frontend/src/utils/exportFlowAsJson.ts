@@ -53,7 +53,7 @@ export function exportFlowAsJson(nodes: Node[], edges: Edge[]) {
   return {
     version: '1.0',
     id: 'exported_flow',
-    name: 'Exported Flow',
+    name: 'VendFlow',
     nodes: finalNodes,
   }
 }

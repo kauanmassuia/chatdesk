@@ -1,6 +1,7 @@
 class Flow < ApplicationRecord
   # Each flow is created by a user.
   belongs_to :user
+  has_many :answers, dependent: :destroy
 
   # Validations to ensure necessary data is present.
   validates :title, presence: true

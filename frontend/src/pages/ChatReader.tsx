@@ -14,19 +14,20 @@ interface FlowNode {
 }
 
 const interactiveTypes: string[] = [
-  "input-text",
+  "input_text",
   "input_date",
-  "input_buttons",
   "input_website",
   "input_phone",
   "input_email",
   "input_wait",
-  "input_pic_choice"
+  "input_buttons",
+  "input_pic_choice",
+  "input_number", // ← Faltando aqui
 ];
 const autoTypes: string[] = ["start", "text", "image", "video", "audio"];
 
 const inputTypeMapping: Record<string, string> = {
-  "input-text": "text",
+  "input_text": "text",
   "input_date": "date",
   "input_website": "url",
   "input_phone": "tel",
@@ -80,6 +81,7 @@ const ChatReader: React.FC = () => {
   useEffect(() => {
     if (!chatFlow || !currentNodeId) return;
     const node = getNodeById(chatFlow, currentNodeId);
+    console.log(chatFlow);
     if (!node) return;
 
     if (node.type === "input_wait") {

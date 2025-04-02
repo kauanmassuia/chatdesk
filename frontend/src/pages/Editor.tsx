@@ -10,7 +10,7 @@ import ReactFlow, {
   Panel,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import { useFlowStore } from '../store/flowStore'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
@@ -82,6 +82,7 @@ function EditorContent() {
         type: 'start',
         position: { x: 200, y: 200 },
         data: {},
+        deletable: false,
       }])
     }
   }, [nodes.length, setNodes])
@@ -159,22 +160,26 @@ function EditorContent() {
     return node
   })
 
+  const saveTimeout = useRef<NodeJS.Timeout | null>(null)
+
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      if (!uid) {
-        console.warn('No uid provided. Skipping autosave.')
-        return
-      }
+    if (!uid) return;
+
+    if (saveTimeout.current) {
+      clearTimeout(saveTimeout.current)
+    }
+
+    saveTimeout.current = setTimeout(async () => {
       setIsSaving(true)
       try {
         const exportData = exportFlowAsJson(nodes, edges)
         await updateFlow(uid, exportData)
       } catch (error) {
         console.error('Error saving flow:', error)
+      } finally {
+        setIsSaving(false)
       }
-      setTimeout(() => setIsSaving(false), 1000)
-    }, 2000)
-    return () => clearTimeout(timer)
+    }, 1000)
   }, [nodes, edges, uid])
 
   return (
@@ -260,20 +265,25 @@ export default function Editor() {
 
   useEffect(() => {
     async function fetchFlow() {
+      // Sempre limpar antes de carregar novo fluxo!
+      setNodes([])
+      setEdges([])
+
       if (flowId) {
         try {
           const flowData = await getFlow(flowId);
-          const { nodes, edges } = importFlowFromJson(flowData.content || { nodes: [], edges: [] });
-          setNodes(nodes);
-          setEdges(edges);
+
+          // Se flowData.content não existir, tratamos como vazio:
+          const parsed = importFlowFromJson(flowData.content || { nodes: [], edges: [] });
+
+          setNodes(parsed.nodes);
+          setEdges(parsed.edges);
         } catch (error) {
           console.error('Error fetching flow:', error);
         } finally {
           setLoading(false);
         }
       } else {
-        setNodes([]);
-        setEdges([]);
         setLoading(false);
       }
     }
