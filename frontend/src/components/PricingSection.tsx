@@ -1,4 +1,3 @@
-// components/PricingSection.tsx
 import React, { useState } from 'react';
 import LoginModal from './modal/LoginModal';
 import RegisterModal from './modal/RegisterModal';
@@ -15,7 +14,7 @@ const PricingSection: React.FC = () => {
       <section id="preco" className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-gray-900">
+            <h2 className="text-3xl font-extrabold text-[#2575fc]">
               Escolha o plano ideal para você
             </h2>
             <p className="mt-4 text-lg text-gray-600">
@@ -24,9 +23,9 @@ const PricingSection: React.FC = () => {
           </div>
           <div className="grid gap-8 lg:grid-cols-3">
             {/* Free Plan */}
-            <div className="flex flex-col rounded-lg shadow-lg overflow-hidden">
+            <div className="flex flex-col rounded-lg shadow-lg overflow-hidden border border-gray-200 transition-transform duration-300 hover:scale-105 hover:shadow-xl shadow-black/20">
               <div className="bg-white p-6 flex-1">
-                <h3 className="text-xl font-semibold text-green-500">Free</h3>
+                <h3 className="text-xl font-semibold text-[#ff9e2c]">Free</h3>
                 <p className="mt-2 text-gray-600">Para quem quer começar sem custo.</p>
                 <p className="mt-4 text-3xl font-bold text-gray-900">R$0/mês</p>
                 <ul className="mt-6 space-y-2 text-gray-700">
@@ -39,19 +38,19 @@ const PricingSection: React.FC = () => {
                 </ul>
               </div>
               <div className="p-6">
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition duration-300">
+                <button className="w-full bg-[#2575fc] hover:bg-[#1e63d8] text-white py-2 rounded-md transition duration-300">
                   Comece agora
                 </button>
               </div>
             </div>
 
             {/* Starter / Básico Plan */}
-            <div className="flex flex-col rounded-lg shadow-lg overflow-hidden relative">
-              <div className="absolute top-0 right-0 bg-yellow-400 text-white text-xs font-bold px-3 py-1 rounded-bl">
+            <div className="flex flex-col rounded-lg shadow-lg overflow-hidden border-2 border-[#ff9e2c] relative animate-bounce-slow shadow-black/20">
+              <div className="absolute top-0 right-0 bg-[#ff9e2c] text-white text-xs font-bold px-3 py-1 rounded-bl">
                 Mais popular
               </div>
               <div className="bg-white p-6 flex-1">
-                <h3 className="text-xl font-semibold text-blue-500">
+                <h3 className="text-xl font-semibold text-[#2575fc]">
                   Upgrade para Básico
                 </h3>
                 <p className="mt-2 text-gray-600">Para indivíduos e pequenos negócios.</p>
@@ -71,9 +70,9 @@ const PricingSection: React.FC = () => {
             </div>
 
             {/* Pro / Profissional Plan */}
-            <div className="flex flex-col rounded-lg shadow-lg overflow-hidden">
+            <div className="flex flex-col rounded-lg shadow-lg overflow-hidden border border-gray-200 transition-transform duration-300 hover:scale-105 hover:shadow-xl shadow-black/20">
               <div className="bg-white p-6 flex-1">
-                <h3 className="text-xl font-semibold text-purple-500">
+                <h3 className="text-xl font-semibold text-[#ff9e2c]">
                   Upgrade para Profissional
                 </h3>
                 <p className="mt-2 text-gray-600">Para agências e startups em crescimento.</p>
@@ -94,12 +93,13 @@ const PricingSection: React.FC = () => {
           </div>
         </div>
       </section>
+      
+      {/* Modais de Login e Registro */}
       <LoginModal
         isOpen={showLoginModal}
         onClose={() => {}}
         onLoginSuccess={handleLoginSuccess}
         onRegisterClick={() => {
-          // Trigger the register modal
           setShowRegisterModal(true);
         }}
       />
@@ -108,10 +108,24 @@ const PricingSection: React.FC = () => {
         onClose={() => setShowRegisterModal(false)}
         onRegisterSuccess={() => {
           setShowRegisterModal(false);
-          // Continue pending purchase after a successful registration
           handleLoginSuccess();
         }}
       />
+
+      {/* Estilos extras para animação personalizada */}
+      <style jsx>{`
+        @keyframes bounceSlow {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-5px);
+          }
+        }
+        .animate-bounce-slow {
+          animation: bounceSlow 1.5s infinite;
+        }
+      `}</style>
     </>
   );
 };

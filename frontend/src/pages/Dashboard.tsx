@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from "react-router-dom";
 import {
   Box,
   Button,
@@ -17,19 +18,13 @@ import {
   useToast,
   useDisclosure,
   Image,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
 } from '@chakra-ui/react';
 import { FiPlus, FiSettings, FiChevronDown, FiLogOut } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../services/authService';
-import { getFlows, createFlow } from '../services/flowService';
+import { getFlows } from '../services/flowService';
 import CreateFlowModal from '../components/modal/CreateFlowModal';
+import ConfiguracaoModal from "../components/modal/ConfiguracaoModal";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -43,52 +38,28 @@ export default function Dashboard() {
   const userName = localStorage.getItem('userName') || 'Guest';
   const [flows, setFlows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const fetchFlows = async () => {
-    setLoading(true);
-    try {
-      const data = await getFlows();
-      setFlows(data);
-    } catch (error) {
-      console.error("Error fetching flows:", error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar os flows.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [initialTab, setInitialTab] = useState("config");
 
   useEffect(() => {
+    const fetchFlows = async () => {
+      setLoading(true);
+      try {
+        const data = await getFlows();
+        setFlows(data);
+      } catch (error) {
+        toast({
+          title: 'Erro',
+          description: 'Não foi possível carregar os flows.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchFlows();
   }, []);
-
-  const handleCreateFlow = async (title: string) => {
-    try {
-      const newFlow = await createFlow(title, {});
-      toast({
-        title: 'Flow criado',
-        description: 'Flow criado com sucesso. Redirecionando para o editor...',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-      fetchFlows();
-    } catch (error) {
-      console.error('Error creating flow:', error);
-      toast({
-        title: 'Erro',
-        description: 'Houve um erro ao criar o flow. Tente novamente.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
 
   const handleLogout = async () => {
     await logout();
@@ -97,53 +68,69 @@ export default function Dashboard() {
 
   return (
     <Box minH="100vh" bg={bgColor}>
-      {/* Header */}
       <Box w="full" py={4} px={6} borderBottom="1px" borderColor={borderColor} bg={cardBg}>
         <Container maxW="1440px">
           <Flex justify="space-between" align="center">
-            <Box>
-              {/* Substituindo o ícone pela logo */}
+            <Link to="/dashboard">
               <Image
                 src="../src/assets/logovendflow.png"
                 alt="Logo"
-                width={{ base: "40%", md: "20%", lg: "55%" }}  // Tamanhos diferentes para cada tamanho de tela
-                height="auto"  // Manter a proporção da imagem
-                align={"left"} // Alinhando à esquerda
-                marginTop={2} // Margem superior para espaçamento
-                marginBottom={2} // Margem inferior para espaçamento
-                marginLeft={-14} // Margem esquerda para espaçamento
-
+                width={{ base: "40%", md: "20%", lg: "55%" }}
+                height="auto"
+                align="left"
+                marginTop={-2}
+                marginBottom={-2}
+                marginLeft={-14}
               />
-            </Box>
+            </Link>
             <HStack spacing={4}>
-              <Button leftIcon={<FiSettings />} variant="ghost" size="sm" onClick={onSettingsOpen}>
-                Configurações e Membros
-              </Button>
-              <Text>{userName}'s workspace</Text>
+                    <Button
+                    leftIcon={<FiSettings />}
+                    variant="solid"
+                    size="sm"
+                    colorScheme="teal"
+                    bg="#2575fc"
+                    height={"36px"}
+                    _hover={{ bg: "white", color: "#2575fc", border: "1px solid #2575fc" }}
+                    _active={{ bg: "white", color: "#2575fc", border: "1px solid #2575fc" }}
+                    onClick={() => { setInitialTab("config"); onSettingsOpen(); }}
+                    >
+                    Configurações e Membros
+                    </Button>
               <Menu>
-                <MenuButton as={Button} rightIcon={<FiChevronDown />} variant="ghost" size="sm">
-                  Área de trabalho
+                <MenuButton
+                  as={Button}
+                  rightIcon={<FiChevronDown />}
+                  variant="solid"
+                  size="sm"
+                  colorScheme="white"
+                  bg="#ff9e2c"
+                  height={"36px"}
+                  _hover={{ bg: "white", color: "#ff9e2c", border: "1px solid #ff9e2c" }}
+                  _active={{ bg: "white", color: "#ff9e2c", border: "1px solid #ff9e2c" }}
+                >
+                  Plano Atual: Gratuito
                 </MenuButton>
                 <MenuList>
-                  <MenuItem>Perfil Kauan Massuia</MenuItem>
-                  <MenuItem>Criar perfil</MenuItem>
+                  <MenuItem onClick={() => { setInitialTab("payment"); onSettingsOpen(); }}>Gratuito</MenuItem>
                 </MenuList>
               </Menu>
-              <Button
+                <Button
                 leftIcon={<FiLogOut />}
                 variant="ghost"
                 size="sm"
                 colorScheme="red"
                 onClick={handleLogout}
-              >
+                border="1px solid"
+                borderColor="red.500"
+                >
                 Logout
-              </Button>
+                </Button>
             </HStack>
           </Flex>
         </Container>
       </Box>
 
-      {/* Conteúdo Principal */}
       <Container maxW="1440px" py={8}>
         <Flex gap={6} wrap="wrap" justify="flex-start">
           <Box
@@ -166,7 +153,6 @@ export default function Dashboard() {
             <Icon as={FiPlus} boxSize={8} mb={4} />
             <Heading size="md">Create a Flow</Heading>
           </Box>
-
           {loading ? (
             <Spinner size="xl" />
           ) : (
@@ -192,29 +178,7 @@ export default function Dashboard() {
                 onClick={() => navigate(`/editor?flow_id=${flow.uid}`)}
                 cursor="pointer"
               >
-                {/* Menu in the top-right corner */}
-                <Menu>
-                  <MenuButton
-                    as={Button}
-                    size="sm"
-                    position="absolute"
-                    top="8px"
-                    right="8px"
-                    variant="ghost"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <FiChevronDown />
-                  </MenuButton>
-                  <MenuList>
-                    <MenuItem onClick={() => console.log('Deletar flow', flow.id)}>Deletar</MenuItem>
-                    <MenuItem onClick={() => console.log('Duplicar flow', flow.id)}>Duplicar</MenuItem>
-                    <MenuItem onClick={() => console.log('Não publicar flow', flow.id)}>Despublicar</MenuItem>
-                  </MenuList>
-                </Menu>
-
-                <Heading size="md" mb={2}>
-                  {flow.title}
-                </Heading>
+                <Heading size="md" mb={2}>{flow.title}</Heading>
                 <Text>{flow.published ? 'Publicado' : 'Rascunho'}</Text>
               </Box>
             ))
@@ -222,38 +186,8 @@ export default function Dashboard() {
         </Flex>
       </Container>
 
-      {/* Modal de Configurações */}
-      <Modal isOpen={isSettingsOpen} onClose={onSettingsClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Configurações e Membros</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            {/* Conteúdo atualizado */}
-            <Text fontWeight="bold">Current date:</Text>
-            <Text mt={2}>Tuesday, April 01, 2025, 1:32 PM -03</Text>
-            <Box mt={4}>
-              <Text fontWeight="bold">Search results:</Text>
-              <Box mt={2}>
-                <Image
-                  src="https://pplx-res.cloudinary.com/image/upload/v1743525057/user_uploads/uWGlroqHNLWHuEu/image.jpg"
-                  alt="Attached image"
-                  borderRadius="md"
-                  boxShadow="md"
-                />
-                <Text mt={2}>File name: image.jpg</Text>
-              </Box>
-            </Box>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" onClick={onSettingsClose}>
-              Fechar
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
-      <CreateFlowModal isOpen={isOpen} onClose={onClose} onCreate={handleCreateFlow} />
+      <ConfiguracaoModal isOpen={isSettingsOpen} onClose={onSettingsClose} initialTab={initialTab} />
+      <CreateFlowModal isOpen={isOpen} onClose={onClose} />
     </Box>
   );
 }
