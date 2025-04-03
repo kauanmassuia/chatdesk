@@ -53,10 +53,10 @@ export default function Home() {
 
         // Inicia a animação
         const startAnimation = () => {
-          const step = (timestamp) => {
-            let start = timestamp;
+            const step = (timestamp: number) => {
+            let start: number = timestamp;
             updateCounter(timestamp, start);
-          };
+            };
 
           requestAnimationFrame(step);
         };
@@ -76,7 +76,10 @@ export default function Home() {
       { threshold: 0.5 } // Verifica quando pelo menos 50% do elemento estiver visível
     );
 
-    observer.observe(document.querySelector('.stats'));
+    const statsElement = document.querySelector('.stats');
+    if (statsElement) {
+      observer.observe(statsElement);
+    }
 
     return () => observer.disconnect(); // Limpar quando o componente for desmontado
   }, []);
