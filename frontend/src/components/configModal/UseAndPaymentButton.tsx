@@ -3,7 +3,7 @@ import PricingSection from '../PricingSection';
 
 interface UseAndPaymentButtonProps {
   onClick: () => void;
-  isActive?: boolean; 
+  isActive?: boolean;
 }
 
 const UseAndPaymentButton = () => {

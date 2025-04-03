@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { logout } from '../services/authService';
+import { logout } from '../../services/authService';
 
 const SignOutButton: React.FC = () => {
   const navigate = useNavigate();

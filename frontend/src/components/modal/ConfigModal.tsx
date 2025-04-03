@@ -1,5 +1,15 @@
 import { useState } from "react";
-import { Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalBody, ModalFooter, Button, Flex, Box } from "@chakra-ui/react";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Box,
+  useBreakpointValue
+} from "@chakra-ui/react";
 import SidebarSettings from "../configModal/SidebarSettings";
 import ConfigPage from "../configModal/ConfigPage";
 import UseAndPaymentButton from "../configModal/UseAndPaymentButton";
@@ -10,16 +20,38 @@ interface SettingsModalProps {
 }
 
 const ConfiguracaoModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
-  const [activePage, setActivePage] = useState("config"); // Estado para armazenar a página ativa
+  const [activePage, setActivePage] = useState("config");
+
+  // Para telas pequenas usa 95% e para telas md para cima usa 60%
+  const modalWidth = useBreakpointValue({ base: "95%", md: "60%" });
+  // Altura fixa de 80% da viewport
+  const modalHeight = "80%";
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="100%" isCentered motionPreset="none">
+    <Modal isOpen={isOpen} onClose={onClose} isCentered motionPreset="none">
       <ModalOverlay />
-      <ModalContent maxW="80%" borderRadius="md" height="80%" position="fixed">
+      <ModalContent
+        maxW={modalWidth}
+        height={modalHeight}
+        borderRadius="lg"
+        p={4}
+      >
         <ModalCloseButton />
-        <ModalBody p={1} display="flex" height="calc(100% - 60px)">
-          {/* Sidebar fixa, sem scroll */}
-          <Box width="250px" bg="gray.100" p={4} borderRight="1px solid #e2e8f0">
+        <ModalBody
+          p={0}
+          display="flex"
+          flexDirection={{ base: "column", md: "row" }}
+          // Subtrai um espaço para footer se necessário
+          height="calc(100% - 60px)"
+        >
+          {/* Sidebar */}
+          <Box
+            width={{ base: "100%", md: "250px" }}
+            bg="gray.100"
+            borderRight={{ md: "1px solid #e2e8f0" }}
+            borderBottom={{ base: "1px solid #e2e8f0", md: "none" }}
+            p={4}
+          >
             <SidebarSettings setActivePage={setActivePage} />
           </Box>
 
@@ -29,8 +61,11 @@ const ConfiguracaoModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) =>
             {activePage === "payment" && <UseAndPaymentButton />}
           </Box>
         </ModalBody>
+
         <ModalFooter justifyContent="flex-end">
-          <Button variant="ghost" onClick={onClose}>Fechar</Button>
+          <Button variant="ghost" onClick={onClose}>
+            Fechar
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
