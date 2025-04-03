@@ -24,7 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import { logout } from '../services/authService';
 import { getFlows } from '../services/flowService';
 import CreateFlowModal from '../components/modal/CreateFlowModal';
-import ConfiguracaoModal from "../components/modal/ConfiguracaoModal";
+import ConfiguracaoModal from "../components/modal/ConfigModal";
 
 export default function Dashboard() {
   const navigate = useNavigate();
