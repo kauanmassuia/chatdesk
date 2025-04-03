@@ -22,7 +22,7 @@ import {
 import { FiPlus, FiSettings, FiChevronDown, FiLogOut } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../services/authService';
-import { getFlows } from '../services/flowService';
+import { getFlows, createFlow } from '../services/flowService';
 import CreateFlowModal from '../components/modal/CreateFlowModal';
 import ConfiguracaoModal from "../components/modal/ConfigModal";
 
@@ -40,26 +40,55 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [initialTab, setInitialTab] = useState("config");
 
+  const fetchFlows = async () => {
+    setLoading(true);
+    try {
+      const data = await getFlows();
+      setFlows(data);
+    } catch (error) {
+      console.error("Error fetching flows:", error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar os flows.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchFlows = async () => {
-      setLoading(true);
-      try {
-        const data = await getFlows();
-        setFlows(data);
-      } catch (error) {
-        toast({
-          title: 'Erro',
-          description: 'Não foi possível carregar os flows.',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchFlows();
   }, []);
+
+  // Create flow using the modal input
+  const handleCreateFlow = async (title: string) => {
+    try {
+      const newFlow = await createFlow(title, {});
+      toast({
+        title: 'Flow criado',
+        description: 'Flow criado com sucesso. Redirecionando para o editor...',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      // Refresh the flows list
+      fetchFlows();
+      // Redirect to the editor with the new flow ID
+      // navigate(`/editor?flow_id=${newFlow.uid}`);
+    } catch (error) {
+      console.error('Error creating flow:', error);
+      toast({
+        title: 'Erro',
+        description: 'Houve um erro ao criar o flow. Tente novamente.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -187,7 +216,7 @@ export default function Dashboard() {
       </Container>
 
       <ConfiguracaoModal isOpen={isSettingsOpen} onClose={onSettingsClose} initialTab={initialTab} />
-      <CreateFlowModal isOpen={isOpen} onClose={onClose} />
+      <CreateFlowModal isOpen={isOpen} onClose={onClose} onCreate={handleCreateFlow} />
     </Box>
   );
 }

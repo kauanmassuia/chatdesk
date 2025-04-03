@@ -13,7 +13,7 @@ class User < ApplicationRecord
   has_one :subscription, dependent: :destroy
 
   has_many :flows, dependent: :destroy
-  has_many :answers
+  has_many :answers, through: :flows
 
   # Validations
   validates :email, presence: true,

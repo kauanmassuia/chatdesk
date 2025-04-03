@@ -31,6 +31,7 @@ Rails.application.routes.draw do
       end
       resources :answers, only: [ :index ] do
         collection do
+          get :answers_count
           post :save_answer
         end
       end
