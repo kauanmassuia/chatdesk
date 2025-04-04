@@ -92,19 +92,33 @@ module Api
       # For customer.subscription.updated, update the subscription status.
       def process_subscription_updated(subscription_data)
         customer_id = subscription_data.customer
-        stripe_subscription_id = subscription_data.id
-        status = subscription_data.status
-
         user = User.find_by(stripe_customer_id: customer_id)
-        unless user && user.subscription && user.subscription.stripe_subscription_id == stripe_subscription_id
+        unless user && user.subscription && user.subscription.stripe_subscription_id == subscription_data.id
           Rails.logger.error "Subscription not found or mismatch for customer id: #{customer_id} in subscription.updated"
           return
         end
 
-        if user.subscription.update(status: status)
+        sub = user.subscription
+
+        if subscription_data.cancel_at_period_end
+          # Downgrade/cancellation: mark the new plan as pending.
+          # Here we assume that when canceling, the new plan becomes "free".
+          sub.pending_plan_type = 'free'
+          # Note: sub.plan_type remains unchanged until the billing period ends.
+        else
+          # Upgrade: update immediately.
+          new_plan_type = subscription_data.metadata["plan_type"] # Ensure Stripe sends this in metadata.
+          sub.plan_type = new_plan_type
+          sub.current_period_start = Time.at(subscription_data.current_period_start)
+          sub.pending_plan_type = nil
+        end
+
+        sub.status = subscription_data.status
+
+        if sub.save
           Rails.logger.info "Subscription updated for user #{user.id}"
         else
-          Rails.logger.error "Failed to update subscription for user #{user.id}: #{user.subscription.errors.full_messages.join(', ')}"
+          Rails.logger.error "Failed to update subscription for user #{user.id}: #{sub.errors.full_messages.join(', ')}"
         end
       end
 
