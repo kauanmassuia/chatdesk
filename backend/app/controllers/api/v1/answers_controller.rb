@@ -75,6 +75,24 @@ module Api
         render json: { error: e.message }, status: :unprocessable_entity
       end
 
+      def answers_count
+        subscription_manager = ::SubscriptionManager.new(current_user)
+        answer_limit = subscription_manager.answer_policy.answer_limit
+        billing_start = subscription_manager.billing_period_start
+        current_answers = current_user.answers.where("answers.created_at >= ?", billing_start).count
+        progress_percentage = subscription_manager.answer_policy.progress_percentage(current_answers)
+
+        billing_end = subscription_manager.billing_period_end
+
+        render json: {
+          current_answers: current_answers,
+          answer_limit: answer_limit,
+          progress_percentage: progress_percentage,
+          billing_start: billing_start,
+          billing_end: billing_end
+        }
+      end
+
       private
 
       def answer_params

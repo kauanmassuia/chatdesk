@@ -6,17 +6,18 @@ module Api
 
       def create_checkout_session
         plan = params[:plan]
-        allowed_plans = %w[standard premium] # adjust as needed
+        allowed_plans = %w[standard premium]
         unless allowed_plans.include?(plan)
           return render json: { error: 'Invalid plan' }, status: :unprocessable_entity
         end
 
-        # Check if the user already has an active subscription
-        if current_user.subscription&.status == "active" && current_user.subscription.plan_type == plan
+        # Use SubscriptionManager to check if the effective plan is already active.
+        subscription_manager = ::SubscriptionManager.new(current_user)
+        if subscription_manager.plan == plan.to_sym
           return render json: { message: "Plano #{plan} já está ativo." }, status: :ok
         end
 
-        # Retrieve the Price ID from environment variables (ensure these are set in test/live mode appropriately)
+        # Retrieve the Price ID from environment variables.
         price_id = case plan
                    when 'standard'
                      ENV.fetch("STRIPE_PRICE_ID_STANDARD")
@@ -24,7 +25,7 @@ module Api
                      ENV.fetch("STRIPE_PRICE_ID_PREMIUM")
                    end
 
-        # Create or retrieve a Stripe customer for the current user
+        # Create or retrieve a Stripe customer for the current user.
         if current_user.stripe_customer_id.blank?
           customer = Stripe::Customer.create(email: current_user.email)
           current_user.update!(stripe_customer_id: customer.id)
@@ -39,7 +40,7 @@ module Api
           customer: customer.id,
           line_items: [{
             price: price_id,
-            quantity: 1,
+            quantity: 1
           }],
           metadata: {
             plan_type: plan,
@@ -55,13 +56,24 @@ module Api
         render json: { error: e.message }, status: :internal_server_error
       end
 
-      # Optionally, add success/cancel actions if needed.
       def success
         render plain: "Subscription successful! Your plan has been updated."
       end
 
       def cancel
         render plain: "Subscription process canceled."
+      end
+
+      def show
+        subscription_manager = ::SubscriptionManager.new(current_user)
+        subscription = current_user.subscription
+
+        render json: {
+          plan: subscription_manager.plan,
+          status: subscription&.status || 'inactive',
+          billing_start: subscription_manager.billing_period_start,
+          billing_end: subscription_manager.billing_period_end
+        }
       end
     end
   end

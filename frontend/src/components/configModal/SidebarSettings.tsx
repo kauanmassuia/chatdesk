@@ -6,7 +6,7 @@ interface SidebarProps {
 
 const SidebarSettings: React.FC<SidebarProps> = ({ setActivePage }) => {
   return (
-    <Box width="100%">
+    <Box width="100%" borderRadius="lg">
       <Heading size="sm" mb={4}>
         Conta
       </Heading>

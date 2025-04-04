@@ -31,10 +31,12 @@ const ConfiguracaoModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) =>
     <Modal isOpen={isOpen} onClose={onClose} isCentered motionPreset="none">
       <ModalOverlay />
       <ModalContent
+        width="100%"
         maxW={modalWidth}
-        height={modalHeight}
+        height="80vh"
+        maxHeight="90vh"
         borderRadius="lg"
-        p={4}
+        p={6}
       >
         <ModalCloseButton />
         <ModalBody
@@ -47,7 +49,6 @@ const ConfiguracaoModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) =>
           {/* Sidebar */}
           <Box
             width={{ base: "100%", md: "250px" }}
-            bg="gray.100"
             borderRight={{ md: "1px solid #e2e8f0" }}
             borderBottom={{ base: "1px solid #e2e8f0", md: "none" }}
             p={4}

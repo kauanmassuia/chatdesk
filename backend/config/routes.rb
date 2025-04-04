@@ -19,6 +19,7 @@ Rails.application.routes.draw do
       post 'create_checkout_session', to: 'subscriptions#create_checkout_session'
       get  'subscription/success',   to: 'subscriptions#success'
       get  'subscription/cancel',    to: 'subscriptions#cancel'
+      get 'subscription', to: 'subscriptions#show'
       post '/stripe_webhooks/receive', to: 'stripe_webhooks#receive'
 
       resources :flows, only: [ :index, :show, :create, :update, :destroy ] do

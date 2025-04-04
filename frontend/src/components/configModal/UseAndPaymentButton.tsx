@@ -1,7 +1,19 @@
-import { Box, Heading, Text, Progress } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import PricingSection from "../PricingSection";
-import { countAnswers } from "../../services/answerService";
+import {
+  Box,
+  Heading,
+  Text,
+  Progress,
+  Stack,
+  Badge,
+  useColorModeValue,
+  HStack,
+  Icon,
+} from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
+import { FaRegChartBar } from 'react-icons/fa';
+import { countAnswers } from '../../services/answerService';
+import PricingSectionModal from './PricingSectionModal';
+import { getUserSubscription } from "../../services/subscriptionService";
 
 interface CountAnswersResponse {
   current_answers: number;
@@ -9,46 +21,98 @@ interface CountAnswersResponse {
   progress_percentage: number;
 }
 
+interface SubscriptionData {
+  plan: 'free' | 'standard' | 'premium';
+  translatedPlan: 'Grátis' | 'Básico' | 'Premium';
+  status: 'active' | 'canceled' | 'trialing';
+  billing_start: string;
+  billing_end: string;
+}
+
 const UseAndPaymentButton = () => {
-  const [currentAnswers, setCurrentAnswers] = useState(0);
-  const [answerLimit, setAnswerLimit] = useState(0);
-  const [progressPercentage, setProgressPercentage] = useState(0);
+  const [usageData, setUsageData] = useState<CountAnswersResponse | null>(null);
+  const [subscriptionData, setSubscriptionData] = useState<SubscriptionData | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data: CountAnswersResponse = await countAnswers();
-        setCurrentAnswers(data.current_answers);
-        setAnswerLimit(data.answer_limit);
-        setProgressPercentage(data.progress_percentage);
+        const [usage, subscription] = await Promise.all([
+          countAnswers(),
+          getUserSubscription(),
+        ]);
+        setUsageData(usage);
+        setSubscriptionData(subscription);
       } catch (error) {
-        console.error("Erro ao buscar dados de uso:", error);
+        console.error('Erro ao buscar dados:', error);
       }
     };
 
     fetchData();
   }, []);
 
+  const bg = useColorModeValue('white', 'gray.700');
+
+  if (!usageData || !subscriptionData) return null;
+
+  const {
+    current_answers,
+    answer_limit,
+    progress_percentage,
+  } = usageData;
+
+  const {
+    translatedPlan,
+    billing_start,
+    billing_end,
+  } = subscriptionData;
+
   return (
-    <Box width="100%" pl={4} mt={-2}>
+    <Box w="100%" px={{ base: 2, md: 4 }}>
       {/* Seção de Uso */}
-      <Heading size="md" mb={3}>Uso</Heading>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-        <Text fontSize="sm" fontWeight="medium">Chats</Text>
-        <Text fontSize="xs" color="gray.500">Renova em 30/04/2025 </Text>
+      <Box mb={8} p={4} borderRadius="lg" bg={bg} boxShadow="sm">
+        <HStack justifyContent="space-between" mb={2}>
+          <Heading size="md">Uso do plano</Heading>
+          <Badge colorScheme="blue" fontSize="0.8em">
+            Renova em {new Date(billing_end).toLocaleDateString('pt-BR')}
+          </Badge>
+        </HStack>
+
+        <Stack spacing={1} mb={3}>
+          <HStack fontSize="sm" color="gray.600">
+            <Icon as={FaRegChartBar} />
+            <Text>
+              {current_answers} de {answer_limit} chats utilizados
+            </Text>
+          </HStack>
+          <Progress
+            value={progress_percentage}
+            size="sm"
+            colorScheme="blue"
+            borderRadius="full"
+          />
+          <Text fontSize="xs" textAlign="right" color="gray.500">
+            {progress_percentage.toFixed(1)}% usado
+          </Text>
+        </Stack>
       </Box>
-      {/* Barra de progresso dinâmica */}
-      <Progress value={progressPercentage} size="sm" colorScheme="blue" borderRadius="full" />
-      <Text fontSize="sm" mt={1} textAlign="right">{currentAnswers} / {answerLimit}</Text>
 
-      {/* Seção do plano */}
-      <Heading size="md" mt={5} mb={2}>Meu plano</Heading>
-      <Text fontSize="sm" color="gray.600" mb={4}>
-        Plano atual: <Text as="span" fontWeight="bold">Standard</Text>
-      </Text>
+      {/* Seção de Plano */}
+      <Box mb={8} p={4} borderRadius="lg" bg={bg} boxShadow="sm">
+        <Heading size="md" mb={1}>
+          Meu plano
+        </Heading>
+        <Text fontSize="sm" color="gray.600" mb={2}>
+          Você está usando o plano{' '}
+          <Text as="span" fontWeight="bold">{translatedPlan}</Text>
+        </Text>
+        <Text fontSize="xs" color="gray.500">
+          Ciclo atual: {new Date(billing_start).toLocaleDateString('pt-BR')} até{' '}
+          {new Date(billing_end).toLocaleDateString('pt-BR')}
+        </Text>
+      </Box>
 
-      {/* Pricing Section */}
-      <PricingSection />
+      {/* Seção de Upgrade */}
+      <PricingSectionModal />
     </Box>
   );
 };

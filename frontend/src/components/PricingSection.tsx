@@ -1,4 +1,14 @@
 import React, { useState } from 'react';
+import {
+  Box,
+  Button,
+  Heading,
+  Stack,
+  Text,
+  SimpleGrid,
+  Badge,
+} from '@chakra-ui/react';
+import { useLocation } from 'react-router-dom';
 import LoginModal from './modal/LoginModal';
 import RegisterModal from './modal/RegisterModal';
 import UpgradeStandard from './buttons/UpgradeStandard';
@@ -8,100 +18,139 @@ import { useHandleUpgrade } from '../hooks/useHandleUpgrade';
 const PricingSection: React.FC = () => {
   const { handleUpgrade, showLoginModal, handleLoginSuccess } = useHandleUpgrade();
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const location = useLocation();
+
+  const isDashboard = location.pathname === '/dashboard';
+
+  const allPlans = [
+    {
+      name: 'Free',
+      price: 'R$0/mês',
+      features: [
+        '✅ 1 usuário',
+        '✅ 10 chats/mês',
+        '✅ Criar pastas',
+        '❌ Marca d’água',
+        '❌ Upload de arquivos',
+        '❌ Suporte prioritário',
+      ],
+      color: '#ff9e2c',
+      button: <Button colorScheme="blue" w="full">Comece agora</Button>,
+      description: 'Para quem quer começar sem custo.',
+    },
+    {
+      name: 'Básico',
+      price: 'R$97/mês',
+      features: [
+        '✅ 2 usuários',
+        '✅ 2000 chats/mês',
+        '✅ Criar pastas',
+        '✅ Marca d’água',
+        '✅ Upload de arquivos',
+        '✅ Suporte prioritário',
+      ],
+      color: '#2575fc',
+      badge: 'Mais popular',
+      button: <UpgradeStandard handleUpgrade={handleUpgrade} />,
+      description: 'Para indivíduos e pequenos negócios.',
+    },
+    {
+      name: 'Profissional',
+      price: 'R$297/mês',
+      features: [
+        '✅ 4 usuários',
+        '✅ 20.000 chats/mês',
+        '✅ Criar pastas',
+        '✅ Marca d’água',
+        '✅ Upload de arquivos',
+        '✅ Suporte prioritário',
+      ],
+      color: '#ff9e2c',
+      button: <UpgradePremium handleUpgrade={handleUpgrade} />,
+      description: 'Para agências e startups em crescimento.',
+    },
+  ];
+
+  // Filter out Free plan if on dashboard
+  const plansToDisplay = isDashboard
+    ? allPlans.filter((plan) => plan.name !== 'Free')
+    : allPlans;
+
+  const renderPlanCard = (plan: any) => (
+    <Box
+      key={plan.name}
+      borderWidth={plan.badge ? '2px' : '1px'}
+      borderColor={plan.badge ? plan.color : 'gray.200'}
+      borderRadius="lg"
+      boxShadow="md"
+      transition="transform 0.3s"
+      _hover={{ transform: 'scale(1.03)', boxShadow: 'xl' }}
+      position="relative"
+      bg="white"
+      p={6}
+    >
+      {plan.badge && (
+        <Badge
+          position="absolute"
+          top={0}
+          right={0}
+          color="white"
+          bg={plan.color}
+          borderRadius="0 0 0 6px"
+          px={3}
+          py={1}
+          fontSize="xs"
+        >
+          {plan.badge}
+        </Badge>
+      )}
+      <Heading fontSize="xl" color={plan.color}>
+        {plan.name}
+      </Heading>
+      <Text mt={2} color="gray.600">
+        {plan.description}
+      </Text>
+      <Text mt={4} fontSize="3xl" fontWeight="bold" color="gray.900">
+        {plan.price}
+      </Text>
+      <Stack spacing={2} mt={6} color="gray.700">
+        {plan.features.map((feature: string, idx: number) => (
+          <Text key={idx}>{feature}</Text>
+        ))}
+      </Stack>
+      <Box mt={6}>{plan.button}</Box>
+    </Box>
+  );
 
   return (
     <>
-      <section id="preco" className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-[#2575fc]">
+      <Box id="preco" py={8} bg="gray.50" width="100%">
+        <Box maxW="full" px={{ base: 2, sm: 4, md: 6 }}>
+          <Box textAlign="center" mb={12}>
+            <Heading fontSize="3xl" fontWeight="extrabold" color="#2575fc">
               Escolha o plano ideal para você
-            </h2>
-            <p className="mt-4 text-lg text-gray-600">
+            </Heading>
+            <Text mt={4} fontSize="lg" color="gray.600">
               Veja nossos planos e comece a usar o VendFlow hoje!
-            </p>
-          </div>
-          <div className="grid gap-8 lg:grid-cols-3">
-            {/* Free Plan */}
-            <div className="flex flex-col rounded-lg shadow-lg overflow-hidden border border-gray-200 transition-transform duration-300 hover:scale-105 hover:shadow-xl shadow-black/20">
-              <div className="bg-white p-6 flex-1">
-                <h3 className="text-xl font-semibold text-[#ff9e2c]">Free</h3>
-                <p className="mt-2 text-gray-600">Para quem quer começar sem custo.</p>
-                <p className="mt-4 text-3xl font-bold text-gray-900">R$0/mês</p>
-                <ul className="mt-6 space-y-2 text-gray-700">
-                  <li>✅ 1 usuário</li>
-                  <li>✅ 10 chats/mês</li>
-                  <li>✅ Criar pastas</li>
-                  <li>❌ Marca d’água</li>
-                  <li>❌ Upload de arquivos</li>
-                  <li>❌ Suporte prioritário</li>
-                </ul>
-              </div>
-              <div className="p-6">
-                <button className="w-full bg-[#2575fc] hover:bg-[#1e63d8] text-white py-2 rounded-md transition duration-300">
-                  Comece agora
-                </button>
-              </div>
-            </div>
+            </Text>
+          </Box>
 
-            {/* Starter / Básico Plan */}
-            <div className="flex flex-col rounded-lg shadow-lg overflow-hidden border-2 border-[#ff9e2c] relative animate-bounce-slow shadow-black/20">
-              <div className="absolute top-0 right-0 bg-[#ff9e2c] text-white text-xs font-bold px-3 py-1 rounded-bl">
-                Mais popular
-              </div>
-              <div className="bg-white p-6 flex-1">
-                <h3 className="text-xl font-semibold text-[#2575fc]">
-                  Upgrade para Básico
-                </h3>
-                <p className="mt-2 text-gray-600">Para indivíduos e pequenos negócios.</p>
-                <p className="mt-4 text-3xl font-bold text-gray-900">R$97/mês</p>
-                <ul className="mt-6 space-y-2 text-gray-700">
-                  <li>✅ 2 usuários</li>
-                  <li>✅ 2000 chats/mês</li>
-                  <li>✅ Criar pastas</li>
-                  <li>✅ Marca d’água</li>
-                  <li>✅ Upload de arquivos</li>
-                  <li>✅ Suporte prioritário</li>
-                </ul>
-              </div>
-              <div className="p-6">
-                <UpgradeStandard handleUpgrade={handleUpgrade} />
-              </div>
-            </div>
+          <SimpleGrid
+            columns={{ base: 1, sm: 1, md: 2, lg: 3 }}
+            spacing={6}
+            width="100%"
+            maxW="100%"
+          >
+            {plansToDisplay.map(renderPlanCard)}
+          </SimpleGrid>
+        </Box>
+      </Box >
 
-            {/* Pro / Profissional Plan */}
-            <div className="flex flex-col rounded-lg shadow-lg overflow-hidden border border-gray-200 transition-transform duration-300 hover:scale-105 hover:shadow-xl shadow-black/20">
-              <div className="bg-white p-6 flex-1">
-                <h3 className="text-xl font-semibold text-[#ff9e2c]">
-                  Upgrade para Profissional
-                </h3>
-                <p className="mt-2 text-gray-600">Para agências e startups em crescimento.</p>
-                <p className="mt-4 text-3xl font-bold text-gray-900">R$297/mês</p>
-                <ul className="mt-6 space-y-2 text-gray-700">
-                  <li>✅ 4 usuários</li>
-                  <li>✅ 20.000 chats/mês</li>
-                  <li>✅ Criar pastas</li>
-                  <li>✅ Marca d’água</li>
-                  <li>✅ Upload de arquivos</li>
-                  <li>✅ Suporte prioritário</li>
-                </ul>
-              </div>
-              <div className="p-6">
-                <UpgradePremium handleUpgrade={handleUpgrade} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Modais de Login e Registro */}
       <LoginModal
         isOpen={showLoginModal}
-        onClose={() => {}}
+        onClose={() => { }}
         onLoginSuccess={handleLoginSuccess}
-        onRegisterClick={() => {
-          setShowRegisterModal(true);
-        }}
+        onRegisterClick={() => setShowRegisterModal(true)}
       />
       <RegisterModal
         isOpen={showRegisterModal}
@@ -111,21 +160,6 @@ const PricingSection: React.FC = () => {
           handleLoginSuccess();
         }}
       />
-
-      {/* Estilos extras para animação personalizada */}
-      <style jsx>{`
-        @keyframes bounceSlow {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-5px);
-          }
-        }
-        .animate-bounce-slow {
-          animation: bounceSlow 1.5s infinite;
-        }
-      `}</style>
     </>
   );
 };
