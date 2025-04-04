@@ -1,3 +1,4 @@
+# app/controllers/api/v1/stripe_webhooks_controller.rb
 module Api
   module V1
     class StripeWebhooksController < ActionController::API
@@ -38,10 +39,9 @@ module Api
 
       # For checkout.session.completed, the event data is a Stripe::Checkout::Session object.
       def process_checkout_session(session)
-        # Use accessor methods provided by the Stripe object.
         customer_id = session.customer
         stripe_subscription_id = session.subscription
-        plan_type = session.metadata["plan_type"]  # Instead of session.dig("metadata", "plan_type")
+        plan_type = session.metadata["plan_type"]
 
         user = User.find_by(stripe_customer_id: customer_id)
         unless user
@@ -53,7 +53,9 @@ module Api
         subscription.assign_attributes(
           stripe_subscription_id: stripe_subscription_id,
           plan_type: plan_type,
-          status: 'active'
+          status: 'active',
+          current_period_start: Time.current,
+          pending_plan_type: nil
         )
         if subscription.save
           Rails.logger.info "Checkout session processed and subscription updated for user #{user.id}"
@@ -67,7 +69,6 @@ module Api
         customer_id = subscription_data.customer
         stripe_subscription_id = subscription_data.id
         status = subscription_data.status
-        # Access metadata from the subscription object
         plan_type = subscription_data.metadata["plan_type"] || (subscription_data.plan && subscription_data.plan.nickname)
 
         user = User.find_by(stripe_customer_id: customer_id)
@@ -80,7 +81,8 @@ module Api
         subscription.assign_attributes(
           stripe_subscription_id: stripe_subscription_id,
           plan_type: plan_type,
-          status: status
+          status: status,
+          current_period_start: Time.current  # Initialize billing start
         )
         if subscription.save
           Rails.logger.info "Subscription created for user #{user.id}"
@@ -89,34 +91,79 @@ module Api
         end
       end
 
-      # For customer.subscription.updated, update the subscription status.
+      # Revisão da função process_subscription_updated
       def process_subscription_updated(subscription_data)
         customer_id = subscription_data.customer
         user = User.find_by(stripe_customer_id: customer_id)
+
         unless user && user.subscription && user.subscription.stripe_subscription_id == subscription_data.id
-          Rails.logger.error "Subscription not found or mismatch for customer id: #{customer_id} in subscription.updated"
+          Rails.logger.error "Subscription not found or mismatch for customer id: #{customer_id}"
           return
         end
 
         sub = user.subscription
 
-        if subscription_data.cancel_at_period_end
-          # Downgrade/cancellation: mark the new plan as pending.
-          # Here we assume that when canceling, the new plan becomes "free".
-          sub.pending_plan_type = 'free'
-          # Note: sub.plan_type remains unchanged until the billing period ends.
-        else
-          # Upgrade: update immediately.
-          new_plan_type = subscription_data.metadata["plan_type"] # Ensure Stripe sends this in metadata.
-          sub.plan_type = new_plan_type
-          sub.current_period_start = Time.at(subscription_data.current_period_start)
-          sub.pending_plan_type = nil
+        # Obter o plano atual do Stripe (usando item.price.product.name ou item.price.nickname)
+        stripe_items = subscription_data.items.data
+        new_plan = if subscription_data.metadata["plan_type"].present?
+                     subscription_data.metadata["plan_type"].downcase
+                   elsif stripe_items.any?
+                     # Tenta obter o nome do plano do primeiro item de assinatura
+                     item = stripe_items.first
+                     product_name = ""
+
+                     # Safely access nested properties
+                     if item.price.respond_to?(:product)
+                       if item.price.product.is_a?(String)
+                         # If product is a string (product ID), use it as fallback
+                         product_name = item.price.product
+                       elsif item.price.product.respond_to?(:name)
+                         # If product is an object with name
+                         product_name = item.price.product.name
+                       end
+                     end
+
+                     # Fallback chain
+                     (product_name ||
+                      (item.price.respond_to?(:nickname) ? item.price.nickname : nil) ||
+                      "").downcase
+                   end
+
+        current_plan = sub.plan_type.downcase
+        allowed_order = ["free", "standard", "premium"]
+
+        # Se não conseguirmos determinar o novo plano, apenas atualizamos o status
+        if new_plan.blank? || !allowed_order.include?(new_plan)
+          Rails.logger.info "No valid plan change detected, updating status only for subscription #{sub.id}"
+          sub.status = subscription_data.status
+          sub.save
+          return
         end
 
+        # Obter datas do período correto do Stripe
+        current_period_start = Time.at(subscription_data.current_period_start)
+        current_period_end = Time.at(subscription_data.current_period_end)
+
+        # Atualizar as datas do período no registro da assinatura
+        sub.current_period_start = current_period_start
+
+        # Verificar o tipo de mudança de plano (upgrade ou downgrade)
+        if allowed_order.index(new_plan) < allowed_order.index(current_plan)
+          # Downgrade: configura como pendente para o próximo ciclo de cobrança
+          sub.pending_plan_type = new_plan
+          Rails.logger.info "Pending downgrade set for user #{user.id}: #{current_plan} -> #{new_plan} effective on #{current_period_end}"
+        else
+          # Upgrade ou renovação do mesmo plano: aplicar imediatamente
+          sub.plan_type = new_plan
+          sub.pending_plan_type = nil
+          Rails.logger.info "Upgrade or renewal applied for user #{user.id}: #{current_plan} -> #{new_plan}"
+        end
+
+        # Atualizar status
         sub.status = subscription_data.status
 
         if sub.save
-          Rails.logger.info "Subscription updated for user #{user.id}"
+          Rails.logger.info "Subscription updated for user #{user.id}, status: #{sub.status}, plan: #{sub.plan_type}, pending: #{sub.pending_plan_type}"
         else
           Rails.logger.error "Failed to update subscription for user #{user.id}: #{sub.errors.full_messages.join(', ')}"
         end

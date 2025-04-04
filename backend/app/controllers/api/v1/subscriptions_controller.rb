@@ -64,16 +64,20 @@ module Api
         render plain: "Subscription process canceled."
       end
 
+      def cancel_plan
+        subscription_manager = ::SubscriptionManager.new(current_user)
+        result = subscription_manager.cancel_subscription
+
+        if result[:success]
+          render json: { message: result[:message] }, status: :ok
+        else
+          render json: { error: result[:message] }, status: :unprocessable_entity
+        end
+      end
+
       def show
         subscription_manager = ::SubscriptionManager.new(current_user)
-        subscription = current_user.subscription
-
-        render json: {
-          plan: subscription_manager.plan,
-          status: subscription&.status || 'inactive',
-          billing_start: subscription_manager.billing_period_start,
-          billing_end: subscription_manager.billing_period_end
-        }
+        render json: subscription_manager.info
       end
     end
   end

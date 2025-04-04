@@ -20,6 +20,7 @@ Rails.application.routes.draw do
       get  'subscription/success',   to: 'subscriptions#success'
       get  'subscription/cancel',    to: 'subscriptions#cancel'
       get 'subscription', to: 'subscriptions#show'
+      delete '/subscription', to: 'subscriptions#cancel_plan'
       post '/stripe_webhooks/receive', to: 'stripe_webhooks#receive'
 
       resources :flows, only: [ :index, :show, :create, :update, :destroy ] do

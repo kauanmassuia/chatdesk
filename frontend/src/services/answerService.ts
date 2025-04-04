@@ -2,6 +2,13 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
 
+export interface CountAnswersResponse {
+  total_answers: number;
+  current_answers: number;
+  answer_limit: number;
+  progress_percentage: number;
+}
+
 export const saveAnswer = async (customUrl: string, answerData: object) => {
   const accessToken = localStorage.getItem("access-token");
   const client = localStorage.getItem("client");
