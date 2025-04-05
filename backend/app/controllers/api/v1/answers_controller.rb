@@ -10,7 +10,7 @@ module Api
 
         # Only count answers created during the current billing period.
         billing_start = subscription_manager.billing_period_start
-        current_period_answers = current_user.answers.where("created_at >= ?", billing_start)
+        current_period_answers = current_user.answers.where("answers.created_at >= ?", billing_start)
 
         total_answers = current_period_answers.count
         # Compute how many answers exceed the monthly allowance.

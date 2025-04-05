@@ -9,7 +9,9 @@ interface InputNodeProps {
   placeholder?: string
   type?: string
   value: string
+  name?: string
   onChange: (value: string) => void
+  onNameChange?: (name: string) => void
   multiline?: boolean  // New prop to support TextNode
   validation?: {
     pattern?: string
@@ -36,7 +38,9 @@ const InputNode = ({
   placeholder,
   type = 'text',
   value,
+  name,
   onChange,
+  onNameChange,
   multiline = false,  // Default to single-line input
   validation
 }: InputNodeProps) => {
@@ -44,7 +48,13 @@ const InputNode = ({
   const borderColor = useColorModeValue('gray.200', 'gray.600')
 
   return (
-    <BaseNode icon={icon} label={label} selected={selected}>
+    <BaseNode
+      icon={icon}
+      label={label}
+      selected={selected}
+      name={name}
+      onNameChange={onNameChange}
+    >
       <Box p={2}>
         <FormControl>
           <FormLabel fontSize="sm" mb={2}>
@@ -133,6 +143,15 @@ export function renderGenericInputNode({
       </FormControl>
     </VStack>
   );
+}
+
+// Helper function to ensure every input node exports its name
+export function exportBaseInputNodeData(node: any) {
+  return {
+    name: node.data?.name || '',
+    prompt: node.data?.value || '',
+    validation: node.data?.validation || null,
+  };
 }
 
 export default InputNode

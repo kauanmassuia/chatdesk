@@ -1,6 +1,6 @@
 import { Handle, Position } from 'reactflow'
-import { Box, Text, useColorModeValue, IconButton, HStack } from '@chakra-ui/react'
-import { memo, ReactNode, useMemo } from 'react'
+import { Box, Text, useColorModeValue, IconButton, HStack, Input, Flex } from '@chakra-ui/react'
+import { memo, ReactNode, useMemo, useState, useRef, KeyboardEvent } from 'react'
 import { IconType } from 'react-icons'
 import { FiMoreHorizontal } from 'react-icons/fi'
 
@@ -9,14 +9,19 @@ interface BaseNodeProps {
   label: string
   selected: boolean
   children: ReactNode
+  name?: string
+  onNameChange?: (name: string) => void
 }
 
-const BaseNode = memo(({ icon: Icon, label, selected, children }: BaseNodeProps) => {
+const BaseNode = memo(({ icon: Icon, label, selected, children, name, onNameChange }: BaseNodeProps) => {
   // Call hooks at the top level
   const bgColor = useColorModeValue('white', 'gray.700')
   const borderColor = useColorModeValue(selected ? 'blue.500' : 'gray.200', selected ? 'blue.400' : 'gray.600')
   const headerBg = useColorModeValue('gray.50', 'gray.800')
   const handleColor = useColorModeValue('#CBD5E0', '#4A5568')
+  const [isEditing, setIsEditing] = useState(false)
+  const [nodeName, setNodeName] = useState(name || label)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   // Combine values using useMemo if needed
   const styles = useMemo(() => ({
@@ -25,6 +30,30 @@ const BaseNode = memo(({ icon: Icon, label, selected, children }: BaseNodeProps)
     headerBg,
     handleColor,
   }), [bgColor, borderColor, headerBg, handleColor])
+
+  const handleNameClick = () => {
+    setIsEditing(true)
+    setTimeout(() => {
+      inputRef.current?.focus()
+      inputRef.current?.select()
+    }, 0)
+  }
+
+  const handleNameChange = () => {
+    if (onNameChange && nodeName.trim()) {
+      onNameChange(nodeName)
+    }
+    setIsEditing(false)
+  }
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleNameChange()
+    } else if (e.key === 'Escape') {
+      setNodeName(name || label)
+      setIsEditing(false)
+    }
+  }
 
   return (
     <Box
@@ -64,9 +93,32 @@ const BaseNode = memo(({ icon: Icon, label, selected, children }: BaseNodeProps)
         borderRadius="md"
       >
         <Icon size={16} />
-        <Text fontWeight="medium" fontSize="sm" flex={1}>
-          {label}
-        </Text>
+        <Flex flex={1} className={isEditing ? "nodrag" : ""}>
+          {isEditing ? (
+            <Input
+              ref={inputRef}
+              size="sm"
+              value={nodeName}
+              onChange={(e) => setNodeName(e.target.value)}
+              onBlur={handleNameChange}
+              onKeyDown={handleKeyDown}
+              className="nodrag"
+              autoFocus
+              placeholder={label}
+            />
+          ) : (
+            <Text
+              fontWeight="medium"
+              fontSize="sm"
+              onClick={handleNameClick}
+              className="nodrag"
+              cursor="text"
+              _hover={{ textDecoration: "underline" }}
+            >
+              {nodeName || label}
+            </Text>
+          )}
+        </Flex>
         <IconButton
           aria-label="Mais opções"
           icon={<FiMoreHorizontal size={16} />}

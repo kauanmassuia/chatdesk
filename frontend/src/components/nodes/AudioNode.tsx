@@ -1,14 +1,16 @@
 // AudioNode.tsx
 import { memo } from 'react'
-import { Input, VStack, Box, useColorModeValue } from '@chakra-ui/react'
-import { FiHeadphones } from 'react-icons/fi'
+import { Input, Box, VStack, useColorModeValue, Text } from '@chakra-ui/react'
+import { FiMusic } from 'react-icons/fi'
 import BaseNode from './BaseNode'
 
 interface AudioNodeProps {
   data: {
     audioUrl: string
-    title: string
+    title?: string
+    name?: string
     onChange: (field: string, value: string) => void
+    onNameChange?: (name: string) => void
   }
   selected: boolean
 }
@@ -16,15 +18,17 @@ interface AudioNodeProps {
 const AudioNode = memo(({ data, selected }: AudioNodeProps) => {
   return (
     <BaseNode
-      icon={FiHeadphones}
+      icon={FiMusic}
       label="Áudio"
+      name={data.name}
+      onNameChange={(name) => data.onNameChange && data.onNameChange(name)}
       selected={selected}
     >
       <VStack spacing={3} align="stretch">
         <Input
           placeholder="Título do áudio"
           size="sm"
-          value={data.title}
+          value={data.title || ''}
           onChange={(e) => data.onChange('title', e.target.value)}
           bg={useColorModeValue('gray.50', 'gray.800')}
         />
@@ -36,15 +40,12 @@ const AudioNode = memo(({ data, selected }: AudioNodeProps) => {
           bg={useColorModeValue('gray.50', 'gray.800')}
         />
         {data.audioUrl && (
-          <Box borderRadius="md" overflow="hidden" bg={useColorModeValue('gray.50', 'gray.800')} p={2}>
+          <Box borderRadius="md" overflow="hidden" bg={useColorModeValue('gray.100', 'gray.700')} p={2}>
             <audio
-              controls
               style={{ width: '100%' }}
+              controls
               src={data.audioUrl}
-              title={data.title}
-            >
-              Seu navegador não suporta o elemento de áudio.
-            </audio>
+            />
           </Box>
         )}
       </VStack>
@@ -55,10 +56,11 @@ const AudioNode = memo(({ data, selected }: AudioNodeProps) => {
 // Exporter function for AudioNode:
 export function exportAudioNode(node: any) {
   return {
-    type: "audio",
+    type: 'audio',
     content: {
-      audioUrl: node.data?.audioUrl || "",
-      title: node.data?.title || "",
+      audioUrl: node.data?.audioUrl || '',
+      title: node.data?.title || '',
+      name: node.data?.name || '',
     },
   }
 }
@@ -66,10 +68,11 @@ export function exportAudioNode(node: any) {
 export function renderAudioNode(node: any) {
   return (
     <Box>
-      <audio controls style={{ width: "300px" }}>
-        <source src={node.content.audioUrl} type="audio/mpeg" />
-        Your browser does not support the audio element.
-      </audio>
+      <audio
+        controls
+        src={node.content.audioUrl}
+        style={{ width: "100%" }}
+      />
     </Box>
   );
 }

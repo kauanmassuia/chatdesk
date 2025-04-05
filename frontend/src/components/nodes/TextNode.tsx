@@ -8,7 +8,9 @@ import { Box, Text } from '@chakra-ui/react';
 interface TextNodeProps {
   data: {
     text: string
+    name?: string
     onChange: (text: string) => void
+    onNameChange?: (name: string) => void
   }
   selected: boolean
 }
@@ -18,6 +20,8 @@ const TextNode = memo(({ data, selected }: TextNodeProps) => {
     <BaseNode
       icon={FiMessageSquare}
       label="Mensagem de Texto"
+      name={data.name}
+      onNameChange={(name) => data.onNameChange && data.onNameChange(name)}
       selected={selected}
     >
       <Textarea
@@ -53,6 +57,7 @@ export function exportTextNode(node: any) {
     type: 'text', // final JSON type
     content: {
       text: node.data?.text || '',
+      name: node.data?.name || '',
     },
   }
 }

@@ -1,11 +1,13 @@
 import { BsTextParagraph } from 'react-icons/bs'
-import InputNode from './InputNode'
+import InputNode, { exportBaseInputNodeData } from './InputNode'
 import { renderGenericInputNode } from './InputNode';
 
 interface TextInputNodeProps {
   data: {
     value: string
+    name?: string
     onChange: (field: string, value: string) => void
+    onNameChange?: (name: string) => void
   }
   selected: boolean
 }
@@ -18,7 +20,9 @@ const TextInputNode = ({ data, selected }: TextInputNodeProps) => {
       selected={selected}
       placeholder="Digite seu texto aqui..."
       value={data.value}
+      name={data.name}
       onChange={(value) => data.onChange('value', value)}
+      onNameChange={(name) => data.onNameChange && data.onNameChange(name)}
     />
   )
 }
@@ -36,6 +40,7 @@ export function exportTextInputNode(node: any) {
   return {
     type: 'input_text', // or "input_text" if you prefer
     content: {
+      ...exportBaseInputNodeData(node),
       prompt: node.data?.value || '',
     },
   }

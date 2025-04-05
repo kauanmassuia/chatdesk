@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Input, VStack, Image, useColorModeValue, Box } from '@chakra-ui/react'
+import { Input, Box, VStack, useColorModeValue, Image, Text } from '@chakra-ui/react'
 import { FiImage } from 'react-icons/fi'
 import BaseNode from './BaseNode'
 
@@ -7,7 +7,9 @@ interface ImageNodeProps {
   data: {
     imageUrl: string
     alt: string
+    name?: string
     onChange: (field: string, value: string) => void
+    onNameChange?: (name: string) => void
   }
   selected: boolean
 }
@@ -17,6 +19,8 @@ const ImageNode = memo(({ data, selected }: ImageNodeProps) => {
     <BaseNode
       icon={FiImage}
       label="Imagem"
+      name={data.name}
+      onNameChange={(name) => data.onNameChange && data.onNameChange(name)}
       selected={selected}
     >
       <VStack spacing={3} align="stretch">
@@ -35,13 +39,15 @@ const ImageNode = memo(({ data, selected }: ImageNodeProps) => {
           bg={useColorModeValue('gray.50', 'gray.800')}
         />
         {data.imageUrl && (
-          <Image
-            src={data.imageUrl}
-            alt={data.alt}
-            maxH="200px"
-            objectFit="contain"
-            borderRadius="md"
-          />
+          <Box borderRadius="md" overflow="hidden">
+            <Image
+              src={data.imageUrl}
+              alt={data.alt}
+              maxH="200px"
+              objectFit="contain"
+              fallback={<Box bg="gray.100" h="100px" w="100%" />}
+            />
+          </Box>
         )}
       </VStack>
     </BaseNode>
@@ -51,7 +57,11 @@ const ImageNode = memo(({ data, selected }: ImageNodeProps) => {
 export function renderImageNode(node: any) {
   return (
     <Box>
-      <img src={node.content.imageUrl} alt={node.content.alt || 'Image'} style={{ maxWidth: "250px" }} />
+      <Image
+        src={node.content.imageUrl}
+        alt={node.content.alt || 'Imagem'}
+        maxW="300px"
+      />
     </Box>
   );
 }
@@ -62,8 +72,9 @@ export function exportImageNode(node: any) {
     content: {
       imageUrl: node.data?.imageUrl || '',
       alt: node.data?.alt || '',
+      name: node.data?.name || '',
     },
-  }
+  };
 }
 
 ImageNode.displayName = 'ImageNode'

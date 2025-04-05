@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Input, Select, Box, VStack, useColorModeValue } from '@chakra-ui/react'
+import { Input, Select, Box, VStack, useColorModeValue, Text } from '@chakra-ui/react'
 import { FiVideo } from 'react-icons/fi'
 import BaseNode from './BaseNode'
 
@@ -7,7 +7,9 @@ interface VideoNodeProps {
   data: {
     videoUrl: string
     type: 'youtube' | 'vimeo' | 'direct'
+    name?: string
     onChange: (field: string, value: string) => void
+    onNameChange?: (name: string) => void
   }
   selected: boolean
 }
@@ -17,6 +19,8 @@ const VideoNode = memo(({ data, selected }: VideoNodeProps) => {
     <BaseNode
       icon={FiVideo}
       label="Vídeo"
+      name={data.name}
+      onNameChange={(name) => data.onNameChange && data.onNameChange(name)}
       selected={selected}
     >
       <VStack spacing={3} align="stretch">
@@ -129,8 +133,8 @@ export function exportVideoNode(node: any) {
     type: 'video',
     content: {
       videoUrl: node.data?.videoUrl || '',
-      // You might also export the media type (youtube, vimeo, direct)
       mediaType: node.data?.type || 'direct',
+      name: node.data?.name || '',
     },
   };
 }

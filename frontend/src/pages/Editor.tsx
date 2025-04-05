@@ -110,6 +110,25 @@ function EditorContent() {
         y: event.clientY,
       })
 
+      // Default node labels mapped by type
+      const defaultLabels: {[key: string]: string} = {
+        text: 'Mensagem de Texto',
+        image: 'Imagem',
+        video: 'Vídeo',
+        audio: 'Áudio',
+        start: 'Start Node',
+        input_text: 'Input - Texto',
+        input_number: 'Input - Número',
+        input_email: 'Input - E-mail',
+        input_website: 'Input - Website',
+        input_date: 'Input - Data',
+        input_wait: 'Input - Aguarde',
+        input_phone: 'Input - Telefone',
+        input_buttons: 'Input - Botões',
+        input_pic_choice: 'Input - Escolha de Imagem',
+        input_payment: 'Input - Pagamento'
+      };
+
       const newNode: Node = {
         id: `${type}-${Date.now()}`,
         type,
@@ -128,12 +147,15 @@ function EditorContent() {
           amount: '',
           currency: 'BRL',
           description: '',
+          name: defaultLabels[type] || type.charAt(0).toUpperCase() + type.slice(1),
           onChange:
             type === 'text'
               ? (value: string) =>
                   updateNodeData(newNode.id, { text: value })
               : (field: string, value: string) =>
                   updateNodeData(newNode.id, { [field]: value }),
+          onNameChange: (name: string) =>
+            updateNodeData(newNode.id, { name })
         },
         dragHandle: '.drag',
       }
@@ -154,6 +176,8 @@ function EditorContent() {
               ? (value: string) => updateNodeData(node.id, { text: value })
               : (field: string, value: string) =>
                   updateNodeData(node.id, { [field]: value }),
+          onNameChange: (name: string) =>
+            updateNodeData(node.id, { name })
         },
       }
     }
