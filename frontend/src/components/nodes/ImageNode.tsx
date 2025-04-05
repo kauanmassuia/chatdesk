@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Input, VStack, Image, useColorModeValue } from '@chakra-ui/react'
+import { Input, VStack, Image, useColorModeValue, Box } from '@chakra-ui/react'
 import { FiImage } from 'react-icons/fi'
 import BaseNode from './BaseNode'
 
@@ -47,6 +47,14 @@ const ImageNode = memo(({ data, selected }: ImageNodeProps) => {
     </BaseNode>
   )
 })
+
+export function renderImageNode(node: any) {
+  return (
+    <Box>
+      <img src={node.content.imageUrl} alt={node.content.alt || 'Image'} style={{ maxWidth: "250px" }} />
+    </Box>
+  );
+}
 
 export function exportImageNode(node: any) {
   return {

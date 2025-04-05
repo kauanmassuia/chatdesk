@@ -1,5 +1,6 @@
 import { TbWorldWww } from 'react-icons/tb'
 import InputNode from './InputNode'
+import { renderGenericInputNode } from './InputNode';
 
 interface WebsiteInputNodeProps {
   data: {
@@ -35,6 +36,24 @@ export function exportWebsiteInputNode(node: any) {
       }
     },
   }
+}
+
+export function renderWebsiteInputNode(props: any) {
+  // URL validation
+  const urlProps = { ...props };
+
+  if (!urlProps.node.content.validation) {
+    urlProps.node.content.validation = {
+      pattern: "^(https?:\\/\\/)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$",
+      message: "Please enter a valid URL"
+    };
+  }
+
+  return renderGenericInputNode({
+    ...urlProps,
+    inputType: "url",
+    placeholder: "Enter a website URL..."
+  });
 }
 
 WebsiteInputNode.displayName = 'WebsiteInputNode'

@@ -52,8 +52,6 @@ const AudioNode = memo(({ data, selected }: AudioNodeProps) => {
   )
 })
 
-AudioNode.displayName = 'AudioNode'
-
 // Exporter function for AudioNode:
 export function exportAudioNode(node: any) {
   return {
@@ -64,5 +62,18 @@ export function exportAudioNode(node: any) {
     },
   }
 }
+
+export function renderAudioNode(node: any) {
+  return (
+    <Box>
+      <audio controls style={{ width: "300px" }}>
+        <source src={node.content.audioUrl} type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+    </Box>
+  );
+}
+
+AudioNode.displayName = 'AudioNode'
 
 export default AudioNode

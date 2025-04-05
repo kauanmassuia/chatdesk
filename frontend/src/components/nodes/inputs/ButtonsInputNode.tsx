@@ -1,4 +1,4 @@
-import { Box, Button, HStack, IconButton, Input, VStack, useColorModeValue, FormControl, FormLabel } from '@chakra-ui/react'
+import { Box, Button, HStack, IconButton, Input, VStack, useColorModeValue, FormControl, FormLabel, Text, Wrap, WrapItem } from '@chakra-ui/react'
 import { Handle, Position } from 'reactflow'
 import { BsGrid, BsPlus, BsTrash } from 'react-icons/bs'
 import BaseNode from '../BaseNode'
@@ -111,6 +111,74 @@ export function exportButtonsInputNode(node: any) {
       })),
     },
   }
+}
+
+export function renderButtonsInputNode({ node, handleChoiceSelect }: any) {
+  const choices = node.content.choices || [];
+  const layout = node.content.layout || 'horizontal'; // Can be 'horizontal', 'vertical', or 'wrap'
+
+  const renderChoiceButtons = () => {
+    if (layout === 'vertical') {
+      return (
+        <VStack spacing={2} align="stretch">
+          {choices.map((choice: any, idx: number) => (
+            <Button
+              key={idx}
+              onClick={() => handleChoiceSelect(choice)}
+              colorScheme={choice.color || "teal"}
+              variant={choice.variant || "solid"}
+              leftIcon={choice.icon ? <span className={choice.icon}></span> : undefined}
+            >
+              {choice.label}
+            </Button>
+          ))}
+        </VStack>
+      );
+    } else if (layout === 'wrap') {
+      return (
+        <Wrap spacing={2}>
+          {choices.map((choice: any, idx: number) => (
+            <WrapItem key={idx}>
+              <Button
+                onClick={() => handleChoiceSelect(choice)}
+                colorScheme={choice.color || "teal"}
+                variant={choice.variant || "solid"}
+                leftIcon={choice.icon ? <span className={choice.icon}></span> : undefined}
+              >
+                {choice.label}
+              </Button>
+            </WrapItem>
+          ))}
+        </Wrap>
+      );
+    } else {
+      // Default: horizontal
+      return (
+        <HStack spacing={2} wrap="wrap">
+          {choices.map((choice: any, idx: number) => (
+            <Button
+              key={idx}
+              onClick={() => handleChoiceSelect(choice)}
+              colorScheme={choice.color || "teal"}
+              variant={choice.variant || "solid"}
+              leftIcon={choice.icon ? <span className={choice.icon}></span> : undefined}
+            >
+              {choice.label}
+            </Button>
+          ))}
+        </HStack>
+      );
+    }
+  };
+
+  return (
+    <VStack spacing={3} align="stretch">
+      <Box>
+        <Text>{node.content.prompt}</Text>
+      </Box>
+      {renderChoiceButtons()}
+    </VStack>
+  );
 }
 
 ButtonsInputNode.displayName = 'ButtonsInputNode'

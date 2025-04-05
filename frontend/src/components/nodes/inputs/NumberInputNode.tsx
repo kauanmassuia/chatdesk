@@ -1,5 +1,6 @@
 import { MdOutlineNumbers } from 'react-icons/md'
 import InputNode from './InputNode'
+import { renderGenericInputNode } from './InputNode';
 
 interface NumberInputNodeProps {
   data: {
@@ -36,6 +37,16 @@ export function exportNumberInputNode(node: any) {
       }
     },
   }
+}
+
+export function renderNumberInputNode(props: any) {
+  // Number inputs can have their own validation defined in the node
+  // e.g., min/max values, number format, etc.
+  return renderGenericInputNode({
+    ...props,
+    inputType: "number",
+    placeholder: "Enter a number..."
+  });
 }
 
 NumberInputNode.displayName = 'NumberInputNode'

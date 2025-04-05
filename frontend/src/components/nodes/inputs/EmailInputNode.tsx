@@ -1,5 +1,6 @@
 import { MdOutlineEmail } from 'react-icons/md'
 import InputNode from './InputNode'
+import { renderGenericInputNode } from './InputNode';
 
 interface EmailInputNodeProps {
   data: {
@@ -22,6 +23,17 @@ const EmailInputNode = ({ data, selected }: EmailInputNodeProps) => {
     />
   )
 }
+
+export function renderEmailInputNode(props: any) {
+  // Email validation is already in the node content from exportEmailInputNode
+  // We don't need to add it here as it will be extracted by renderGenericInputNode
+  return renderGenericInputNode({
+    ...props,
+    inputType: "email",
+    placeholder: "Enter your email address..."
+  });
+}
+
 
 // Export function for the chat UI.
 export function exportEmailInputNode(node: any) {

@@ -101,6 +101,29 @@ function getVimeoId(url: string): string {
   return match ? match[2] : ''
 }
 
+function getYoutubeEmbedUrl(url: string): string {
+  const match = url.match(/(?:v=|youtu\.be\/)([^&]+)/); // Regex to extract the video ID
+  if (match && match[1]) {
+    return `https://www.youtube.com/embed/${match[1]}`;
+  }
+  return url; // If it's not a YouTube URL, return the original URL.
+}
+
+export function renderVideoNode(node: any) {
+  const embedUrl = getYoutubeEmbedUrl(node.content.videoUrl || node.content.url);
+  return (
+    <Box>
+      <iframe
+        src={embedUrl}
+        title="video"
+        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        style={{ width: "300px", height: "200px" }}
+      />
+    </Box>
+  );
+}
+
 export function exportVideoNode(node: any) {
   return {
     type: 'video',

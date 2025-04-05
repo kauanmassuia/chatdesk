@@ -1,5 +1,6 @@
 import { BsClock } from 'react-icons/bs'
 import InputNode from './InputNode'
+import { Box, Text, Spinner, VStack } from '@chakra-ui/react';
 
 interface WaitInputNodeProps {
   data: {
@@ -30,6 +31,32 @@ export function exportWaitInputNode(node: any) {
       waitTime: parseInt(node.data?.value || '0', 10),  // Convert to integer (seconds)
     },
   }
+}
+
+export function renderWaitInputNode({ node }: any) {
+  // Show a spinner and countdown if needed
+  const waitTime = node.content?.waitTime || 1;
+  const waitMessage = node.content?.message || "Please wait...";
+
+  return (
+    <VStack spacing={3} align="center">
+      <Box>
+        <Text>{waitMessage}</Text>
+      </Box>
+      <Spinner
+        thickness="4px"
+        speed="0.65s"
+        emptyColor="gray.200"
+        color="blue.500"
+        size="md"
+      />
+      {waitTime > 2 && (
+        <Text fontSize="sm" color="gray.500">
+          (Waiting for {waitTime} seconds)
+        </Text>
+      )}
+    </VStack>
+  );
 }
 
 WaitInputNode.displayName = 'WaitInputNode'

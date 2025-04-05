@@ -1,4 +1,4 @@
-import { Box, FormControl, FormLabel, HStack, Input, Select, VStack, useColorModeValue } from '@chakra-ui/react'
+import { Box, FormControl, FormLabel, HStack, Input, Select, VStack, useColorModeValue, Text, Button, Divider } from '@chakra-ui/react'
 import { MdPayment } from 'react-icons/md'
 import BaseNode from '../BaseNode'
 
@@ -65,4 +65,35 @@ const PaymentInputNode = ({ data, selected }: PaymentInputNodeProps) => {
   )
 }
 
-export default PaymentInputNode 
+export function renderPaymentInputNode({ node, handleChoiceSelect }: any) {
+  const amount = node.content.amount || 0;
+  const currency = node.content.currency || 'USD';
+  const description = node.content.description || '';
+
+  return (
+    <VStack spacing={3} align="stretch" p={3} borderWidth="1px" borderRadius="md">
+      <Box>
+        <Text fontWeight="bold">{node.content.prompt || 'Payment Required'}</Text>
+        {description && <Text fontSize="sm" color="gray.600" mt={1}>{description}</Text>}
+      </Box>
+      <Divider />
+      <HStack justifyContent="space-between">
+        <Text>Amount:</Text>
+        <Text fontWeight="bold">{amount} {currency}</Text>
+      </HStack>
+      <Button
+        onClick={() => handleChoiceSelect({ label: 'Payment completed', next: node.next })}
+        colorScheme="green"
+        size="md"
+        mt={2}
+      >
+        Pay {amount} {currency}
+      </Button>
+      <Text fontSize="xs" color="gray.500" textAlign="center">
+        Secure payment processed by our payment provider
+      </Text>
+    </VStack>
+  );
+}
+
+export default PaymentInputNode

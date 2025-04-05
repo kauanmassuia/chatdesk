@@ -1,4 +1,4 @@
-import { Box, FormControl, FormLabel, Input, Textarea, useColorModeValue } from '@chakra-ui/react'
+import { Box, FormControl, FormLabel, Input, Textarea, useColorModeValue, HStack, VStack, Text, Button, FormErrorMessage } from '@chakra-ui/react'
 import BaseNode from '../BaseNode'
 import { IconType } from 'react-icons'
 
@@ -15,6 +15,18 @@ interface InputNodeProps {
     pattern?: string
     message?: string
   }
+}
+
+interface RenderInputNodeProps {
+  node: any;
+  inputValue: string;
+  setInputValue: (value: string) => void;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  handleInputSubmit: () => void;
+  inputType?: string;
+  placeholder?: string;
+  isInvalid?: boolean;
+  validationError?: string;
 }
 
 const InputNode = ({
@@ -66,6 +78,61 @@ const InputNode = ({
       </Box>
     </BaseNode>
   )
+}
+
+export function renderGenericInputNode({
+  node,
+  inputValue,
+  setInputValue,
+  handleKeyDown,
+  handleInputSubmit,
+  inputType = "text",
+  placeholder = "Type your answer...",
+}: RenderInputNodeProps) {
+  // Extract validation patterns from node content if available
+  const validationPattern = node.content.validation?.pattern || null;
+  const validationMessage = node.content.validation?.message || "Please enter a valid value";
+
+  // Check if the current input is valid
+  const isInvalid = validationPattern ?
+    !new RegExp(validationPattern).test(inputValue) && inputValue.length > 0 : false;
+
+  return (
+    <VStack spacing={3} align="stretch">
+      <Box>
+        <Text>{node.content.prompt}</Text>
+      </Box>
+      <FormControl isInvalid={isInvalid}>
+        <HStack>
+          <Input
+            type={inputType}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => {
+              // Only submit if valid or no validation
+              if (!isInvalid || !validationPattern) {
+                handleKeyDown(e);
+              }
+            }}
+            placeholder={placeholder}
+            pattern={validationPattern}
+            title={validationMessage}
+            flex="1"
+          />
+          <Button
+            onClick={handleInputSubmit}
+            colorScheme="blue"
+            isDisabled={isInvalid && !!inputValue}
+          >
+            Send
+          </Button>
+        </HStack>
+        {isInvalid && (
+          <FormErrorMessage>{validationMessage}</FormErrorMessage>
+        )}
+      </FormControl>
+    </VStack>
+  );
 }
 
 export default InputNode

@@ -2,6 +2,8 @@ import { memo } from 'react'
 import { Textarea, useColorModeValue } from '@chakra-ui/react'
 import { FiMessageSquare } from 'react-icons/fi'
 import BaseNode from './BaseNode'
+import { Box, Text } from '@chakra-ui/react';
+
 
 interface TextNodeProps {
   data: {
@@ -36,6 +38,14 @@ const TextNode = memo(({ data, selected }: TextNodeProps) => {
     </BaseNode>
   )
 })
+
+export function renderTextNode(node: any) {
+  return (
+    <Box>
+      <Text>{node.content.text}</Text>
+    </Box>
+  );
+}
 
 export function exportTextNode(node: any) {
   // node.data.text holds the text

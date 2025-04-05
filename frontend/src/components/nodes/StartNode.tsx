@@ -52,4 +52,9 @@ export function exportStartNode(node: any) {
   }
 }
 
+export function renderStartNode() {
+  // Start node is typically not rendered
+  return null;
+}
+
 export default StartNode

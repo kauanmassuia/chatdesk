@@ -41,6 +41,14 @@ const MessageNode = memo(({ data }: MessageNodeProps) => {
   )
 })
 
+export function renderMessageNode(node: any) {
+  return (
+    <Box>
+      <Text>{node.content.text || node.content.message || ''}</Text>
+    </Box>
+  );
+}
+
 MessageNode.displayName = 'MessageNode'
 
 export default MessageNode

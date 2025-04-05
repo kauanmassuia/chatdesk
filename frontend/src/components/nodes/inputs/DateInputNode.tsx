@@ -1,5 +1,6 @@
 import { BsCalendarDate } from 'react-icons/bs'
 import InputNode from './InputNode'
+import { Box, Text, Input, Button, VStack, HStack, FormControl } from '@chakra-ui/react';
 
 interface DateInputNodeProps {
   data: {
@@ -32,6 +33,34 @@ export function exportDateInputNode(node: any) {
       prompt: node.data?.prompt || '',
     },
   }
+}
+
+export function renderDateInputNode({ node, inputValue, setInputValue, handleInputSubmit }: any) {
+  // Date inputs need special handling for formatting and validation
+  return (
+    <VStack spacing={3} align="stretch">
+      <Box>
+        <Text>{node.content.prompt}</Text>
+      </Box>
+      <FormControl>
+        <HStack>
+          <Input
+            type="date"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            flex="1"
+          />
+          <Button
+            onClick={handleInputSubmit}
+            colorScheme="blue"
+            isDisabled={!inputValue}
+          >
+            Send
+          </Button>
+        </HStack>
+      </FormControl>
+    </VStack>
+  );
 }
 
 DateInputNode.displayName = 'DateInputNode'

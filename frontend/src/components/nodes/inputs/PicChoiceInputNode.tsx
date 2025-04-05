@@ -1,4 +1,4 @@
-import { Box, Button, HStack, IconButton, Image, Input, VStack, useColorModeValue } from '@chakra-ui/react'
+import { Box, Button, HStack, IconButton, Image, Input, VStack, useColorModeValue, Text, SimpleGrid } from '@chakra-ui/react'
 import { HiOutlinePhotograph } from 'react-icons/hi'
 import { BsPlus, BsTrash } from 'react-icons/bs'
 import BaseNode from '../BaseNode'
@@ -145,6 +145,41 @@ export function exportPicChoiceInputNode(node: any) {
       })),
     },
   }
+}
+
+export function renderPicChoiceInputNode({ node, handleChoiceSelect }: any) {
+  const choices = node.content.choices || [];
+  const columns = node.content.columns || 2; // Default to 2 columns
+
+  return (
+    <VStack spacing={3} align="stretch">
+      <Box>
+        <Text>{node.content.prompt}</Text>
+      </Box>
+      <SimpleGrid columns={columns} spacing={3}>
+        {choices.map((choice: any, idx: number) => (
+          <Button
+            key={idx}
+            onClick={() => handleChoiceSelect(choice)}
+            variant="outline"
+            height="auto"
+            padding={2}
+            display="flex"
+            flexDirection="column"
+          >
+            <Image
+              src={choice.imageUrl}
+              alt={choice.label}
+              maxHeight="80px"
+              objectFit="contain"
+              marginBottom={2}
+            />
+            <Text>{choice.label}</Text>
+          </Button>
+        ))}
+      </SimpleGrid>
+    </VStack>
+  );
 }
 
 PicChoiceInputNode.displayName = 'PicChoiceInputNode'

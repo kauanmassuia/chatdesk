@@ -1,5 +1,6 @@
 import { BsTelephone } from 'react-icons/bs'
 import InputNode from './InputNode'
+import { renderGenericInputNode } from './InputNode';
 
 interface PhoneInputNodeProps {
   data: {
@@ -35,6 +36,25 @@ export function exportPhoneInputNode(node: any) {
       }
     },
   }
+}
+
+export function renderPhoneInputNode(props: any) {
+  // Phone inputs often have specific format requirements
+  // If validation isn't already defined in the node, we'll add a default one
+  const phoneProps = { ...props };
+
+  if (!phoneProps.node.content.validation) {
+    phoneProps.node.content.validation = {
+      pattern: "^[0-9\\+\\-\\s\\(\\)]{8,20}$",
+      message: "Please enter a valid phone number"
+    };
+  }
+
+  return renderGenericInputNode({
+    ...phoneProps,
+    inputType: "tel",
+    placeholder: "Enter your phone number..."
+  });
 }
 
 PhoneInputNode.displayName = 'PhoneInputNode'

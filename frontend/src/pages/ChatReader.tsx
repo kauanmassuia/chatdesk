@@ -1,10 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Text, Input, Button, VStack, HStack } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 import '../styles/chat.css';
-import { getYoutubeEmbedUrl } from '../utils/getYoutubeEmbedUrl.ts';
+import { useParams } from 'react-router-dom';
 import { fetchPublishedFlow } from '../services/flowService';
 import { saveAnswer } from '../services/answerService';
-import { useParams } from 'react-router-dom';
+
+// Import node renderers
+import { renderTextNode } from '../components/nodes/TextNode';
+import { renderImageNode } from '../components/nodes/ImageNode';
+import { renderVideoNode } from '../components/nodes/VideoNode';
+import { renderAudioNode } from '../components/nodes/AudioNode';
+import { renderStartNode } from '../components/nodes/StartNode';
+import { renderMessageNode } from '../components/nodes/MessageNode';
+
+// Import input node renderers
+import { renderTextInputNode } from '../components/nodes/inputs/TextInputNode';
+import { renderDateInputNode } from '../components/nodes/inputs/DateInputNode';
+import { renderWebsiteInputNode } from '../components/nodes/inputs/WebsiteInputNode';
+import { renderPhoneInputNode } from '../components/nodes/inputs/PhoneInputNode';
+import { renderEmailInputNode } from '../components/nodes/inputs/EmailInputNode';
+import { renderNumberInputNode } from '../components/nodes/inputs/NumberInputNode';
+import { renderButtonsInputNode } from '../components/nodes/inputs/ButtonsInputNode';
+import { renderPicChoiceInputNode } from '../components/nodes/inputs/PicChoiceInputNode';
+import { renderWaitInputNode } from '../components/nodes/inputs/WaitInputNode';
+import { renderPaymentInputNode } from '../components/nodes/inputs/PaymentInputNode';
 
 interface FlowNode {
   id: string;
@@ -22,18 +41,11 @@ const interactiveTypes: string[] = [
   "input_wait",
   "input_buttons",
   "input_pic_choice",
-  "input_number", // ← Faltando aqui
+  "input_number",
+  "input_payment",
 ];
-const autoTypes: string[] = ["start", "text", "image", "video", "audio"];
 
-const inputTypeMapping: Record<string, string> = {
-  "input_text": "text",
-  "input_date": "date",
-  "input_website": "url",
-  "input_phone": "tel",
-  "input_email": "email",
-  "input_number": "number",
-};
+const autoTypes: string[] = ["start", "text", "image", "video", "audio", "message"];
 
 function isRightAligned(nodeType: string): boolean {
   return nodeType === "user";
@@ -45,6 +57,7 @@ const ChatReader: React.FC = () => {
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
   const [conversation, setConversation] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const [isInputValid, setIsInputValid] = useState(true);
   const chatHistoryRef = useRef<HTMLDivElement>(null);
 
   function getNodeById(flow: { nodes: FlowNode[] }, id: string | null): FlowNode | null {
@@ -78,10 +91,25 @@ const ChatReader: React.FC = () => {
     }
   }, [conversation]);
 
+  // Validate input based on current node type and validation rules
+  const validateInput = (value: string, node: FlowNode): boolean => {
+    if (!node || !node.content || !node.content.validation) return true;
+
+    const { pattern } = node.content.validation;
+    if (!pattern || !value) return true;
+
+    try {
+      const regex = new RegExp(pattern);
+      return regex.test(value);
+    } catch (e) {
+      console.error("Invalid regex pattern:", pattern);
+      return true; // If pattern is invalid, don't block submission
+    }
+  };
+
   useEffect(() => {
     if (!chatFlow || !currentNodeId) return;
     const node = getNodeById(chatFlow, currentNodeId);
-    console.log(chatFlow);
     if (!node) return;
 
     if (node.type === "input_wait") {
@@ -106,11 +134,30 @@ const ChatReader: React.FC = () => {
       if (!alreadyInHistory) {
         setConversation((prev) => [...prev, node]);
       }
+
+      // Reset input value and validation when showing a new input node
+      setInputValue("");
+      setIsInputValid(true);
     }
   }, [currentNodeId, conversation, chatFlow]);
 
+  // Update validation status whenever input changes
+  useEffect(() => {
+    if (!chatFlow || !currentNodeId) return;
+    const node = getNodeById(chatFlow, currentNodeId);
+    if (!node) return;
+
+    // Only validate if there's input and the node type requires validation
+    if (inputValue && interactiveTypes.includes(node.type)) {
+      setIsInputValid(validateInput(inputValue, node));
+    } else {
+      setIsInputValid(true);
+    }
+  }, [inputValue, currentNodeId, chatFlow]);
+
   function handleInputSubmit() {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || !isInputValid) return;
+
     const userBubble = {
       id: `user_${Date.now()}`,
       type: "user",
@@ -134,7 +181,7 @@ const ChatReader: React.FC = () => {
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && isInputValid && inputValue.trim()) {
       handleInputSubmit();
     }
   }
@@ -146,115 +193,75 @@ const ChatReader: React.FC = () => {
       content: { text: choice.label },
     };
     setConversation((prev) => [...prev, userBubble]);
+
+    // Save choice answer
+    if (custom_url && currentNodeId) {
+      const choiceValue = choice.value || choice.label;
+      saveAnswer(custom_url, { [currentNodeId]: choiceValue })
+        .catch((error) => console.error("Error saving choice:", error));
+    }
+
     setTimeout(() => {
       setCurrentNodeId(choice.next ?? null);
     }, 500);
   }
 
+  // Node renderer mapping function
   function renderNode(node: FlowNode) {
-    if (interactiveTypes.includes(node.type) && node.type !== "input_buttons" && node.type !== "input_pic_choice" && node.type !== "input_wait") {
-      const htmlInputType = inputTypeMapping[node.type] || "text";
-      return (
-        <VStack spacing={3} align="stretch">
-          <Box>
-            <Text>{node.content.prompt}</Text>
-          </Box>
-          <HStack>
-            <Input
-              type={htmlInputType}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type your answer..."
-              flex="1"
-            />
-            <Button onClick={handleInputSubmit} colorScheme="blue">
-              Send
-            </Button>
-          </HStack>
-        </VStack>
-      );
+    const props = {
+      node,
+      inputValue,
+      setInputValue,
+      handleKeyDown,
+      handleInputSubmit,
+      handleChoiceSelect,
+      isInvalid: !isInputValid
+    };
+
+    // Map node types to their respective renderer functions
+    switch (node.type) {
+      // Auto types
+      case "text":
+        return renderTextNode(node);
+      case "image":
+        return renderImageNode(node);
+      case "video":
+        return renderVideoNode(node);
+      case "audio":
+        return renderAudioNode(node);
+      case "start":
+        return renderStartNode();
+      case "message":
+        return renderMessageNode(node);
+      case "user":
+        return renderTextNode(node); // User messages are rendered as text
+
+      // Input types
+      case "input_text":
+        return renderTextInputNode(props);
+      case "input_date":
+        return renderDateInputNode(props);
+      case "input_website":
+        return renderWebsiteInputNode(props);
+      case "input_phone":
+        return renderPhoneInputNode(props);
+      case "input_email":
+        return renderEmailInputNode(props);
+      case "input_number":
+        return renderNumberInputNode(props);
+      case "input_buttons":
+        return renderButtonsInputNode(props);
+      case "input_pic_choice":
+        return renderPicChoiceInputNode(props);
+      case "input_wait":
+        return renderWaitInputNode(props);
+      case "input_payment":
+        return renderPaymentInputNode(props);
+
+      default:
+        // Fallback for unknown node types
+        return <Box>{node.content?.text || ""}</Box>;
     }
-    if (node.type === "input_buttons") {
-      return (
-        <VStack spacing={3} align="stretch">
-          <Box>
-            <Text>{node.content.prompt}</Text>
-          </Box>
-          <HStack spacing={3}>
-            {node.content.choices.map((choice: any, idx: number) => (
-              <Button key={idx} onClick={() => handleChoiceSelect(choice)} colorScheme="teal">
-                {choice.label}
-              </Button>
-            ))}
-          </HStack>
-        </VStack>
-      );
-    }
-    if (node.type === "input_pic_choice") {
-      return (
-        <VStack spacing={3} align="stretch">
-          <Box>
-            <Text>{node.content.prompt}</Text>
-          </Box>
-          <HStack spacing={4}>
-            {node.content.choices.map((choice: any, idx: number) => (
-              <Button key={idx} onClick={() => handleChoiceSelect(choice)} variant="outline">
-                <img
-                  src={choice.imageUrl}
-                  alt={choice.label}
-                  style={{ maxHeight: "50px", marginRight: "8px" }}
-                />
-                <span>{choice.label}</span>
-              </Button>
-            ))}
-          </HStack>
-        </VStack>
-      );
-    }
-    if (node.type === "input_wait") {
-      return null;
-    }
-    if (autoTypes.includes(node.type)) {
-      if (node.type === "text") {
-        return <Box><Text>{node.content.text}</Text></Box>;
-      }
-      if (node.type === "image") {
-        return (
-          <Box>
-            <img src={node.content.imageUrl} alt={node.content.alt} style={{ maxWidth: "250px" }} />
-          </Box>
-        );
-      }
-      if (node.type === "video") {
-        const embedUrl = getYoutubeEmbedUrl(node.content.videoUrl || node.content.url);
-        return (
-          <Box>
-            <iframe
-              src={embedUrl}
-              title="video"
-              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              style={{ width: "300px", height: "200px" }}
-            />
-          </Box>
-        );
-      }
-      if (node.type === "audio") {
-        return (
-          <Box>
-            <audio controls style={{ width: "300px" }}>
-              <source src={node.content.audioUrl} type="audio/mpeg" />
-              Your browser does not support the audio element.
-            </audio>
-          </Box>
-        );
-      }
-      if (node.type === "start") {
-        return null;
-      }
-    }
-    return <Box><Text>{node.content?.text || ""}</Text></Box>;
   }
 
   const currentNode = chatFlow ? getNodeById(chatFlow, currentNodeId) : null;
