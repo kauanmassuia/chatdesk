@@ -1,11 +1,14 @@
 import { MdOutlineNumbers } from 'react-icons/md'
 import InputNode from './InputNode'
 import { renderGenericInputNode } from './InputNode';
+import { exportBaseInputNodeData } from './InputNode';
 
 interface NumberInputNodeProps {
   data: {
     prompt: string  // Use prompt here instead of value
+    name?: string
     onChange: (field: string, value: string) => void
+    onNameChange?: (name: string) => void
   }
   selected: boolean
 }
@@ -20,7 +23,9 @@ const NumberInputNode = ({ data, selected }: NumberInputNodeProps) => {
       type="text"
       placeholder="Digite a pergunta para número..."
       value={data.prompt}
+      name={data.name}
       onChange={(value) => data.onChange('prompt', value)}
+      onNameChange={(name) => data.onNameChange && data.onNameChange(name)}
     />
   )
 }
@@ -30,6 +35,7 @@ export function exportNumberInputNode(node: any) {
   return {
     type: 'input_number',
     content: {
+      ...exportBaseInputNodeData(node),
       prompt: node.data?.prompt || '',
       validation: {
         pattern: '^[0-9]+$',

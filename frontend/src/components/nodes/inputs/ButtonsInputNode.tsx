@@ -2,11 +2,14 @@ import { Box, Button, HStack, IconButton, Input, VStack, useColorModeValue, Form
 import { Handle, Position } from 'reactflow'
 import { BsGrid, BsPlus, BsTrash } from 'react-icons/bs'
 import BaseNode from '../BaseNode'
+import { exportBaseInputNodeData } from './InputNode';
 
 interface ButtonsInputNodeData {
   buttons: string[]
   prompt?: string
+  name?: string
   onChange: (field: string, value: any) => void
+  onNameChange?: (name: string) => void
 }
 
 interface ButtonsInputNodeProps {
@@ -35,7 +38,7 @@ const ButtonsInputNode = ({ data, selected }: ButtonsInputNodeProps) => {
   }
 
   return (
-    <BaseNode icon={BsGrid} label="Buttons Input" selected={selected}>
+    <BaseNode icon={BsGrid} label="Buttons Input" selected={selected} name={data.name} onNameChange={(name) => data.onNameChange && data.onNameChange(name)}>
       <Box p={2}>
         <VStack spacing={3} align="stretch">
           {/* Prompt input */}
@@ -104,6 +107,7 @@ export function exportButtonsInputNode(node: any) {
   return {
     type: 'input_buttons',
     content: {
+      ...exportBaseInputNodeData(node),
       prompt: node.data?.prompt || '',
       choices: (node.data?.buttons || []).map((btn: string) => ({
         label: btn,

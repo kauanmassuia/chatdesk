@@ -149,7 +149,8 @@ export function renderGenericInputNode({
 export function exportBaseInputNodeData(node: any) {
   return {
     name: node.data?.name || '',
-    prompt: node.data?.value || '',
+    // Some nodes use 'prompt' and others use 'value' - handle both cases
+    prompt: node.data?.prompt || node.data?.value || '',
     validation: node.data?.validation || null,
   };
 }

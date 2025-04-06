@@ -1,13 +1,16 @@
 import { Box, FormControl, FormLabel, HStack, Input, Select, VStack, useColorModeValue, Text, Button, Divider } from '@chakra-ui/react'
 import { MdPayment } from 'react-icons/md'
 import BaseNode from '../BaseNode'
+import { exportBaseInputNodeData } from './InputNode'
 
 interface PaymentInputNodeProps {
   data: {
     amount: string
     currency: string
     description: string
+    name?: string
     onChange: (field: string, value: string) => void
+    onNameChange?: (name: string) => void
   }
   selected: boolean
 }
@@ -17,7 +20,13 @@ const PaymentInputNode = ({ data, selected }: PaymentInputNodeProps) => {
   const borderColor = useColorModeValue('gray.200', 'gray.600')
 
   return (
-    <BaseNode icon={MdPayment} label="Payment Input" selected={selected}>
+    <BaseNode
+      icon={MdPayment}
+      label="Payment Input"
+      selected={selected}
+      name={data.name}
+      onNameChange={(name) => data.onNameChange && data.onNameChange(name)}
+    >
       <Box p={2}>
         <VStack spacing={3} align="stretch">
           <HStack>
@@ -94,6 +103,20 @@ export function renderPaymentInputNode({ node, handleChoiceSelect }: any) {
       </Text>
     </VStack>
   );
+}
+
+// Export function for the chat UI
+export function exportPaymentInputNode(node: any) {
+  return {
+    type: 'input_payment',
+    content: {
+      ...exportBaseInputNodeData(node),
+      prompt: node.data?.description || 'Payment Required',
+      amount: node.data?.amount || '0',
+      currency: node.data?.currency || 'USD',
+      description: node.data?.description || '',
+    },
+  }
 }
 
 export default PaymentInputNode

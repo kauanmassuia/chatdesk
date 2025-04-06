@@ -1,11 +1,14 @@
 import { BsCalendarDate } from 'react-icons/bs'
 import InputNode from './InputNode'
 import { Box, Text, Input, Button, VStack, HStack, FormControl } from '@chakra-ui/react';
+import { exportBaseInputNodeData } from './InputNode';
 
 interface DateInputNodeProps {
   data: {
     prompt: string // prompt text for what the user sees in the chat UI
+    name?: string
     onChange: (field: string, value: string) => void
+    onNameChange?: (name: string) => void
   }
   selected: boolean
 }
@@ -19,7 +22,9 @@ const DateInputNode = ({ data, selected }: DateInputNodeProps) => {
       selected={selected}
       placeholder="Digite a pergunta para data..."
       value={data.prompt}
+      name={data.name}
       onChange={(value) => data.onChange('prompt', value)}
+      onNameChange={(name) => data.onNameChange && data.onNameChange(name)}
       type="text" // Use text input in the editor so you can type the prompt.
     />
   )
@@ -30,6 +35,7 @@ export function exportDateInputNode(node: any) {
   return {
     type: 'input_date',
     content: {
+      ...exportBaseInputNodeData(node),
       prompt: node.data?.prompt || '',
     },
   }

@@ -25,17 +25,27 @@ import {
   Tooltip,
   Tag,
   HStack,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
+  Switch,
+  Input,
+  EditableInput,
+  Editable,
+  EditablePreview,
+  EditableTextarea,
+  EditableInputProps,
+  EditableProps,
 } from '@chakra-ui/react';
-import { FaTrash, FaDownload, FaLock, FaCrown, FaChartLine } from 'react-icons/fa';
+import { FaEyeSlash, FaEye, FaDownload, FaLock, FaCrown, FaChartLine, FaEdit } from 'react-icons/fa';
 import { getAnswers, AnswerData, AnswersResponse } from '../services/answerService';
+import { getFlow, updateFlow } from '../services/flowService';
+
+interface Column {
+  id: string;
+  name: string;
+  originalName?: string;
+  nodeId?: string;
+  nodeType?: string;
+  getValue: (row: AnswerData) => string | number | boolean;
+}
 
 const Results: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -46,18 +56,28 @@ const Results: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [hiddenRows, setHiddenRows] = useState<Record<string, boolean>>({});
+  const [showHidden, setShowHidden] = useState<boolean>(false);
+  const [flow, setFlow] = useState<any>(null);
+  const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
   const toast = useToast();
 
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
-  const headerBg = useColorModeValue('gray.50', 'gray.700');
-  const lockedRowBg = useColorModeValue('gray.100', 'gray.800');
-  const upgradeButtonBg = useColorModeValue('yellow.400', 'yellow.500');
+  const borderColor = useColorModeValue('gray.100', 'gray.700');
+  const headerBg = useColorModeValue('white', 'gray.800');
+  const lockedRowBg = useColorModeValue('gray.50', 'gray.800');
+  const hiddenRowBg = useColorModeValue('gray.50', 'gray.900');
+  const hoverBg = useColorModeValue('gray.50', 'gray.700');
 
+  // Fetch flow and answers data
   useEffect(() => {
-    const fetchAnswers = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
+        // Fetch flow data
+        const flowData = await getFlow(uid);
+        setFlow(flowData);
+
+        // Fetch answers
         const apiData: AnswersResponse = await getAnswers();
         const filteredData = {
           ...apiData,
@@ -66,52 +86,95 @@ const Results: React.FC = () => {
           )
         };
         setData(filteredData);
+
+        // Initialize hidden rows from localStorage if available
+        const savedHiddenRows = localStorage.getItem(`hidden_rows_${uid}`);
+        if (savedHiddenRows) {
+          setHiddenRows(JSON.parse(savedHiddenRows));
+        }
       } catch (err) {
-        console.error('Error fetching answers:', err);
-        setError('Failed to load answers. Please try again later.');
+        console.error('Error fetching data:', err);
+        setError('Failed to load data. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAnswers();
+    fetchData();
   }, [uid]);
 
-  // Extract columns from answer_data with proper naming
+  // Helper function to find a node by ID in flow content
+  const findNodeById = (nodeId: string) => {
+    if (!flow || !flow.content || !flow.content.nodes) return null;
+
+    return flow.content.nodes.find((node: any) => node.id === nodeId);
+  };
+
+  // Extract columns from answer_data with proper naming using flow data
   const columns = useMemo(() => {
-    if (!data?.answers.length) return [];
+    if (!data?.answers.length || !flow?.content?.nodes) return [];
 
     const allKeys = new Set<string>();
-    const nodeNames = new Map<string, string>();
+    const nodeInfo = new Map<string, { name: string, nodeId: string, type: string }>();
 
-    // First pass: collect all possible keys and their corresponding node names
+    // First pass: collect all possible keys from answers
     data.answers.forEach(answer => {
       if (answer.answer_data && typeof answer.answer_data === 'object') {
-        Object.entries(answer.answer_data).forEach(([key, value]) => {
+        Object.keys(answer.answer_data).forEach(key => {
           allKeys.add(key);
+        });
+      }
+    });
 
-          // If this field has a 'name' property, store it for this key
-          if (typeof value === 'object' && value !== null && 'name' in value) {
-            nodeNames.set(key, value.name as string);
-          }
+    // Map node IDs to names using flow data
+    flow.content.nodes.forEach((node: any) => {
+      if (node.id && allKeys.has(node.id)) {
+        const nodeName = node.content?.name || node.id;
+        nodeInfo.set(node.id, {
+          name: nodeName,
+          nodeId: node.id,
+          type: node.type || 'unknown'
         });
       }
     });
 
     // Generate columns with proper display names
-    return Array.from(allKeys).map(key => ({
-      id: key,
-      name: nodeNames.get(key) || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
-      getValue: (row: AnswerData) => {
-        const value = row.answer_data[key];
-        if (typeof value === 'object' && value !== null) {
-          // If the value is an object, use its main value property
-          return value.value || value.text || JSON.stringify(value);
+    return Array.from(allKeys).map(key => {
+      const nodeData = nodeInfo.get(key);
+      return {
+        id: key,
+        name: nodeData?.name || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
+        originalName: nodeData?.name,
+        nodeId: key,
+        nodeType: nodeData?.type,
+        getValue: (row: AnswerData) => {
+          const value = row.answer_data[key];
+
+          // Handle different value types
+          if (value === null || value === undefined) {
+            return '';
+          }
+
+          if (typeof value === 'object') {
+            // First try to get value or text property if available
+            if ('value' in value) return value.value;
+            if ('text' in value) return value.text;
+
+            // Handle arrays specially (e.g., for multiple choice answers)
+            if (Array.isArray(value)) {
+              return value.join(', ');
+            }
+
+            // Fall back to JSON string representation
+            return JSON.stringify(value);
+          }
+
+          // For simple values, return as is
+          return value;
         }
-        return value || '';
-      }
-    }));
-  }, [data?.answers]);
+      };
+    });
+  }, [data?.answers, flow]);
 
   // Add created_at column
   const allColumns = useMemo(() => {
@@ -129,12 +192,14 @@ const Results: React.FC = () => {
   }, [columns]);
 
   const toggleSelectAll = () => {
-    if (Object.keys(selectedRows).length === (data?.answers.length || 0)) {
+    if (Object.keys(selectedRows).length === visibleAnswers.length) {
       setSelectedRows({});
     } else {
       const newSelectedRows: Record<string, boolean> = {};
-      data?.answers.forEach((answer, index) => {
-        newSelectedRows[index] = true;
+      visibleAnswers.forEach((answer, index) => {
+        if (!isRowLocked(index)) {
+          newSelectedRows[index] = true;
+        }
       });
       setSelectedRows(newSelectedRows);
     }
@@ -147,7 +212,115 @@ const Results: React.FC = () => {
     }));
   };
 
+  const toggleHideRow = (index: number) => {
+    const indexKey = index.toString();
+    const newHiddenRows = {
+      ...hiddenRows,
+      [indexKey]: !hiddenRows[indexKey]
+    };
+
+    setHiddenRows(newHiddenRows);
+
+    // Save to localStorage
+    localStorage.setItem(`hidden_rows_${uid}`, JSON.stringify(newHiddenRows));
+
+    // Clear selection for this row
+    if (selectedRows[index]) {
+      const newSelectedRows = { ...selectedRows };
+      delete newSelectedRows[index];
+      setSelectedRows(newSelectedRows);
+    }
+
+    toast({
+      title: newHiddenRows[indexKey] ? "Answer hidden" : "Answer unhidden",
+      status: "success",
+      duration: 2000,
+      isClosable: true,
+    });
+  };
+
+  const isRowHidden = (index: number): boolean => !!hiddenRows[index.toString()];
+  const isRowLocked = (index: number): boolean => !!(data && index >= (data.answer_limit || 0));
+
+  const visibleAnswers = useMemo(() => {
+    if (!data?.answers) return [];
+
+    // Filter answers based on hidden status if not showing hidden
+    const filtered = data.answers.filter((_, index) =>
+      showHidden || !isRowHidden(index)
+    );
+
+    // Sort to put hidden answers at the end
+    return [...filtered].sort((a, b) => {
+      const indexA = data.answers.indexOf(a);
+      const indexB = data.answers.indexOf(b);
+
+      if (isRowHidden(indexA) && !isRowHidden(indexB)) return 1;
+      if (!isRowHidden(indexA) && isRowHidden(indexB)) return -1;
+      return 0;
+    });
+  }, [data?.answers, hiddenRows, showHidden]);
+
   const selectedCount = Object.values(selectedRows).filter(Boolean).length;
+
+  // Handle column name edit
+  const handleColumnNameEdit = async (columnId: string, newName: string) => {
+    if (!flow || !columnId || columnId === 'created_at') return;
+
+    // Don't update if the name hasn't changed
+    const column = allColumns.find(col => col.id === columnId);
+    if (column?.name === newName) return;
+
+    try {
+      // Make a deep copy of the flow content to avoid direct state mutation
+      const updatedContent = JSON.parse(JSON.stringify(flow.content));
+      const nodeIndex = updatedContent.nodes.findIndex((node: any) => node.id === columnId);
+
+      if (nodeIndex >= 0) {
+        // Update the node name in content
+        if (!updatedContent.nodes[nodeIndex].content) {
+          updatedContent.nodes[nodeIndex].content = {};
+        }
+        updatedContent.nodes[nodeIndex].content.name = newName;
+
+        // Update flow with new content and set updatePublished to true
+        await updateFlow(uid, updatedContent, true);
+
+        // Update local flow state
+        setFlow({
+          ...flow,
+          content: updatedContent
+        });
+
+        // Update columns without fetching again
+        const updatedColumns = [...columns];
+        const columnIndex = updatedColumns.findIndex(col => col.id === columnId);
+        if (columnIndex >= 0) {
+          updatedColumns[columnIndex] = {
+            ...updatedColumns[columnIndex],
+            name: newName
+          };
+        }
+
+        toast({
+          title: "Column name updated",
+          description: "The column name has been updated successfully.",
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      console.error('Error updating column name:', error);
+      toast({
+        title: "Failed to update column name",
+        description: "There was an error updating the column name. Please try again.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
 
   const exportCSV = () => {
     if (selectedCount === 0) {
@@ -171,9 +344,9 @@ const Results: React.FC = () => {
     let csvContent = 'data:text/csv;charset=utf-8,' +
       exportColumns.map(col => `"${col.name}"`).join(',') + '\n';
 
-    // Add data rows
+    // Add data rows - only export non-hidden, non-locked rows
     data?.answers.forEach((row, index) => {
-      if (selectedRows[index]) {
+      if (selectedRows[index] && !isRowHidden(index) && !isRowLocked(index)) {
         const exportRow = exportColumns.map(col => {
           const column = allColumns.find(c => c.id === col.id);
           const value = column ? column.getValue(row) : '';
@@ -202,45 +375,18 @@ const Results: React.FC = () => {
     });
   };
 
-  const handleDelete = () => {
-    if (selectedCount === 0) {
-      toast({
-        title: "No rows selected",
-        description: "Please select at least one row to delete",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-    onOpen();
-  };
-
-  const confirmDelete = () => {
-    // This would connect to your backend delete API
-    toast({
-      title: "Deletion successful",
-      description: `${selectedCount} rows have been deleted`,
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
-    setSelectedRows({});
-    onClose();
-  };
-
   if (loading) {
     return (
-      <Box p={6} textAlign="center">
+      <Box p={5} textAlign="center">
         <Spinner size="xl" />
-        <Text mt={4}>Loading answers...</Text>
+        <Text mt={3}>Loading answers...</Text>
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Box p={6}>
+      <Box p={5}>
         <Alert status="error" borderRadius="md">
           <AlertIcon />
           <AlertTitle mr={2}>Error</AlertTitle>
@@ -252,8 +398,8 @@ const Results: React.FC = () => {
 
   if (!data?.answers.length) {
     return (
-      <Box p={6}>
-        <Heading mb={4}>Flow Results</Heading>
+      <Box p={5}>
+        <Heading mb={4} size="md">Flow Results</Heading>
         <Alert status="info" borderRadius="md">
           <AlertIcon />
           <AlertTitle mr={2}>No answers yet</AlertTitle>
@@ -270,12 +416,15 @@ const Results: React.FC = () => {
   const overLimitCount = data.over_limit_count;
   const isOverLimit = overLimitCount > 0;
 
+  // Count hidden answers
+  const hiddenAnswersCount = Object.values(hiddenRows).filter(Boolean).length;
+
   return (
-    <Box p={6}>
-      <Flex justify="space-between" align="center" mb={6}>
-        <Heading size="lg">Flow Results</Heading>
+    <Box p={5}>
+      <Flex justify="space-between" align="center" mb={4}>
+        <Heading size="md">Flow Results</Heading>
         <HStack>
-          <Tag colorScheme="blue" size="lg">
+          <Tag colorScheme="blue" size="md">
             <HStack spacing={1}>
               <FaChartLine />
               <Text>{data.answers.length} Answers</Text>
@@ -285,145 +434,175 @@ const Results: React.FC = () => {
       </Flex>
 
       {isOverLimit && (
-        <Alert
-          status="warning"
-          variant="solid"
-          mb={6}
-          borderRadius="md"
-          bg={upgradeButtonBg}
-        >
-          <Flex width="100%" justify="space-between" align="center">
-            <Flex align="center">
-              <AlertIcon color="yellow.800" />
-              <Box>
-                <AlertTitle color="yellow.900">
-                  {overLimitCount} answers are locked
-                </AlertTitle>
-                <AlertDescription color="yellow.900">
-                  You've reached your monthly limit of {answerLimit} answers. Upgrade your plan to unlock all {totalAnswers} answers.
-                </AlertDescription>
-              </Box>
-            </Flex>
-            <Button
-              rightIcon={<FaCrown />}
-              bg="white"
-              color="yellow.800"
-              _hover={{ bg: "gray.100" }}
-              as={Link}
-              to="/settings/subscription"
-            >
-              Upgrade Now
-            </Button>
-          </Flex>
-        </Alert>
-      )}
-
-      {selectedCount > 0 && (
         <Flex
-          align="center"
           justify="space-between"
+          align="center"
           mb={4}
           p={3}
-          bg={headerBg}
           borderRadius="md"
+          bg="blue.50"
+          color="blue.800"
           borderWidth="1px"
-          borderColor={borderColor}
+          borderColor="blue.100"
         >
-          <Text fontWeight="medium">
-            {selectedCount} row{selectedCount !== 1 ? 's' : ''} selected
+          <Text fontSize="sm">
+            <FaLock size="12px" style={{ display: 'inline', marginRight: '8px' }} />
+            You've reached your plan limit. {overLimitCount} answers are locked.
           </Text>
-          <Flex gap={2}>
-            <Tooltip label="Export selected rows to CSV">
-              <IconButton
-                aria-label="Download selected rows"
-                icon={<FaDownload />}
-                onClick={exportCSV}
-                variant="outline"
-              />
-            </Tooltip>
-            <Tooltip label="Delete selected rows">
-              <IconButton
-                aria-label="Delete selected rows"
-                icon={<FaTrash />}
-                onClick={handleDelete}
-                colorScheme="red"
-                variant="outline"
-              />
-            </Tooltip>
-          </Flex>
+          <Button
+            size="sm"
+            rightIcon={<FaCrown />}
+            colorScheme="blue"
+            variant="outline"
+            as={Link}
+            to="/settings/subscription"
+          >
+            Upgrade
+          </Button>
         </Flex>
       )}
 
-      <Box overflowX="auto" borderWidth="1px" borderRadius="lg" borderColor={borderColor}>
+      <Flex justifyContent="space-between" alignItems="center" mb={3}>
+        {selectedCount > 0 && (
+          <HStack spacing={2}>
+            <Text fontSize="sm" fontWeight="medium">
+              {selectedCount} selected
+            </Text>
+            <Tooltip label="Export selected rows to CSV">
+              <IconButton
+                size="sm"
+                aria-label="Export selected rows"
+                icon={<FaDownload />}
+                onClick={exportCSV}
+                variant="ghost"
+              />
+            </Tooltip>
+          </HStack>
+        )}
+
+        {/* Pushed to the right side */}
+        <HStack ml="auto" spacing={2}>
+          <Text fontSize="sm">{hiddenAnswersCount > 0 ? `${hiddenAnswersCount} hidden` : ''}</Text>
+          <Flex alignItems="center">
+            <Text fontSize="sm" mr={2}>Show hidden</Text>
+            <Switch
+              size="sm"
+              isChecked={showHidden}
+              onChange={(e) => setShowHidden(e.target.checked)}
+            />
+          </Flex>
+        </HStack>
+      </Flex>
+
+      <Box
+        overflowX="auto"
+        borderWidth="1px"
+        borderRadius="md"
+        borderColor={borderColor}
+        boxShadow="sm"
+      >
         <Table variant="simple" size="sm">
           <Thead bg={headerBg}>
             <Tr>
-              <Th width="40px">
+              <Th width="40px" px={2}>
                 <Checkbox
                   isChecked={
                     Object.keys(selectedRows).length > 0 &&
-                    Object.keys(selectedRows).length === data.answers.length
+                    Object.keys(selectedRows).length === visibleAnswers.filter((_, i) => {
+                      const index = data.answers.indexOf(_);
+                      return !isRowLocked(index);
+                    }).length
                   }
                   onChange={toggleSelectAll}
+                  size="sm"
                 />
               </Th>
               {allColumns.map(column => (
-                <Th key={column.id}>{column.name}</Th>
+                <Th key={column.id} fontSize="xs" py={3} px={3}>
+                  <Flex alignItems="center">
+                    {column.id === 'created_at' ? (
+                      column.name
+                    ) : (
+                      <Editable
+                        defaultValue={column.name}
+                        onSubmit={(nextValue) => handleColumnNameEdit(column.id, nextValue)}
+                        display="flex"
+                        alignItems="center"
+                        width="100%"
+                      >
+                        <EditablePreview />
+                        <EditableInput minW="100px" />
+                        <Tooltip label="Edit column name">
+                          <IconButton
+                            aria-label="Edit column name"
+                            icon={<FaEdit />}
+                            size="xs"
+                            variant="ghost"
+                            ml={1}
+                            onClick={() => setEditingColumnId(column.id)}
+                          />
+                        </Tooltip>
+                      </Editable>
+                    )}
+                  </Flex>
+                </Th>
               ))}
+              <Th width="50px" px={2}></Th>
             </Tr>
           </Thead>
           <Tbody>
-            {data.answers.map((row, rowIndex) => (
-              <Tr
-                key={row.id || rowIndex}
-                _hover={{ bg: "gray.50" }}
-                bg={rowIndex >= answerLimit ? lockedRowBg : undefined}
-              >
-                <Td>
-                  <Checkbox
-                    isChecked={!!selectedRows[rowIndex]}
-                    onChange={() => toggleSelectRow(rowIndex)}
-                    isDisabled={rowIndex >= answerLimit}
-                  />
-                </Td>
-                {allColumns.map(column => (
-                  <Td key={column.id}>
-                    {rowIndex >= answerLimit ? (
-                      <Flex align="center" opacity={0.5}>
-                        <FaLock size="12px" style={{ marginRight: '8px' }} />
-                        <Text as="span">Locked</Text>
-                      </Flex>
-                    ) : (
-                      column.getValue(row)
-                    )}
+            {data.answers.map((row, rowIndex) => {
+              const isHidden = isRowHidden(rowIndex);
+              const isLocked = isRowLocked(rowIndex);
+
+              // Skip if hidden and not showing hidden
+              if (isHidden && !showHidden) return null;
+
+              return (
+                <Tr
+                  key={row.id || rowIndex}
+                  _hover={{ bg: hoverBg }}
+                  bg={isHidden ? hiddenRowBg : isLocked ? lockedRowBg : undefined}
+                  opacity={isHidden ? 0.7 : 1}
+                >
+                  <Td px={2}>
+                    <Checkbox
+                      isChecked={!!selectedRows[rowIndex]}
+                      onChange={() => toggleSelectRow(rowIndex)}
+                      isDisabled={isLocked || isHidden}
+                      size="sm"
+                    />
                   </Td>
-                ))}
-              </Tr>
-            ))}
+                  {allColumns.map(column => (
+                    <Td key={column.id} py={2} px={3} fontSize="sm">
+                      {isLocked ? (
+                        <Flex align="center" opacity={0.5}>
+                          <FaLock size="10px" style={{ marginRight: '6px' }} />
+                          <Text as="span" fontSize="xs">Locked</Text>
+                        </Flex>
+                      ) : (
+                        <Box maxW="250px" overflow="hidden" textOverflow="ellipsis">
+                          {column.getValue(row)}
+                        </Box>
+                      )}
+                    </Td>
+                  ))}
+                  <Td px={2}>
+                    <IconButton
+                      aria-label={isHidden ? "Unhide row" : "Hide row"}
+                      icon={isHidden ? <FaEye size="14px" /> : <FaEyeSlash size="14px" />}
+                      onClick={() => toggleHideRow(rowIndex)}
+                      variant="ghost"
+                      size="xs"
+                      isDisabled={isLocked}
+                    />
+                  </Td>
+                </Tr>
+              );
+            })}
           </Tbody>
         </Table>
       </Box>
-
-      {/* Delete confirmation modal */}
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Confirm Deletion</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            Are you sure you want to delete {selectedCount} selected row{selectedCount !== 1 ? 's' : ''}?
-            This action cannot be undone.
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={onClose}>
-              Cancel
-            </Button>
-            <Button colorScheme="red" onClick={confirmDelete}>
-              Delete
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
     </Box>
   );
 };

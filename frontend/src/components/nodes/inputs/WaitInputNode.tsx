@@ -1,11 +1,14 @@
 import { BsClock } from 'react-icons/bs'
 import InputNode from './InputNode'
 import { Box, Text, Spinner, VStack } from '@chakra-ui/react';
+import { exportBaseInputNodeData } from './InputNode';
 
 interface WaitInputNodeProps {
   data: {
     value: string  // The wait time in seconds
+    name?: string
     onChange: (field: string, value: string) => void
+    onNameChange?: (name: string) => void
   }
   selected: boolean
 }
@@ -18,7 +21,9 @@ const WaitInputNode = ({ data, selected }: WaitInputNodeProps) => {
       selected={selected}
       type="number"  // Type number since we're specifying a time in seconds
       value={data.value}
+      name={data.name}
       onChange={(value) => data.onChange('value', value)}  // Update the value (seconds)
+      onNameChange={(name) => data.onNameChange && data.onNameChange(name)}
     />
   )
 }
@@ -28,6 +33,7 @@ export function exportWaitInputNode(node: any) {
   return {
     type: 'input_wait',  // Type for wait node
     content: {
+      ...exportBaseInputNodeData(node),
       waitTime: parseInt(node.data?.value || '0', 10),  // Convert to integer (seconds)
     },
   }

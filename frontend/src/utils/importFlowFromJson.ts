@@ -10,7 +10,8 @@ export function importFlowFromJson(flowJson: any): { nodes: Node[], edges: Edge[
         prompt: node.content.prompt || '',
         buttons: Array.isArray(node.content.choices)
           ? node.content.choices.map((choice: any) => choice.label)
-          : []
+          : [],
+        name: node.content.name || '',
       };
     }
 
@@ -19,6 +20,8 @@ export function importFlowFromJson(flowJson: any): { nodes: Node[], edges: Edge[
       if (data.value === undefined || data.value === null) {
         data.value = data.prompt || '';
       }
+      // Preserve name
+      data.name = node.content.name || '';
     }
 
     // Rehydrate wait input nodes: if value is missing, use waitTime (converted to string) as the value.
@@ -26,6 +29,23 @@ export function importFlowFromJson(flowJson: any): { nodes: Node[], edges: Edge[
       if (data.value === undefined || data.value === null) {
         data.value = data.waitTime !== undefined ? data.waitTime.toString() : '';
       }
+      // Preserve name
+      data.name = node.content.name || '';
+    }
+
+    // Handle picture choice nodes
+    if (node.type === 'input_pic_choice' && data) {
+      data.name = node.content.name || '';
+    }
+
+    // Handle payment nodes
+    if (node.type === 'input_payment' && data) {
+      data.name = node.content.name || '';
+    }
+
+    // Handle all other input nodes to ensure name is preserved
+    if (node.type.startsWith('input_') && data && !data.name) {
+      data.name = node.content.name || '';
     }
 
     const newType = node.type;

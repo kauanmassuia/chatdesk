@@ -28,6 +28,13 @@ module Api
 
       # PATCH/PUT /api/v1/flows/:id
       def update
+        # If update_published is true and content is being updated,
+        # also update published_content
+        if params[:update_published] && params[:content].present? && @flow.published
+          @flow.published_content = params[:content]
+          @flow.content = params[:content]
+        end
+
         if @flow.update(flow_params)
           render json: @flow
         else

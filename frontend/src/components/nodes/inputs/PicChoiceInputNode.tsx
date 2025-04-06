@@ -3,6 +3,7 @@ import { HiOutlinePhotograph } from 'react-icons/hi'
 import { BsPlus, BsTrash } from 'react-icons/bs'
 import BaseNode from '../BaseNode'
 import { Handle, Position } from 'reactflow'
+import { exportBaseInputNodeData } from './InputNode';
 
 interface PicChoice {
   imageUrl: string
@@ -13,7 +14,9 @@ interface PicChoiceInputNodeProps {
   data: {
     prompt: string  // Prompt for the user
     choices: PicChoice[]
+    name?: string
     onChange: (field: string, value: any) => void
+    onNameChange?: (name: string) => void
   }
   selected: boolean
 }
@@ -39,7 +42,7 @@ const PicChoiceInputNode = ({ data, selected }: PicChoiceInputNodeProps) => {
   const borderColor = useColorModeValue('gray.200', 'gray.600')
 
   return (
-    <BaseNode icon={HiOutlinePhotograph} label="Picture Choice" selected={selected}>
+    <BaseNode icon={HiOutlinePhotograph} label="Picture Choice" selected={selected} name={data.name} onNameChange={(name) => data.onNameChange && data.onNameChange(name)}>
       <Box p={2}>
         <VStack spacing={4} align="stretch">
           {/* Prompt input */}
@@ -137,6 +140,7 @@ export function exportPicChoiceInputNode(node: any) {
   return {
     type: 'input_pic_choice',  // This is how the chat UI will know it's a picture choice input
     content: {
+      ...exportBaseInputNodeData(node),
       prompt: node.data?.prompt || '',
       choices: (node.data?.choices || []).map((choice: PicChoice) => ({
         label: choice.label,
