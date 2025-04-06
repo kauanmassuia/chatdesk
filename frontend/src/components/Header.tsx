@@ -19,8 +19,8 @@ import { RiTestTubeLine, RiUploadCloudLine } from 'react-icons/ri';
 import { useFlowStore } from '../store/flowStore';
 import { exportFlowAsJson } from '../utils/exportFlowAsJson';
 import ImportFlowModal from './modal/ImportFlowModal';
-import Publish from './buttons/Publish'; // imported new Publish component
-import { useNavigate } from 'react-router-dom';
+import Publish from './buttons/Publish';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface HeaderProps {
   flowId: string | null;
@@ -30,6 +30,12 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
   const { nodes, edges } = useFlowStore();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determine current page
+  const isResults = location.search.includes('/results');
+  const isPublished = location.search.includes('/published');
+  const isEditor = !isResults && !isPublished;
 
   const handleExport = () => {
     const flowJson = exportFlowAsJson(nodes, edges);
@@ -41,6 +47,22 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  };
+
+  const navigateToPage = (page: 'editor' | 'results' | 'published') => {
+    if (!flowId) return;
+
+    switch (page) {
+      case 'editor':
+        navigate(`/editor?flow_id=${flowId}`);
+        break;
+      case 'results':
+        navigate(`/editor?flow_id=${flowId}/results`);
+        break;
+      case 'published':
+        navigate(`/editor?flow_id=${flowId}/published`);
+        break;
+    }
   };
 
   const borderColor = useColorModeValue('gray.200', 'gray.700');
@@ -70,15 +92,14 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
               icon={<FiChevronLeft />}
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/dashboard')} // Redirecionando para /dashboard
-              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave e texto cinza
-              _active={{ bg: '#ff9800', color: 'white' }} // Fundo laranja quando ativo
+              onClick={() => navigate('/dashboard')}
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }}
+              _active={{ bg: '#ff9800', color: 'white' }}
               transition="all 0.3s ease"
             />
-            
-            {/* Funnel Name (Hypothetical) */}
+
             <Text fontSize="sm" fontWeight="semibold" color="gray.600">
-              Funil de Vendas {/* Placeholder name */}
+              Funil de Vendas
             </Text>
 
             <IconButton
@@ -86,9 +107,9 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
               icon={<FiHelpCircle />}
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/docs')} // Redirecionando para /docs
-              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave e texto cinza
-              _active={{ bg: '#ff9800', color: 'white' }} // Fundo laranja quando ativo
+              onClick={() => navigate('/docs')}
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }}
+              _active={{ bg: '#ff9800', color: 'white' }}
               transition="all 0.3s ease"
             />
           </HStack>
@@ -97,57 +118,60 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
           <HStack spacing={6} flex={1} justify="center" display={{ base: 'none', md: 'flex' }}>
             <Button
               size="sm"
-              variant="outline" // Botão com fundo transparente
-              color="#6c757d" // Texto cinza
-              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave
+              variant="outline"
+              color="#6c757d"
+              isActive={isEditor}
+              onClick={() => navigateToPage('editor')}
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }}
               _active={{
                 bg: 'white',
                 color: '#ff9800',
-                border: '1px solid #ff9800' // Borda laranja quando selecionado
-              }} // Seleção com fundo branco e borda laranja
+                border: '1px solid #ff9800'
+              }}
               transition="all 0.3s ease"
             >
               Flow
             </Button>
             <Button
               size="sm"
-              variant="outline" // Botão com fundo transparente
-              color="#6c757d" // Texto cinza
-              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave
+              variant="outline"
+              color="#6c757d"
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }}
               _active={{
                 bg: 'white',
                 color: '#ff9800',
-                border: '1px solid #ff9800' // Borda laranja quando selecionado
-              }} // Seleção com fundo branco e borda laranja
+                border: '1px solid #ff9800'
+              }}
               transition="all 0.3s ease"
             >
               Tema
             </Button>
             <Button
               size="sm"
-              variant="outline" // Botão com fundo transparente
-              color="#6c757d" // Texto cinza
-              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave
+              variant="outline"
+              color="#6c757d"
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }}
               _active={{
                 bg: 'white',
                 color: '#ff9800',
-                border: '1px solid #ff9800' // Borda laranja quando selecionado
-              }} // Seleção com fundo branco e borda laranja
+                border: '1px solid #ff9800'
+              }}
               transition="all 0.3s ease"
             >
               Configurações
             </Button>
             <Button
               size="sm"
-              variant="outline" // Botão com fundo transparente
-              color="#6c757d" // Texto cinza
-              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave
+              variant="outline"
+              color="#6c757d"
+              isActive={isResults}
+              onClick={() => navigateToPage('results')}
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }}
               _active={{
                 bg: 'white',
                 color: '#ff9800',
-                border: '1px solid #ff9800' // Borda laranja quando selecionado
-              }} // Seleção com fundo branco e borda laranja
-              onClick={() => flowId && navigate(`/editor?flow_id=${flowId}/results`)}
+                border: '1px solid #ff9800'
+              }}
               transition="all 0.3s ease"
             >
               Resultados
@@ -163,8 +187,8 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
                 variant="ghost"
                 aria-label="Mais opções"
                 size="sm"
-                _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave e texto cinza
-                _active={{ bg: '#ff9800', color: 'white' }} // Fundo laranja quando ativo
+                _hover={{ bg: '#f8f9fa', color: '#6c757d' }}
+                _active={{ bg: '#ff9800', color: 'white' }}
                 transition="all 0.3s ease"
               />
               <MenuList>
@@ -186,39 +210,38 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
             </Menu>
             <Button
               size="sm"
-              variant="outline" // Botão com fundo transparente
-              color="#6c757d" // Texto cinza
+              variant="outline"
+              color="#6c757d"
               leftIcon={<BsLightning />}
-              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }}
               _active={{
                 bg: 'white',
                 color: '#ff9800',
-                border: '1px solid #ff9800' // Borda laranja quando selecionado
-              }} // Seleção com fundo branco e borda laranja
+                border: '1px solid #ff9800'
+              }}
               transition="all 0.3s ease"
             >
               Compartilhar
             </Button>
             <Button
               size="sm"
-              variant="outline" // Botão com fundo transparente
-              color="#6c757d" // Texto cinza
+              variant="outline"
+              color="#6c757d"
               leftIcon={<RiTestTubeLine />}
-              _hover={{ bg: '#f8f9fa', color: '#6c757d' }} // Hover com fundo mais suave
+              _hover={{ bg: '#f8f9fa', color: '#6c757d' }}
               _active={{
                 bg: 'white',
                 color: '#ff9800',
-                border: '1px solid #ff9800' // Borda laranja quando selecionado
-              }} // Seleção com fundo branco e borda laranja
+                border: '1px solid #ff9800'
+              }}
               transition="all 0.3s ease"
             >
               Testar
             </Button>
-            <Publish flowId={flowId} /> {/* new Publish component */}
+            <Publish flowId={flowId} />
           </HStack>
         </HStack>
       </Container>
-      {/* Import Modal */}
       <ImportFlowModal isOpen={isOpen} onClose={onClose} />
     </Box>
   );

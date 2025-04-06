@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { getFlow, updateFlowUrl } from '../services/flowService';
-import { Box, Input, Button, Heading, Text, useToast } from '@chakra-ui/react';
+import { Box, Input, Button, Heading, Text, useToast, Flex } from '@chakra-ui/react';
+import Header from '../components/Header';
 
 const Published: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -55,23 +56,26 @@ const Published: React.FC = () => {
   };
 
   return (
-    <Box p={6}>
-      <Heading mb={4}>Edit Custom URL</Heading>
-      {flow ? (
-        <>
-          <Text mb={2}>Current Title: {flow.title}</Text>
-          <Input
-            mb={4}
-            value={customUrl}
-            onChange={(e) => setCustomUrl(e.target.value)}
-            placeholder="Enter custom URL"
-          />
-          <Button colorScheme="blue" onClick={handleSave}>Save</Button>
-        </>
-      ) : (
-        <Text>Loading flow details...</Text>
-      )}
-    </Box>
+    <Flex direction="column" h="100vh">
+      <Header flowId={uid} />
+      <Box p={6} mt="56px">
+        <Heading mb={4}>Edit Custom URL</Heading>
+        {flow ? (
+          <>
+            <Text mb={2}>Current Title: {flow.title}</Text>
+            <Input
+              mb={4}
+              value={customUrl}
+              onChange={(e) => setCustomUrl(e.target.value)}
+              placeholder="Enter custom URL"
+            />
+            <Button colorScheme="blue" onClick={handleSave}>Save</Button>
+          </>
+        ) : (
+          <Text>Loading flow details...</Text>
+        )}
+      </Box>
+    </Flex>
   );
 };
 

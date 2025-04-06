@@ -37,6 +37,7 @@ import {
 import { FaEyeSlash, FaEye, FaDownload, FaLock, FaCrown, FaChartLine, FaEdit } from 'react-icons/fa';
 import { getAnswers, AnswerData, AnswersResponse } from '../services/answerService';
 import { getFlow, updateFlow } from '../services/flowService';
+import Header from '../components/Header';
 
 interface Column {
   id: string;
@@ -377,37 +378,46 @@ const Results: React.FC = () => {
 
   if (loading) {
     return (
-      <Box p={5} textAlign="center">
-        <Spinner size="xl" />
-        <Text mt={3}>Loading answers...</Text>
-      </Box>
+      <Flex direction="column" h="100vh">
+        <Header flowId={uid} />
+        <Box p={5} textAlign="center" mt="56px">
+          <Spinner size="xl" />
+          <Text mt={3}>Loading answers...</Text>
+        </Box>
+      </Flex>
     );
   }
 
   if (error) {
     return (
-      <Box p={5}>
-        <Alert status="error" borderRadius="md">
-          <AlertIcon />
-          <AlertTitle mr={2}>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      </Box>
+      <Flex direction="column" h="100vh">
+        <Header flowId={uid} />
+        <Box p={5} mt="56px">
+          <Alert status="error" borderRadius="md">
+            <AlertIcon />
+            <AlertTitle mr={2}>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </Box>
+      </Flex>
     );
   }
 
   if (!data?.answers.length) {
     return (
-      <Box p={5}>
-        <Heading mb={4} size="md">Flow Results</Heading>
-        <Alert status="info" borderRadius="md">
-          <AlertIcon />
-          <AlertTitle mr={2}>No answers yet</AlertTitle>
-          <AlertDescription>
-            This flow hasn't received any submissions yet.
-          </AlertDescription>
-        </Alert>
-      </Box>
+      <Flex direction="column" h="100vh">
+        <Header flowId={uid} />
+        <Box p={5} mt="56px">
+          <Heading mb={4} size="md">Flow Results</Heading>
+          <Alert status="info" borderRadius="md">
+            <AlertIcon />
+            <AlertTitle mr={2}>No answers yet</AlertTitle>
+            <AlertDescription>
+              This flow hasn't received any submissions yet.
+            </AlertDescription>
+          </Alert>
+        </Box>
+      </Flex>
     );
   }
 
@@ -420,190 +430,193 @@ const Results: React.FC = () => {
   const hiddenAnswersCount = Object.values(hiddenRows).filter(Boolean).length;
 
   return (
-    <Box p={5}>
-      <Flex justify="space-between" align="center" mb={4}>
-        <Heading size="md">Flow Results</Heading>
-        <HStack>
-          <Tag colorScheme="blue" size="md">
-            <HStack spacing={1}>
-              <FaChartLine />
-              <Text>{data.answers.length} Answers</Text>
-            </HStack>
-          </Tag>
-        </HStack>
-      </Flex>
-
-      {isOverLimit && (
-        <Flex
-          justify="space-between"
-          align="center"
-          mb={4}
-          p={3}
-          borderRadius="md"
-          bg="blue.50"
-          color="blue.800"
-          borderWidth="1px"
-          borderColor="blue.100"
-        >
-          <Text fontSize="sm">
-            <FaLock size="12px" style={{ display: 'inline', marginRight: '8px' }} />
-            You've reached your plan limit. {overLimitCount} answers are locked.
-          </Text>
-          <Button
-            size="sm"
-            rightIcon={<FaCrown />}
-            colorScheme="blue"
-            variant="outline"
-            as={Link}
-            to="/settings/subscription"
-          >
-            Upgrade
-          </Button>
-        </Flex>
-      )}
-
-      <Flex justifyContent="space-between" alignItems="center" mb={3}>
-        {selectedCount > 0 && (
-          <HStack spacing={2}>
-            <Text fontSize="sm" fontWeight="medium">
-              {selectedCount} selected
-            </Text>
-            <Tooltip label="Export selected rows to CSV">
-              <IconButton
-                size="sm"
-                aria-label="Export selected rows"
-                icon={<FaDownload />}
-                onClick={exportCSV}
-                variant="ghost"
-              />
-            </Tooltip>
+    <Flex direction="column" h="100vh">
+      <Header flowId={uid} />
+      <Box p={5} mt="56px">
+        <Flex justify="space-between" align="center" mb={4}>
+          <Heading size="md">Flow Results</Heading>
+          <HStack>
+            <Tag colorScheme="blue" size="md">
+              <HStack spacing={1}>
+                <FaChartLine />
+                <Text>{data.answers.length} Answers</Text>
+              </HStack>
+            </Tag>
           </HStack>
+        </Flex>
+
+        {isOverLimit && (
+          <Flex
+            justify="space-between"
+            align="center"
+            mb={4}
+            p={3}
+            borderRadius="md"
+            bg="blue.50"
+            color="blue.800"
+            borderWidth="1px"
+            borderColor="blue.100"
+          >
+            <Text fontSize="sm">
+              <FaLock size="12px" style={{ display: 'inline', marginRight: '8px' }} />
+              You've reached your plan limit. {overLimitCount} answers are locked.
+            </Text>
+            <Button
+              size="sm"
+              rightIcon={<FaCrown />}
+              colorScheme="blue"
+              variant="outline"
+              as={Link}
+              to="/settings/subscription"
+            >
+              Upgrade
+            </Button>
+          </Flex>
         )}
 
-        {/* Pushed to the right side */}
-        <HStack ml="auto" spacing={2}>
-          <Text fontSize="sm">{hiddenAnswersCount > 0 ? `${hiddenAnswersCount} hidden` : ''}</Text>
-          <Flex alignItems="center">
-            <Text fontSize="sm" mr={2}>Show hidden</Text>
-            <Switch
-              size="sm"
-              isChecked={showHidden}
-              onChange={(e) => setShowHidden(e.target.checked)}
-            />
-          </Flex>
-        </HStack>
-      </Flex>
-
-      <Box
-        overflowX="auto"
-        borderWidth="1px"
-        borderRadius="md"
-        borderColor={borderColor}
-        boxShadow="sm"
-      >
-        <Table variant="simple" size="sm">
-          <Thead bg={headerBg}>
-            <Tr>
-              <Th width="40px" px={2}>
-                <Checkbox
-                  isChecked={
-                    Object.keys(selectedRows).length > 0 &&
-                    Object.keys(selectedRows).length === visibleAnswers.filter((_, i) => {
-                      const index = data.answers.indexOf(_);
-                      return !isRowLocked(index);
-                    }).length
-                  }
-                  onChange={toggleSelectAll}
+        <Flex justifyContent="space-between" alignItems="center" mb={3}>
+          {selectedCount > 0 && (
+            <HStack spacing={2}>
+              <Text fontSize="sm" fontWeight="medium">
+                {selectedCount} selected
+              </Text>
+              <Tooltip label="Export selected rows to CSV">
+                <IconButton
                   size="sm"
+                  aria-label="Export selected rows"
+                  icon={<FaDownload />}
+                  onClick={exportCSV}
+                  variant="ghost"
                 />
-              </Th>
-              {allColumns.map(column => (
-                <Th key={column.id} fontSize="xs" py={3} px={3}>
-                  <Flex alignItems="center">
-                    {column.id === 'created_at' ? (
-                      column.name
-                    ) : (
-                      <Editable
-                        defaultValue={column.name}
-                        onSubmit={(nextValue) => handleColumnNameEdit(column.id, nextValue)}
-                        display="flex"
-                        alignItems="center"
-                        width="100%"
-                      >
-                        <EditablePreview />
-                        <EditableInput minW="100px" />
-                        <Tooltip label="Edit column name">
-                          <IconButton
-                            aria-label="Edit column name"
-                            icon={<FaEdit />}
-                            size="xs"
-                            variant="ghost"
-                            ml={1}
-                            onClick={() => setEditingColumnId(column.id)}
-                          />
-                        </Tooltip>
-                      </Editable>
-                    )}
-                  </Flex>
+              </Tooltip>
+            </HStack>
+          )}
+
+          {/* Pushed to the right side */}
+          <HStack ml="auto" spacing={2}>
+            <Text fontSize="sm">{hiddenAnswersCount > 0 ? `${hiddenAnswersCount} hidden` : ''}</Text>
+            <Flex alignItems="center">
+              <Text fontSize="sm" mr={2}>Show hidden</Text>
+              <Switch
+                size="sm"
+                isChecked={showHidden}
+                onChange={(e) => setShowHidden(e.target.checked)}
+              />
+            </Flex>
+          </HStack>
+        </Flex>
+
+        <Box
+          overflowX="auto"
+          borderWidth="1px"
+          borderRadius="md"
+          borderColor={borderColor}
+          boxShadow="sm"
+        >
+          <Table variant="simple" size="sm">
+            <Thead bg={headerBg}>
+              <Tr>
+                <Th width="40px" px={2}>
+                  <Checkbox
+                    isChecked={
+                      Object.keys(selectedRows).length > 0 &&
+                      Object.keys(selectedRows).length === visibleAnswers.filter((_, i) => {
+                        const index = data.answers.indexOf(_);
+                        return !isRowLocked(index);
+                      }).length
+                    }
+                    onChange={toggleSelectAll}
+                    size="sm"
+                  />
                 </Th>
-              ))}
-              <Th width="50px" px={2}></Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {data.answers.map((row, rowIndex) => {
-              const isHidden = isRowHidden(rowIndex);
-              const isLocked = isRowLocked(rowIndex);
-
-              // Skip if hidden and not showing hidden
-              if (isHidden && !showHidden) return null;
-
-              return (
-                <Tr
-                  key={row.id || rowIndex}
-                  _hover={{ bg: hoverBg }}
-                  bg={isHidden ? hiddenRowBg : isLocked ? lockedRowBg : undefined}
-                  opacity={isHidden ? 0.7 : 1}
-                >
-                  <Td px={2}>
-                    <Checkbox
-                      isChecked={!!selectedRows[rowIndex]}
-                      onChange={() => toggleSelectRow(rowIndex)}
-                      isDisabled={isLocked || isHidden}
-                      size="sm"
-                    />
-                  </Td>
-                  {allColumns.map(column => (
-                    <Td key={column.id} py={2} px={3} fontSize="sm">
-                      {isLocked ? (
-                        <Flex align="center" opacity={0.5}>
-                          <FaLock size="10px" style={{ marginRight: '6px' }} />
-                          <Text as="span" fontSize="xs">Locked</Text>
-                        </Flex>
+                {allColumns.map(column => (
+                  <Th key={column.id} fontSize="xs" py={3} px={3}>
+                    <Flex alignItems="center">
+                      {column.id === 'created_at' ? (
+                        column.name
                       ) : (
-                        <Box maxW="250px" overflow="hidden" textOverflow="ellipsis">
-                          {column.getValue(row)}
-                        </Box>
+                        <Editable
+                          defaultValue={column.name}
+                          onSubmit={(nextValue) => handleColumnNameEdit(column.id, nextValue)}
+                          display="flex"
+                          alignItems="center"
+                          width="100%"
+                        >
+                          <EditablePreview />
+                          <EditableInput minW="100px" />
+                          <Tooltip label="Edit column name">
+                            <IconButton
+                              aria-label="Edit column name"
+                              icon={<FaEdit />}
+                              size="xs"
+                              variant="ghost"
+                              ml={1}
+                              onClick={() => setEditingColumnId(column.id)}
+                            />
+                          </Tooltip>
+                        </Editable>
                       )}
+                    </Flex>
+                  </Th>
+                ))}
+                <Th width="50px" px={2}></Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {data.answers.map((row, rowIndex) => {
+                const isHidden = isRowHidden(rowIndex);
+                const isLocked = isRowLocked(rowIndex);
+
+                // Skip if hidden and not showing hidden
+                if (isHidden && !showHidden) return null;
+
+                return (
+                  <Tr
+                    key={row.id || rowIndex}
+                    _hover={{ bg: hoverBg }}
+                    bg={isHidden ? hiddenRowBg : isLocked ? lockedRowBg : undefined}
+                    opacity={isHidden ? 0.7 : 1}
+                  >
+                    <Td px={2}>
+                      <Checkbox
+                        isChecked={!!selectedRows[rowIndex]}
+                        onChange={() => toggleSelectRow(rowIndex)}
+                        isDisabled={isLocked || isHidden}
+                        size="sm"
+                      />
                     </Td>
-                  ))}
-                  <Td px={2}>
-                    <IconButton
-                      aria-label={isHidden ? "Unhide row" : "Hide row"}
-                      icon={isHidden ? <FaEye size="14px" /> : <FaEyeSlash size="14px" />}
-                      onClick={() => toggleHideRow(rowIndex)}
-                      variant="ghost"
-                      size="xs"
-                      isDisabled={isLocked}
-                    />
-                  </Td>
-                </Tr>
-              );
-            })}
-          </Tbody>
-        </Table>
+                    {allColumns.map(column => (
+                      <Td key={column.id} py={2} px={3} fontSize="sm">
+                        {isLocked ? (
+                          <Flex align="center" opacity={0.5}>
+                            <FaLock size="10px" style={{ marginRight: '6px' }} />
+                            <Text as="span" fontSize="xs">Locked</Text>
+                          </Flex>
+                        ) : (
+                          <Box maxW="250px" overflow="hidden" textOverflow="ellipsis">
+                            {column.getValue(row)}
+                          </Box>
+                        )}
+                      </Td>
+                    ))}
+                    <Td px={2}>
+                      <IconButton
+                        aria-label={isHidden ? "Unhide row" : "Hide row"}
+                        icon={isHidden ? <FaEye size="14px" /> : <FaEyeSlash size="14px" />}
+                        onClick={() => toggleHideRow(rowIndex)}
+                        variant="ghost"
+                        size="xs"
+                        isDisabled={isLocked}
+                      />
+                    </Td>
+                  </Tr>
+                );
+              })}
+            </Tbody>
+          </Table>
+        </Box>
       </Box>
-    </Box>
+    </Flex>
   );
 };
 
