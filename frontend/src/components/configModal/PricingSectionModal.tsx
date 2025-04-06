@@ -8,6 +8,9 @@ import {
   Badge,
   Tooltip,
   useBreakpointValue,
+  useColorModeValue,
+  VStack,
+  HStack
 } from '@chakra-ui/react';
 import UpgradeStandard from '../buttons/UpgradeStandard';
 import UpgradePremium from '../buttons/UpgradePremium';
@@ -16,6 +19,8 @@ import { useHandleUpgrade } from '../../hooks/useHandleUpgrade';
 const PricingSectionModal = () => {
   const { handleUpgrade } = useHandleUpgrade();
   const isMobile = useBreakpointValue({ base: true, md: false });
+
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
 
   const plans = [
     {
@@ -27,7 +32,7 @@ const PricingSectionModal = () => {
         '2 usuários',
         '2.000 chats/mês',
         { label: 'Chats extras: R$10 por 500' },
-        'Marca d’água removida',
+        "Marca d'agua removida",
         'Upload de arquivos',
         'Criar pastas',
         'Suporte prioritário',
@@ -57,30 +62,36 @@ const PricingSectionModal = () => {
     <Box
       key={plan.name}
       borderWidth="1px"
-      borderColor={plan.popular ? plan.color : 'gray.200'}
+      borderColor={plan.popular ? plan.color : borderColor}
       borderRadius="xl"
-      p={6}
+      p={{ base: 4, md: 6 }}
       position="relative"
-      bg="white"
-      _hover={{ boxShadow: 'md' }}
+      bg={useColorModeValue('white', 'gray.800')}
+      _hover={{
+        boxShadow: 'md',
+        transform: 'translateY(-2px)',
+        transition: 'all 0.2s ease-in-out'
+      }}
+      transition="all 0.2s ease-in-out"
     >
       {plan.popular && (
         <Badge
           position="absolute"
           top="-3"
-          right="4"
+          right={{ base: "2", md: "4" }}
           color="white"
           bg={plan.color}
           px={3}
           py={1}
           borderRadius="lg"
           fontSize="xs"
+          fontWeight="medium"
         >
           Mais popular
         </Badge>
       )}
 
-      <Heading fontSize="lg" mb={1}>
+      <Heading fontSize={{ base: "md", md: "lg" }} mb={1}>
         Upgrade para{' '}
         <Box as="span" color={plan.color}>
           {plan.name}
@@ -89,14 +100,16 @@ const PricingSectionModal = () => {
       <Text fontSize="sm" color="gray.600" mb={4}>
         {plan.description}
       </Text>
-      <Text fontSize="3xl" fontWeight="bold" mb={1}>
-        {plan.price}
-      </Text>
-      <Text fontSize="sm" color="gray.500" mb={4}>
-        /mês
-      </Text>
+      <HStack spacing={1} mb={1} alignItems="baseline">
+        <Text fontSize={{ base: "2xl", md: "3xl" }} fontWeight="bold">
+          {plan.price}
+        </Text>
+        <Text fontSize="sm" color="gray.500">
+          /mês
+        </Text>
+      </HStack>
 
-      <Stack spacing={2} mb={6} fontSize="sm" color="gray.700">
+      <VStack spacing={2} mb={6} fontSize="sm" color="gray.700" align="start">
         {plan.features.map((feature: any, idx: number) =>
           typeof feature === 'string' ? (
             <Text key={idx}>✓ {feature}</Text>
@@ -106,18 +119,20 @@ const PricingSectionModal = () => {
             </Text>
           )
         )}
-      </Stack>
+      </VStack>
 
       <Box mt="auto">{plan.button}</Box>
     </Box>
   );
 
   return (
-    <Box width="100%">
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-        {plans.map(renderPlan)}
-      </SimpleGrid>
-    </Box>
+    <SimpleGrid
+      columns={{ base: 1, md: 2 }}
+      spacing={{ base: 4, md: 6 }}
+      width="100%"
+    >
+      {plans.map(renderPlan)}
+    </SimpleGrid>
   );
 };
 

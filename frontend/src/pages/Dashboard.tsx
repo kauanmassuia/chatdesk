@@ -122,7 +122,12 @@ export default function Dashboard() {
                     height={"36px"}
                     _hover={{ bg: "white", color: "#2575fc", border: "1px solid #2575fc" }}
                     _active={{ bg: "white", color: "#2575fc", border: "1px solid #2575fc" }}
-                    onClick={() => { setInitialTab("config"); onSettingsOpen(); }}
+                    onClick={() => {
+                      setInitialTab("config");
+                      setTimeout(() => {
+                        onSettingsOpen();
+                      }, 0);
+                    }}
                     >
                     Configurações e Membros
                     </Button>
@@ -141,7 +146,12 @@ export default function Dashboard() {
                   Plano Atual: Gratuito
                 </MenuButton>
                 <MenuList>
-                  <MenuItem onClick={() => { setInitialTab("payment"); onSettingsOpen(); }}>Gratuito</MenuItem>
+                  <MenuItem onClick={() => {
+                    setInitialTab("payment");
+                    setTimeout(() => {
+                      onSettingsOpen();
+                    }, 0);
+                  }}>Gratuito</MenuItem>
                 </MenuList>
               </Menu>
                 <Button

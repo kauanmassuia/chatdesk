@@ -19,8 +19,11 @@ import { RiTestTubeLine, RiUploadCloudLine } from 'react-icons/ri';
 import { useFlowStore } from '../store/flowStore';
 import { exportFlowAsJson } from '../utils/exportFlowAsJson';
 import ImportFlowModal from './modal/ImportFlowModal';
+import NotPublishedModal from './modal/NotPublishedModal';
 import Publish from './buttons/Publish';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { getFlow } from '../services/flowService';
 
 interface HeaderProps {
   flowId: string | null;
@@ -28,14 +31,32 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ flowId }) => {
   const { nodes, edges } = useFlowStore();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isImportOpen, onOpen: onImportOpen, onClose: onImportClose } = useDisclosure();
+  const { isOpen: isNotPublishedOpen, onOpen: onNotPublishedOpen, onClose: onNotPublishedClose } = useDisclosure();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isFlowPublished, setIsFlowPublished] = useState<boolean>(false);
 
   // Determine current page
   const isResults = location.search.includes('/results');
   const isPublished = location.search.includes('/published');
   const isEditor = !isResults && !isPublished;
+
+  useEffect(() => {
+    // Check if flow is published when flowId changes
+    const checkPublishedStatus = async () => {
+      if (flowId) {
+        try {
+          const flowData = await getFlow(flowId);
+          setIsFlowPublished(flowData.published || false);
+        } catch (error) {
+          console.error('Error checking flow published status:', error);
+        }
+      }
+    };
+
+    checkPublishedStatus();
+  }, [flowId]);
 
   const handleExport = () => {
     const flowJson = exportFlowAsJson(nodes, edges);
@@ -47,6 +68,16 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  };
+
+  const handleShare = () => {
+    if (!flowId) return;
+
+    if (isFlowPublished) {
+      navigateToPage('published');
+    } else {
+      onNotPublishedOpen();
+    }
   };
 
   const navigateToPage = (page: 'editor' | 'results' | 'published') => {
@@ -200,7 +231,7 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
                   Exportar Flow
                 </MenuItem>
                 <MenuItem
-                  onClick={onOpen}
+                  onClick={onImportOpen}
                   _hover={{ bg: '#ff9800', color: 'white' }}
                 >
                   <RiUploadCloudLine style={{ marginRight: '8px' }} />
@@ -213,6 +244,7 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
               variant="outline"
               color="#6c757d"
               leftIcon={<BsLightning />}
+              onClick={handleShare}
               _hover={{ bg: '#f8f9fa', color: '#6c757d' }}
               _active={{
                 bg: 'white',
@@ -242,7 +274,19 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
           </HStack>
         </HStack>
       </Container>
-      <ImportFlowModal isOpen={isOpen} onClose={onClose} />
+      <ImportFlowModal isOpen={isImportOpen} onClose={onImportClose} />
+      <NotPublishedModal
+        isOpen={isNotPublishedOpen}
+        onClose={onNotPublishedClose}
+        onPublish={() => {
+          onNotPublishedClose();
+          // Find the Publish component and trigger its click programmatically
+          const publishElement = document.querySelector('[data-testid="publish-button"]');
+          if (publishElement) {
+            (publishElement as HTMLElement).click();
+          }
+        }}
+      />
     </Box>
   );
 };
