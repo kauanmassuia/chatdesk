@@ -230,7 +230,7 @@ const ChatReader: React.FC = () => {
       case "audio":
         return renderAudioNode(node);
       case "start":
-        return renderStartNode();
+        return renderStartNode(node);
       case "message":
         return renderMessageNode(node);
       case "user":

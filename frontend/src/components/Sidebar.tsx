@@ -32,19 +32,73 @@ import {
 import { TbWorldWww } from 'react-icons/tb';
 import { HiOutlinePhotograph } from 'react-icons/hi';
 
-const DraggableItem = ({
-  icon: Icon,
-  label,
-  type,
-  colorScheme = 'gray',
-}: {
+// Theme variables - easy to edit
+const theme = {
+  // Colors
+  bubbleColor: '#2575fc',
+  inputColor: '#ff9800',
+  textColor: '#555',
+  bgLight: 'white',
+  bgDark: '#1A202C',
+  borderLight: '#eaeaea',
+  borderDark: '#2D3748',
+  nodeBgLight: '#f5f5f5',
+  nodeBgDark: '#2D3748',
+
+  // Styling
+  borderWidth: '1px',
+  borderRadius: '6px',
+  hoverScale: 1.03,
+  buttonHeight: '36px',
+  fontWeight: '600',
+
+  // Typography
+  fontSize: '12px',
+
+  // Spacing
+  sidebarWidth: '300px',
+  padding: '8px',
+  gap: '16px',
+};
+
+// Node types and their configurations
+const nodeTypes = {
+  bubbles: {
+    title: 'Bubbles',
+    color: theme.bubbleColor,
+    items: [
+      { icon: FiMessageSquare, label: 'Texto', type: 'text' },
+      { icon: FiImage, label: 'Imagem', type: 'image' },
+      { icon: FiVideo, label: 'Vídeo', type: 'video' },
+      { icon: FiCode, label: 'Incorporar', type: 'embed' },
+      { icon: FiHeadphones, label: 'Áudio', type: 'audio' },
+    ],
+  },
+  inputs: {
+    title: 'Inputs',
+    color: theme.inputColor,
+    items: [
+      { icon: BsTextParagraph, label: 'Texto', type: 'input_text' },
+      { icon: MdOutlineNumbers, label: 'Número', type: 'input_number' },
+      { icon: MdOutlineEmail, label: 'E-mail', type: 'input_email' },
+      { icon: TbWorldWww, label: 'Website', type: 'input_website' },
+      { icon: BsCalendarDate, label: 'Data', type: 'input_date' },
+      { icon: BsClock, label: 'Atraso', type: 'input_wait' },
+      { icon: BsTelephone, label: 'Telefone', type: 'input_phone' },
+      { icon: BsGrid, label: 'Botões', type: 'input_buttons' },
+      { icon: HiOutlinePhotograph, label: 'Imagem', type: 'input_pic_choice' },
+      { icon: MdPayment, label: 'Pagamento', type: 'input_payment' },
+    ],
+  },
+};
+
+const DraggableItem = ({ icon: Icon, label, type, borderColor }: {
   icon: any;
   label: string;
   type: string;
-  colorScheme?: string;
+  borderColor: string;
 }) => {
-  const bgColor = useColorModeValue('white', '#2D3748');
-  const hoverBg = useColorModeValue('#f5f5f5', '#4A5568');
+  const bgColor = useColorModeValue(theme.nodeBgLight, theme.nodeBgDark);
 
   const onDragStart = (event: React.DragEvent, nodeType: string) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
@@ -56,164 +110,135 @@ const DraggableItem = ({
       draggable
       onDragStart={(e) => onDragStart(e, type)}
       variant="outline"
-      leftIcon={<Icon size={16} />}
+      leftIcon={<Icon size={14} color={borderColor} />}
       justifyContent="flex-start"
       w="full"
       bg={bgColor}
-      borderColor={colorScheme === 'orange' ? '#ff9800' : colorScheme === 'blue' ? '#2575fc' : 'gray.200'}
-      color={colorScheme === 'orange' ? '#ff9800' : colorScheme === 'blue' ? '#2575fc' : undefined}
+      borderWidth={theme.borderWidth}
+      borderColor={borderColor}
+      color={theme.textColor}
       _hover={{
-        bg: hoverBg,
-        borderColor: colorScheme === 'orange' ? '#e68a00' : colorScheme === 'blue' ? '#1a63d8' : 'gray.300',
-        color: colorScheme === 'orange' ? '#e68a00' : colorScheme === 'blue' ? '#1a63d8' : undefined,
-        transform: 'scale(1.05)',
+        transform: `scale(${theme.hoverScale})`,
+        borderColor: borderColor,
       }}
       _active={{
         transform: 'scale(1)',
       }}
-      size="sm"
-      h="40px"
-      borderRadius="md"
-      transition="transform 0.3s ease"
+      h={theme.buttonHeight}
+      fontSize={theme.fontSize}
+      borderRadius={theme.borderRadius}
       fontFamily="Poppins, sans-serif"
+      transition="all 0.2s ease"
+      boxShadow="none"
+      fontWeight={theme.fontWeight}
     >
       {label}
     </Button>
   );
 };
 
+const NodeSection = ({ title, items, color }: {
+  title: string;
+  items: any[];
+  color: string;
+}) => (
+  <Box>
+    <Text
+      fontWeight="bold"
+      fontSize={theme.fontSize}
+      mb={2}
+      color={color}
+      fontFamily="Poppins, sans-serif"
+      letterSpacing="0.3px"
+    >
+      {title}
+    </Text>
+    <SimpleGrid columns={2} spacing={theme.gap}>
+      {items.map((item) => (
+        <DraggableItem
+          key={item.label}
+          icon={item.icon}
+          label={item.label}
+          type={item.type}
+          borderColor={color}
+        />
+      ))}
+    </SimpleGrid>
+  </Box>
+);
+
 const Sidebar = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const bgColor = useColorModeValue('white', '#1A202C');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const bgColor = useColorModeValue(theme.bgLight, theme.bgDark);
+  const borderColor = useColorModeValue(theme.borderLight, theme.borderDark);
 
-  // Dados de Bubbles e Inputs
-  const bubbles = [
-    { icon: FiMessageSquare, label: 'Texto', type: 'text', colorScheme: 'blue' },
-    { icon: FiImage, label: 'Imagem', type: 'image', colorScheme: 'blue' },
-    { icon: FiVideo, label: 'Vídeo', type: 'video', colorScheme: 'blue' },
-    { icon: FiCode, label: 'Incorporar', type: 'embed', colorScheme: 'blue' },
-    { icon: FiHeadphones, label: 'Áudio', type: 'audio', colorScheme: 'blue' },
-  ];
-
-  const inputs = [
-    { icon: BsTextParagraph, label: 'Texto', type: 'input_text', colorScheme: 'orange' },
-    { icon: MdOutlineNumbers, label: 'Número', type: 'input_number', colorScheme: 'orange' },
-    { icon: MdOutlineEmail, label: 'E-mail', type: 'input_email', colorScheme: 'orange' },
-    { icon: TbWorldWww, label: 'Website', type: 'input_website', colorScheme: 'orange' },
-    { icon: BsCalendarDate, label: 'Data', type: 'input_date', colorScheme: 'orange' },
-    { icon: BsClock, label: 'Atraso', type: 'input_wait', colorScheme: 'orange' },
-    { icon: BsTelephone, label: 'Telefone', type: 'input_phone', colorScheme: 'orange' },
-    { icon: BsGrid, label: 'Botões', type: 'input_buttons', colorScheme: 'orange' },
-    { icon: HiOutlinePhotograph, label: 'Imagem', type: 'input_pic_choice', colorScheme: 'orange' },
-    { icon: MdPayment, label: 'Pagamento', type: 'input_payment', colorScheme: 'orange' },
-  ];
-
-  // Função para filtrar itens conforme a pesquisa
-  const filterItems = (items: { label: string; type: string; colorScheme?: string; icon?: any }[]) => {
-    return items.filter(item => item.label.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filterItems = (items: any[]) => {
+    return items.filter(item =>
+      item.label.toLowerCase().includes(searchQuery.toLowerCase())
+    );
   };
 
   return (
     <Box
-      w="300px"
+      w={theme.sidebarWidth}
       h="calc(100vh - 56px)"
       bg={bgColor}
-      borderRight="1px solid"
+      borderRight={theme.borderWidth}
       borderColor={borderColor}
-      py={6}
-      px={4}
+      p={theme.padding}
       overflowY="auto"
-      boxShadow="lg"
       css={{
         '&::-webkit-scrollbar': {
-          width: '6px',
+          width: '4px',
         },
         '&::-webkit-scrollbar-track': {
-          background: useColorModeValue('#EDF2F7', '#2D3748'),
+          background: 'transparent',
         },
         '&::-webkit-scrollbar-thumb': {
-          background: useColorModeValue('#A0AEC0', '#4A5568'),
+          background: useColorModeValue('#ddd', '#444'),
           borderRadius: '24px',
         },
       }}
     >
-      <VStack align="stretch" spacing={6}>
-        {/* Campo de busca com ícone */}
+      <VStack align="stretch" spacing={4}>
         <Box position="relative">
           <Input
             placeholder="Buscar"
-            size="md"
-            bg={useColorModeValue('white', 'gray.800')}
+            size="sm"
+            bg="transparent"
             borderColor={borderColor}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             _placeholder={{ color: useColorModeValue('gray.400', 'gray.500') }}
             _focus={{
-              borderColor: useColorModeValue('#2575fc', '#ff9800'),
-              boxShadow: '0px 0px 4px rgba(37,117,252,0.5)',
+              borderColor: theme.bubbleColor,
+              boxShadow: 'none',
             }}
-            fontFamily="Outfit, sans-serif"
+            fontFamily="Poppins, sans-serif"
+            fontSize={theme.fontSize}
+            borderRadius={theme.borderRadius}
           />
           <IconButton
             aria-label="Ícone de Busca"
-            icon={<FiSearch />}
-            size="sm"
+            icon={<FiSearch size={14} />}
+            size="xs"
             position="absolute"
             top="50%"
-            right="10px"
+            right="8px"
             transform="translateY(-50%)"
             bg="transparent"
+            color={theme.textColor}
           />
         </Box>
 
-        {/* Seção de Bubbles */}
-        <Box>
-          <Text
-            fontWeight="bold"
-            fontSize="sm"
-            mb={3}
-            color="#2575fc"
-            fontFamily="Poppins, sans-serif"
-          >
-            Bubbles
-          </Text>
-          <SimpleGrid columns={2} spacing={3}>
-            {filterItems(bubbles).map((item) => (
-              <DraggableItem
-                key={item.label}
-                icon={item.icon}
-                label={item.label}
-                type={item.type}
-                colorScheme="blue"
-              />
-            ))}
-          </SimpleGrid>
-        </Box>
-
-        {/* Seção de Inputs */}
-        <Box>
-          <Text
-            fontWeight="bold"
-            fontSize="sm"
-            mb={3}
-            color="#ff9800"
-            fontFamily="Poppins, sans-serif"
-          >
-            Inputs
-          </Text>
-          <SimpleGrid columns={2} spacing={3}>
-            {filterItems(inputs).map((item) => (
-              <DraggableItem
-                key={item.label}
-                icon={item.icon}
-                label={item.label}
-                type={item.type}
-                colorScheme="orange"
-              />
-            ))}
-          </SimpleGrid>
-        </Box>
+        {Object.entries(nodeTypes).map(([key, section]) => (
+          <NodeSection
+            key={key}
+            title={section.title}
+            items={filterItems(section.items)}
+            color={section.color}
+          />
+        ))}
       </VStack>
     </Box>
   );
