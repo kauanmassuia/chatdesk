@@ -51,7 +51,7 @@ export function renderNumberInputNode(props: any) {
   return renderGenericInputNode({
     ...props,
     inputType: "number",
-    placeholder: "Enter a number..."
+    placeholder: "Digite um número..."
   });
 }
 

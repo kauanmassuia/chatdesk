@@ -32,7 +32,7 @@ export function renderTextInputNode(props: any) {
   return renderGenericInputNode({
     ...props,
     inputType: "text",
-    placeholder: "Type your answer..."
+    placeholder: "Digite sua resposta..."
   });
 }
 

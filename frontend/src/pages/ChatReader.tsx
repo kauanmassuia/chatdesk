@@ -1,21 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box } from '@chakra-ui/react';
+import { Box, Image } from '@chakra-ui/react';
 import '../styles/chat.css';
 import { useParams } from 'react-router-dom';
 import { fetchPublishedFlow } from '../services/flowService';
 import { saveAnswer } from '../services/answerService';
+import logoImage from '../assets/logovendflow.png';
 
 // Import node renderers
 import { renderTextNode } from '../components/nodes/TextNode';
 import { renderImageNode } from '../components/nodes/ImageNode';
 import { renderVideoNode } from '../components/nodes/VideoNode';
 import { renderAudioNode } from '../components/nodes/AudioNode';
-import { renderStartNode } from '../components/nodes/StartNode';
 import { renderMessageNode } from '../components/nodes/MessageNode';
 
 // Import input node renderers
 import { renderTextInputNode } from '../components/nodes/inputs/TextInputNode';
-import { renderDateInputNode } from '../components/nodes/inputs/DateInputNode';
+import { renderDateInputNode, formatDateBrazilian, parseToIsoDate } from '../components/nodes/inputs/DateInputNode';
 import { renderWebsiteInputNode } from '../components/nodes/inputs/WebsiteInputNode';
 import { renderPhoneInputNode } from '../components/nodes/inputs/PhoneInputNode';
 import { renderEmailInputNode } from '../components/nodes/inputs/EmailInputNode';
@@ -59,6 +59,9 @@ const ChatReader: React.FC = () => {
   const [inputValue, setInputValue] = useState("");
   const [isInputValid, setIsInputValid] = useState(true);
   const chatHistoryRef = useRef<HTMLDivElement>(null);
+  const [chatTitle, setChatTitle] = useState("Chat Assistant");
+  const [botProfileImg, setBotProfileImg] = useState<string>(logoImage);
+  const [showInputField, setShowInputField] = useState(false);
 
   function getNodeById(flow: { nodes: FlowNode[] }, id: string | null): FlowNode | null {
     if (!id) return null;
@@ -70,6 +73,14 @@ const ChatReader: React.FC = () => {
     fetchPublishedFlow(custom_url).then((data) => {
       if (data && data.published_content) {
         setChatFlow(data.published_content);
+        // Set chat title if available from the published flow
+        if (data.title) {
+          setChatTitle(data.title);
+        }
+        // Set bot profile image if available
+        if (data.bot_image) {
+          setBotProfileImg(data.bot_image);
+        }
       }
     });
   }, [custom_url]);
@@ -78,9 +89,7 @@ const ChatReader: React.FC = () => {
     if (!chatFlow) return;
     const startNode = getNodeById(chatFlow, "start");
     if (startNode) {
-      if (autoTypes.includes(startNode.type)) {
-        setConversation([startNode]);
-      }
+      // Skip rendering the start node, just move to its next node
       setCurrentNodeId(startNode.next ?? null);
     }
   }, [chatFlow]);
@@ -130,16 +139,28 @@ const ChatReader: React.FC = () => {
     }
 
     if (interactiveTypes.includes(node.type)) {
+      // Adicionar o nó de input ao histórico de conversa para manter o prompt visível
       const alreadyInHistory = conversation.some((c) => c.id === node.id);
       if (!alreadyInHistory) {
-        setConversation((prev) => [...prev, node]);
+        const timer = setTimeout(() => {
+          setConversation((prev) => [...prev, node]);
+        }, 1000);
+        return () => clearTimeout(timer);
       }
+
+      // Mostrar o campo de input após um pequeno delay para coincidir com o prompt
+      setShowInputField(false);
+      const inputTimer = setTimeout(() => {
+        setShowInputField(true);
+      }, 1500); // Um pouco mais de delay que o prompt para parecer uma sequência natural
 
       // Reset input value and validation when showing a new input node
       setInputValue("");
       setIsInputValid(true);
+
+      return () => clearTimeout(inputTimer);
     }
-  }, [currentNodeId, conversation, chatFlow]);
+  }, [currentNodeId, chatFlow, conversation]);
 
   // Update validation status whenever input changes
   useEffect(() => {
@@ -155,6 +176,18 @@ const ChatReader: React.FC = () => {
     }
   }, [inputValue, currentNodeId, chatFlow]);
 
+  // Add this function for handling already answered nodes
+  function markNodeAsAnswered(node: FlowNode): FlowNode {
+    if (!node) return node;
+    return {
+      ...node,
+      content: {
+        ...node.content,
+        answered: true
+      }
+    };
+  }
+
   function handleInputSubmit() {
     if (!inputValue.trim() || !isInputValid) return;
 
@@ -163,7 +196,13 @@ const ChatReader: React.FC = () => {
       type: "user",
       content: { text: inputValue },
     };
-    setConversation((prev) => [...prev, userBubble]);
+
+    setConversation((prev) => {
+      // Mark the current node as answered before adding user's response
+      return prev.map(n =>
+        n.id === currentNodeId ? markNodeAsAnswered(n) : n
+      ).concat(userBubble);
+    });
 
     // Save answer via saveAnswer
     if (custom_url && currentNodeId) {
@@ -192,7 +231,13 @@ const ChatReader: React.FC = () => {
       type: "user",
       content: { text: choice.label },
     };
-    setConversation((prev) => [...prev, userBubble]);
+
+    setConversation((prev) => {
+      // Mark the current node as answered before adding user's response
+      return prev.map(n =>
+        n.id === currentNodeId ? markNodeAsAnswered(n) : n
+      ).concat(userBubble);
+    });
 
     // Save choice answer
     if (custom_url && currentNodeId) {
@@ -208,6 +253,16 @@ const ChatReader: React.FC = () => {
 
   // Node renderer mapping function
   function renderNode(node: FlowNode) {
+    // Skip rendering start nodes
+    if (node.type === "start") {
+      return null;
+    }
+
+    // If node is an answered input node, only show the prompt
+    if (node.content?.answered && interactiveTypes.includes(node.type)) {
+      return <Box>{node.content.prompt}</Box>;
+    }
+
     const props = {
       node,
       inputValue,
@@ -229,8 +284,6 @@ const ChatReader: React.FC = () => {
         return renderVideoNode(node);
       case "audio":
         return renderAudioNode(node);
-      case "start":
-        return renderStartNode(node);
       case "message":
         return renderMessageNode(node);
       case "user":
@@ -240,7 +293,43 @@ const ChatReader: React.FC = () => {
       case "input_text":
         return renderTextInputNode(props);
       case "input_date":
-        return renderDateInputNode(props);
+        return (
+          <div className="p-1">
+            <div className="relative">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => {
+                  // Accept only digits and slashes for date input
+                  const value = e.target.value.replace(/[^\d/]/g, '');
+
+                  // Format as user types: add slashes automatically
+                  let formattedValue = value;
+                  if (value.length === 2 && !value.includes('/')) {
+                    formattedValue = value + '/';
+                  } else if (value.length === 5 && value.indexOf('/') === 2 && !value.includes('/', 3)) {
+                    formattedValue = value + '/';
+                  }
+
+                  setInputValue(formattedValue);
+                }}
+                onKeyDown={handleKeyDown}
+                placeholder="DD/MM/AAAA"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                maxLength={10}
+                key="input-date"
+                autoFocus
+              />
+            </div>
+            <button
+              onClick={handleInputSubmit}
+              disabled={(!isInputValid && !!inputValue) || inputValue.length < 10}
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md w-full"
+            >
+              Enviar
+            </button>
+          </div>
+        );
       case "input_website":
         return renderWebsiteInputNode(props);
       case "input_phone":
@@ -250,49 +339,289 @@ const ChatReader: React.FC = () => {
       case "input_number":
         return renderNumberInputNode(props);
       case "input_buttons":
-        return renderButtonsInputNode(props);
+        // Para nós de escolha/buttons, mostrar apenas o prompt na conversa
+        // Os botões serão renderizados no campo de input
+        return <Box>{node.content.prompt}</Box>;
       case "input_pic_choice":
-        return renderPicChoiceInputNode(props);
+        // Para nós de escolha com imagens, mostrar apenas o prompt na conversa
+        // As opções com imagens serão renderizadas no campo de input
+        return <Box>{node.content.prompt}</Box>;
       case "input_wait":
         return renderWaitInputNode(props);
       case "input_payment":
         return renderPaymentInputNode(props);
 
       default:
-        // Fallback for unknown node types
-        return <Box>{node.content?.text || ""}</Box>;
+        if (node) {
+          return renderNode(node);
+        }
+        return null;
     }
   }
 
   const currentNode = chatFlow ? getNodeById(chatFlow, currentNodeId) : null;
 
   return (
-    <div className="flex flex-col h-screen">
-      <div ref={chatHistoryRef} className="flex flex-col flex-1 overflow-y-auto p-4 space-y-2">
-        {conversation.map((node, idx) => {
-          const alignRight = isRightAligned(node.type);
-          return (
-            <div
-              key={idx}
-              className={
-                (alignRight
-                  ? "self-end bg-user-bubble text-user-bubble"
-                  : "self-start bg-bot-bubble text-bot-bubble") +
-                " rounded-xl p-2 max-w-[80%] bubble-" +
-                node.type
-              }
-            >
-              {renderNode(node)}
-            </div>
-          );
-        })}
-        {currentNode &&
-          interactiveTypes.includes(currentNode.type) &&
-          !conversation.some((c) => c.id === currentNode.id) && (
-            <div className={"self-start bg-bot-bubble text-bot-bubble rounded-xl p-2 max-w-[80%] bubble-" + currentNode.type}>
-              {renderNode(currentNode)}
-            </div>
+    <div className="flex flex-col h-screen bg-gray-50">
+      {/* Header with bot profile pic and title */}
+      <div className="p-3 bg-white shadow-sm flex items-center border-b">
+        <div className="flex items-center max-w-3xl mx-auto w-full">
+          <img src={botProfileImg} alt="Bot" className="h-9 w-9 rounded-full object-cover mr-3" />
+          <h1 className="font-medium">{chatTitle}</h1>
+        </div>
+      </div>
+
+      {/* Chat container com área de rolagem */}
+      <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full relative overflow-hidden">
+        {/* Messages area com rolagem */}
+        <div
+          ref={chatHistoryRef}
+          className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50"
+          style={{ paddingBottom: '60px' }} // Adicionando espaço para o footer
+        >
+          {conversation.map((node, idx) => {
+            // Skip rendering start nodes
+            if (node.type === "start") return null;
+
+            const alignRight = isRightAligned(node.type);
+            return (
+              <div
+                key={node.id || idx}
+                className={`flex ${alignRight ? 'justify-end' : 'justify-start'}`}
+              >
+                {!alignRight && (
+                  <img
+                    src={botProfileImg}
+                    alt="Bot"
+                    className="h-8 w-8 rounded-full object-cover mr-2 self-end"
+                  />
+                )}
+                <div
+                  className={
+                    (alignRight
+                      ? "bg-user-bubble text-user-bubble"
+                      : "bg-bot-bubble text-bot-bubble") +
+                    " rounded-2xl p-3 max-w-[80%] shadow-sm bubble-" +
+                    node.type
+                  }
+                >
+                  {renderNode(node)}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Display current interactive input node - only if it's active (not answered) */}
+          {currentNode && interactiveTypes.includes(currentNode.type) &&
+           !currentNode.content?.answered && showInputField && (
+            <>
+              {/* User input field on the right */}
+              {currentNode.type !== "input_wait" && (
+                <div className="flex justify-end mt-2 mb-10">
+                  <div className="bg-white rounded-2xl p-2 max-w-[80%] shadow-sm bubble-animate bubble-appear">
+                    {React.createElement(() => {
+                      const props = {
+                        node: currentNode,
+                        inputValue,
+                        setInputValue,
+                        handleKeyDown,
+                        handleInputSubmit,
+                        isInvalid: !isInputValid
+                      };
+
+                      // Only render the input fields, not the prompt
+                      switch (currentNode.type) {
+                        case "input_text":
+                          return (
+                            <div className="p-1">
+                              <input
+                                type="text"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder="Digite sua resposta..."
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                // Add key to prevent input from losing focus
+                                key="input-text"
+                                autoFocus
+                              />
+                              <button
+                                onClick={handleInputSubmit}
+                                disabled={!isInputValid && !!inputValue}
+                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md w-full"
+                              >
+                                Enviar
+                              </button>
+                            </div>
+                          );
+                        case "input_date":
+                          return (
+                            <div className="p-1">
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  value={inputValue}
+                                  onChange={(e) => {
+                                    // Accept only digits and slashes for date input
+                                    const value = e.target.value.replace(/[^\d/]/g, '');
+
+                                    // Format as user types: add slashes automatically
+                                    let formattedValue = value;
+                                    if (value.length === 2 && !value.includes('/')) {
+                                      formattedValue = value + '/';
+                                    } else if (value.length === 5 && value.indexOf('/') === 2 && !value.includes('/', 3)) {
+                                      formattedValue = value + '/';
+                                    }
+
+                                    setInputValue(formattedValue);
+                                  }}
+                                  onKeyDown={handleKeyDown}
+                                  placeholder="DD/MM/AAAA"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                  maxLength={10}
+                                  key="input-date"
+                                  autoFocus
+                                />
+                              </div>
+                              <button
+                                onClick={handleInputSubmit}
+                                disabled={(!isInputValid && !!inputValue) || inputValue.length < 10}
+                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md w-full"
+                              >
+                                Enviar
+                              </button>
+                            </div>
+                          );
+                        case "input_email":
+                          return (
+                            <div className="p-1">
+                              <input
+                                type="email"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder="Digite seu email..."
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                key="input-email"
+                                autoFocus
+                              />
+                              <button
+                                onClick={handleInputSubmit}
+                                disabled={!isInputValid && !!inputValue}
+                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md w-full"
+                              >
+                                Enviar
+                              </button>
+                            </div>
+                          );
+                        case "input_phone":
+                          return (
+                            <div className="p-1">
+                              <input
+                                type="tel"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder="Digite seu telefone..."
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                key="input-phone"
+                                autoFocus
+                              />
+                              <button
+                                onClick={handleInputSubmit}
+                                disabled={!isInputValid && !!inputValue}
+                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md w-full"
+                              >
+                                Enviar
+                              </button>
+                            </div>
+                          );
+                        case "input_number":
+                          return (
+                            <div className="p-1">
+                              <input
+                                type="number"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder="Digite um número..."
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                key="input-number"
+                                autoFocus
+                              />
+                              <button
+                                onClick={handleInputSubmit}
+                                disabled={!isInputValid && !!inputValue}
+                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md w-full"
+                              >
+                                Enviar
+                              </button>
+                            </div>
+                          );
+                        case "input_website":
+                          return (
+                            <div className="p-1">
+                              <input
+                                type="url"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder="Digite uma URL..."
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                key="input-website"
+                                autoFocus
+                              />
+                              <button
+                                onClick={handleInputSubmit}
+                                disabled={!isInputValid && !!inputValue}
+                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md w-full"
+                              >
+                                Enviar
+                              </button>
+                            </div>
+                          );
+                        case "input_buttons":
+                          const choices = currentNode.content.choices || [];
+                          const layout = currentNode.content.layout || 'vertical'; // Change default to vertical for mobile
+
+                          return (
+                            <div className="p-1">
+                              <div className={`flex ${layout === 'horizontal' ? 'flex-row flex-wrap' : 'flex-col'} gap-2`}>
+                                {choices.map((choice: any, idx: number) => (
+                                  <button
+                                    key={idx}
+                                    onClick={() => handleChoiceSelect(choice)}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all shadow-sm"
+                                  >
+                                    {choice.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        case "input_pic_choice":
+                          return renderPicChoiceInputNode({
+                            ...props,
+                            handleChoiceSelect
+                          });
+                        default:
+                          return renderNode({...currentNode, content: {...currentNode.content, hidePrompt: true}});
+                      }
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
           )}
+        </div>
+
+        {/* Fixed watermark at the bottom */}
+        <div className="fixed bottom-0 left-0 right-0 p-3 bg-white bg-opacity-90 border-t border-gray-200 text-center z-10 max-w-3xl mx-auto w-full">
+          <div className="flex justify-center items-center">
+            <img src={logoImage} alt="VendFlow" className="h-4 mr-1" />
+            <span className="text-xs font-medium text-gray-600">Powered by VendFlow</span>
+          </div>
+        </div>
       </div>
     </div>
   );

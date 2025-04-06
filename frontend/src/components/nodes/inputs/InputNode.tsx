@@ -97,51 +97,35 @@ export function renderGenericInputNode({
   handleKeyDown,
   handleInputSubmit,
   inputType = "text",
-  placeholder = "Type your answer...",
+  placeholder = "Digite sua resposta...",
+  isInvalid = false,
+  validationError,
 }: RenderInputNodeProps) {
   // Extract validation patterns from node content if available
   const validationPattern = node.content.validation?.pattern || null;
-  const validationMessage = node.content.validation?.message || "Please enter a valid value";
+  const validationMessage = node.content.validation?.message || "Por favor, digite um valor válido";
+
+  // Check if this input has already been answered (if it has an answer node in the conversation)
+  const isAnswered = node.content.answered === true;
 
   // Check if the current input is valid
-  const isInvalid = validationPattern ?
-    !new RegExp(validationPattern).test(inputValue) && inputValue.length > 0 : false;
+  const isInputInvalid = validationPattern ?
+    !new RegExp(validationPattern).test(inputValue) && inputValue.length > 0 : false || isInvalid;
 
+  // Only show the prompt since the node is just a prompt message from the bot
+  if (isAnswered) {
   return (
-    <VStack spacing={3} align="stretch">
       <Box>
         <Text>{node.content.prompt}</Text>
       </Box>
-      <FormControl isInvalid={isInvalid}>
-        <HStack>
-          <Input
-            type={inputType}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => {
-              // Only submit if valid or no validation
-              if (!isInvalid || !validationPattern) {
-                handleKeyDown(e);
-              }
-            }}
-            placeholder={placeholder}
-            pattern={validationPattern}
-            title={validationMessage}
-            flex="1"
-          />
-          <Button
-            onClick={handleInputSubmit}
-            colorScheme="blue"
-            isDisabled={isInvalid && !!inputValue}
-          >
-            Send
-          </Button>
-        </HStack>
-        {isInvalid && (
-          <FormErrorMessage>{validationMessage}</FormErrorMessage>
-        )}
-      </FormControl>
-    </VStack>
+    );
+  }
+
+  // Show prompt only, input will be displayed on the right side
+  return (
+    <Box>
+      <Text>{node.content.prompt}</Text>
+    </Box>
   );
 }
 

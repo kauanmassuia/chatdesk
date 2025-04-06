@@ -58,7 +58,7 @@ export function renderWebsiteInputNode(props: any) {
   return renderGenericInputNode({
     ...urlProps,
     inputType: "url",
-    placeholder: "Enter a website URL..."
+    placeholder: "Digite uma URL..."
   });
 }
 

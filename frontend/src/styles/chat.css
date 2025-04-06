@@ -1,8 +1,8 @@
 :root {
-  --bot-bubble-bg: #F7F8FF;
+  --bot-bubble-bg: #f5f7fb;
   --bot-bubble-color: #303235;
-  --user-bubble-bg: #E1FFC7;
-  --user-bubble-color: #303235;
+  --user-bubble-bg: #e8f5fe;
+  --user-bubble-color: #1a73e8;
   --chat-font-size: 16px;
   --chat-padding: 1rem;
 }
@@ -19,4 +19,75 @@
 }
 .text-user-bubble {
   color: var(--user-bubble-color) !important;
+}
+
+/* Chat bubble animations */
+.bubble-animate {
+  transition: all 0.3s ease;
+}
+
+.bubble-appear {
+  animation: bubbleAppear 0.3s ease forwards;
+}
+
+@keyframes bubbleAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Chat bubble styles */
+.bubble-text, .bubble-message, .bubble-start, .bubble-user {
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* Specific node type styling */
+.bubble-image img {
+  border-radius: 0.5rem;
+  max-width: 100%;
+}
+
+.bubble-video video {
+  border-radius: 0.5rem;
+  max-width: 100%;
+}
+
+.bubble-audio audio {
+  max-width: 100%;
+}
+
+/* Input styling */
+input, textarea, select {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+  transition: all 0.2s;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #3182ce;
+  box-shadow: 0 0 0 1px #3182ce;
+}
+
+.input-invalid {
+  border-color: #e53e3e !important;
+}
+
+/* Button styling */
+button {
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+button:hover {
+  transform: translateY(-1px);
 }

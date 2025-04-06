@@ -42,31 +42,33 @@ export function exportDateInputNode(node: any) {
 }
 
 export function renderDateInputNode({ node, inputValue, setInputValue, handleInputSubmit }: any) {
-  // Date inputs need special handling for formatting and validation
+  // Show only the prompt text since the actual input will be rendered on the right side in ChatReader
   return (
-    <VStack spacing={3} align="stretch">
-      <Box>
-        <Text>{node.content.prompt}</Text>
-      </Box>
-      <FormControl>
-        <HStack>
-          <Input
-            type="date"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            flex="1"
-          />
-          <Button
-            onClick={handleInputSubmit}
-            colorScheme="blue"
-            isDisabled={!inputValue}
-          >
-            Send
-          </Button>
-        </HStack>
-      </FormControl>
-    </VStack>
+    <Box>
+      <Text>{node.content.prompt}</Text>
+    </Box>
   );
+}
+
+// Helper to convert between ISO date format and Brazilian format (dd/mm/yyyy)
+export function formatDateBrazilian(isoDate: string): string {
+  if (!isoDate) return '';
+  try {
+    const [year, month, day] = isoDate.split('-');
+    return `${day}/${month}/${year}`;
+  } catch (e) {
+    return isoDate;
+  }
+}
+
+export function parseToIsoDate(brDate: string): string {
+  if (!brDate) return '';
+  try {
+    const [day, month, year] = brDate.split('/');
+    return `${year}-${month}-${day}`;
+  } catch (e) {
+    return brDate;
+  }
 }
 
 DateInputNode.displayName = 'DateInputNode'

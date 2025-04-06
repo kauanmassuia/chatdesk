@@ -59,7 +59,7 @@ export function renderPhoneInputNode(props: any) {
   return renderGenericInputNode({
     ...phoneProps,
     inputType: "tel",
-    placeholder: "Enter your phone number..."
+    placeholder: "Digite seu telefone..."
   });
 }
 

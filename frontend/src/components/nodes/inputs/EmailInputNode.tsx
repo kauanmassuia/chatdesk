@@ -35,7 +35,7 @@ export function renderEmailInputNode(props: any) {
   return renderGenericInputNode({
     ...props,
     inputType: "email",
-    placeholder: "Enter your email address..."
+    placeholder: "Digite seu email..."
   });
 }
 
