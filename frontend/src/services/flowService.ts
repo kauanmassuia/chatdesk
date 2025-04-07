@@ -111,6 +111,22 @@ export const updateFlowUrl = async (uid: string, url: string) => {
   return response.data;
 };
 
+export const updateFlowTitle = async (uid: string, title: string) => {
+  const accessToken = localStorage.getItem("access-token");
+  const client = localStorage.getItem("client");
+  const uidHeader = localStorage.getItem("uid");
+
+  const response = await axios.put(
+    `${API_BASE_URL}/flows/${uid}`,
+    { flow: { title } },
+    {
+      headers: { 'access-token': accessToken, client, uid: uidHeader },
+      withCredentials: true,
+    }
+  );
+  return response.data;
+};
+
 export const fetchPublishedFlow = async (customUrl: string) => {
   const response = await axios.get(`${API_BASE_URL}/flows/published/${customUrl}`);
   if (response.data && response.data.published_content && typeof response.data.published_content === 'string') {

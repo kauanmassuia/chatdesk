@@ -11,9 +11,11 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
-  useBreakpointValue
+  useBreakpointValue,
+  Input,
+  Tooltip
 } from '@chakra-ui/react';
-import { FiChevronLeft, FiHelpCircle, FiMoreHorizontal } from 'react-icons/fi';
+import { FiChevronLeft, FiHelpCircle, FiMoreHorizontal, FiEdit2, FiCheck } from 'react-icons/fi';
 import { BsLightning } from 'react-icons/bs';
 import { RiTestTubeLine, RiUploadCloudLine } from 'react-icons/ri';
 import { useFlowStore } from '../store/flowStore';
@@ -22,8 +24,8 @@ import ImportFlowModal from './modal/ImportFlowModal';
 import NotPublishedModal from './modal/NotPublishedModal';
 import Publish from './buttons/Publish';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { getFlow } from '../services/flowService';
+import { useState, useEffect, useRef } from 'react';
+import { getFlow, updateFlowTitle } from '../services/flowService';
 
 interface HeaderProps {
   flowId: string | null;
@@ -36,6 +38,9 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isFlowPublished, setIsFlowPublished] = useState<boolean>(false);
+  const [flowTitle, setFlowTitle] = useState<string>('Untitled Flow');
+  const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   // Determine current page
   const isResults = location.search.includes('/results');
@@ -49,6 +54,7 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
         try {
           const flowData = await getFlow(flowId);
           setIsFlowPublished(flowData.published || false);
+          setFlowTitle(flowData.title || 'Untitled Flow');
         } catch (error) {
           console.error('Error checking flow published status:', error);
         }
@@ -57,6 +63,37 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
 
     checkPublishedStatus();
   }, [flowId]);
+
+  // Focus input when editing
+  useEffect(() => {
+    if (isEditingTitle && titleInputRef.current) {
+      titleInputRef.current.focus();
+      titleInputRef.current.select();
+    }
+  }, [isEditingTitle]);
+
+  const handleTitleEdit = () => {
+    setIsEditingTitle(true);
+  };
+
+  const handleTitleSave = async () => {
+    if (!flowId) return;
+
+    try {
+      await updateFlowTitle(flowId, flowTitle);
+      setIsEditingTitle(false);
+    } catch (error) {
+      console.error('Error updating flow title:', error);
+    }
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleTitleSave();
+    } else if (e.key === 'Escape') {
+      setIsEditingTitle(false);
+    }
+  };
 
   const handleExport = () => {
     const flowJson = exportFlowAsJson(nodes, edges);
@@ -129,9 +166,51 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
               transition="all 0.3s ease"
             />
 
-            <Text fontSize="sm" fontWeight="semibold" color="gray.600">
-              Funil de Vendas
-            </Text>
+            {isEditingTitle ? (
+              <HStack>
+                <Input
+                  ref={titleInputRef}
+                  value={flowTitle}
+                  onChange={(e) => setFlowTitle(e.target.value)}
+                  onKeyDown={handleTitleKeyDown}
+                  onBlur={handleTitleSave}
+                  size="sm"
+                  fontSize="sm"
+                  fontWeight="semibold"
+                  width="auto"
+                  maxW="200px"
+                  borderColor="gray.300"
+                  _hover={{ borderColor: 'gray.400' }}
+                  _focus={{ borderColor: '#ff9800', boxShadow: '0 0 0 1px #ff9800' }}
+                />
+                <IconButton
+                  aria-label="Save title"
+                  icon={<FiCheck />}
+                  size="xs"
+                  variant="ghost"
+                  onClick={handleTitleSave}
+                  color="#6c757d"
+                  _hover={{ bg: '#f8f9fa', color: '#ff9800' }}
+                />
+              </HStack>
+            ) : (
+              <Tooltip label="Click to edit title" placement="top" hasArrow>
+                <HStack
+                  spacing={1}
+                  onClick={handleTitleEdit}
+                  cursor="pointer"
+                  _hover={{ color: '#ff9800' }}
+                  transition="all 0.2s ease"
+                >
+                  <Text fontSize="sm" fontWeight="semibold" color="gray.600">
+                    {flowTitle}
+                  </Text>
+                  <Box opacity={0.5} _groupHover={{ opacity: 1 }}>
+                    <FiEdit2 size={12} />
+                  </Box>
+                </HStack>
+              </Tooltip>
+            )}
 
             <IconButton
               aria-label="Ajuda"
