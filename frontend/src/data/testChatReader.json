@@ -1,0 +1,59 @@
+{
+  "version": "1.0",
+  "id": "exported_flow",
+  "name": "VendFlow",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "start",
+      "content": {
+        "name": "Start Node"
+      },
+      "next": "text-1743973802831",
+      "position": {
+        "x": 200,
+        "y": 200
+      }
+    },
+    {
+      "id": "text-1743973802831",
+      "type": "text",
+      "content": {
+        "text": "Olá, tudo bem?",
+        "name": "Mensagem de Texto"
+      },
+      "next": "input_text-1744066187391",
+      "position": {
+        "x": 434.26913084714965,
+        "y": 319.8687854243321
+      }
+    },
+    {
+      "id": "input_text-1744066187391",
+      "type": "input_text",
+      "content": {
+        "name": "Input - Texto",
+        "prompt": "Digite aqui o seu nome.",
+        "validation": null
+      },
+      "next": "text-1744066215056",
+      "position": {
+        "x": 467.7906357625708,
+        "y": 526.7872003932695
+      }
+    },
+    {
+      "id": "text-1744066215056",
+      "type": "text",
+      "content": {
+        "text": "Legal, por aqui você pode customizar seu Chat!",
+        "name": "Mensagem de Texto"
+      },
+      "next": null,
+      "position": {
+        "x": 533.8943527674036,
+        "y": 742.9194972846917
+      }
+    }
+  ]
+}

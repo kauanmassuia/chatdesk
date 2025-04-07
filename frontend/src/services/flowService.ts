@@ -36,17 +36,24 @@ export const createFlow = async (title: string, content: object = {}) => {
   return response.data;
 };
 
-export const updateFlow = async (uid: string, content: object, updatePublished: boolean = false) => {
+export const updateFlow = async (uid: string, content: object, updatePublished: boolean = false, metadata?: object) => {
   const accessToken = localStorage.getItem("access-token");
   const client = localStorage.getItem("client");
   const uidHeader = localStorage.getItem("uid");
 
+  const requestData: any = {
+    content,
+    update_published: updatePublished
+  };
+
+  // Add metadata to the request if provided
+  if (metadata) {
+    requestData.metadata = metadata;
+  }
+
   const response = await axios.put(
     `${API_BASE_URL}/flows/${uid}`,
-    {
-      content,
-      update_published: updatePublished // This tells the backend to also update published_content
-    },
+    requestData,
     {
       headers: { 'access-token': accessToken, client, uid: uidHeader },
       withCredentials: true,

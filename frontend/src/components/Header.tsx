@@ -45,7 +45,8 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
   // Determine current page
   const isResults = location.search.includes('/results');
   const isPublished = location.search.includes('/published');
-  const isEditor = !isResults && !isPublished;
+  const isTheme = location.search.includes('/theme');
+  const isEditor = !isResults && !isPublished && !isTheme;
 
   useEffect(() => {
     // Check if flow is published when flowId changes
@@ -117,7 +118,7 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
     }
   };
 
-  const navigateToPage = (page: 'editor' | 'results' | 'published') => {
+  const navigateToPage = (page: 'editor' | 'results' | 'published' | 'theme') => {
     if (!flowId) return;
 
     switch (page) {
@@ -129,6 +130,9 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
         break;
       case 'published':
         navigate(`/editor?flow_id=${flowId}/published`);
+        break;
+      case 'theme':
+        navigate(`/editor?flow_id=${flowId}/theme`);
         break;
     }
   };
@@ -246,6 +250,8 @@ const Header: React.FC<HeaderProps> = ({ flowId }) => {
               size="sm"
               variant="outline"
               color="#6c757d"
+              isActive={isTheme}
+              onClick={() => navigateToPage('theme')}
               _hover={{ bg: '#f8f9fa', color: '#6c757d' }}
               _active={{
                 bg: 'white',
