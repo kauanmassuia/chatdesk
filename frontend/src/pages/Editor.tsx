@@ -34,6 +34,7 @@ import { useLocation } from 'react-router-dom'
 import { updateFlow, getFlow } from '../services/flowService'
 import { exportFlowAsJson } from '../utils/exportFlowAsJson'
 import { importFlowFromJson } from '../utils/importFlowFromJson'
+import { estilizarLinhas } from '../components/LineEditor'
 
 const nodeTypes = {
   text: TextNode,
@@ -73,7 +74,7 @@ function EditorContent() {
   const uid = new URLSearchParams(location.search).get('flow_id')
   const [isSaving, setIsSaving] = useState(false)
 
-  const bgColor = useColorModeValue('gray.50', 'gray.900')
+  const bgColor = useColorModeValue('gray.', 'gray.900')
   const dropHighlightColor = useColorModeValue('blue.50', 'blue.900')
 
   useEffect(() => {
@@ -217,21 +218,21 @@ function EditorContent() {
           transition="background-color 0.1s ease-out"
           position="relative"
         >
-          <ReactFlow
-            nodes={rehydratedNodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            nodeTypes={nodeTypes}
-            onDragOver={onDragOver}
-            onDrop={onDrop}
-            onDragLeave={onDragLeave}
-            fitView={false}  // Desabilitar fitView para evitar ajuste automático
-            minZoom={0.5}  // Zoom mínimo
-            maxZoom={1.5}  // Zoom máximo
-            defaultViewport={{ x: 0, y: 0, zoom: 0.8 }} // Ajuste de zoom inicial
-          >
+                  <ReactFlow
+          nodes={rehydratedNodes}
+          edges={estilizarLinhas(edges)}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          nodeTypes={nodeTypes}
+          onDragOver={onDragOver}
+          onDrop={onDrop}
+          onDragLeave={onDragLeave}
+          fitView={false}
+          minZoom={0.5}
+          maxZoom={1.5}
+          defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+        >
             <Background gap={16} size={1} />
             <Controls showInteractive={false} />
             <MiniMap
