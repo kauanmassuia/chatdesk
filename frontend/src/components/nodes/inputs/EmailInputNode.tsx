@@ -2,6 +2,7 @@ import { MdOutlineEmail } from 'react-icons/md'
 import InputNode from './InputNode'
 import { renderGenericInputNode } from './InputNode';
 import { exportBaseInputNodeData } from './InputNode';
+import { Box, Text } from '@chakra-ui/react';
 
 interface EmailInputNodeProps {
   data: {
@@ -30,10 +31,35 @@ const EmailInputNode = ({ data, selected }: EmailInputNodeProps) => {
 }
 
 export function renderEmailInputNode(props: any) {
+  const { node } = props;
+
+  // When being used to render the node in the conversation, only show the prompt
+  if (!props.setInputValue || !props.handleInputSubmit) {
+    return (
+      <Box>
+        <Text>{node?.content?.prompt || ''}</Text>
+      </Box>
+    );
+  }
+
+  // Make sure we have validation in the node
+  const emailProps = { ...props };
+  if (!emailProps.node?.content?.validation) {
+    emailProps.node = {
+      ...emailProps.node,
+      content: {
+        ...emailProps.node?.content,
+        validation: {
+          pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',
+          message: 'Por favor, digite um email válido'
+        }
+      }
+    };
+  }
+
   // Email validation is already in the node content from exportEmailInputNode
-  // We don't need to add it here as it will be extracted by renderGenericInputNode
   return renderGenericInputNode({
-    ...props,
+    ...emailProps,
     inputType: "email",
     placeholder: "Digite seu email..."
   });

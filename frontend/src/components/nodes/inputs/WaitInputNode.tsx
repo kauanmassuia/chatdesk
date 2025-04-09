@@ -39,10 +39,12 @@ export function exportWaitInputNode(node: any) {
   }
 }
 
-export function renderWaitInputNode({ node }: any) {
+export function renderWaitInputNode(props: any) {
+  const { node } = props;
+
   // Show a spinner and countdown if needed
-  const waitTime = node.content?.waitTime || 1;
-  const waitMessage = node.content?.message || "Please wait...";
+  const waitTime = node?.content?.waitTime || 1;
+  const waitMessage = node?.content?.message || "Por favor, aguarde...";
 
   return (
     <VStack spacing={3} align="center">
@@ -58,7 +60,7 @@ export function renderWaitInputNode({ node }: any) {
       />
       {waitTime > 2 && (
         <Text fontSize="sm" color="gray.500">
-          (Waiting for {waitTime} seconds)
+          (Aguardando por {waitTime} segundos)
         </Text>
       )}
     </VStack>

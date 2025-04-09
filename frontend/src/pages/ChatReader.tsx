@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Box, Image } from '@chakra-ui/react';
 import '../styles/chat.css';
 import { useParams } from 'react-router-dom';
@@ -51,6 +51,69 @@ function isRightAligned(nodeType: string): boolean {
   return nodeType === "user";
 }
 
+// Define interface for InputField props
+interface InputFieldProps {
+  type?: string;
+  nodeType: string;
+  inputValue: string;
+  setInputValue: (value: string) => void;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  handleInputSubmit: () => void;
+  isInvalid: boolean;
+  currentNode: FlowNode;
+  handleChoiceSelect: (choice: any) => void;
+}
+
+// Create an InputField component outside the main component
+const InputField = React.memo(({
+  nodeType,
+  inputValue,
+  setInputValue,
+  handleKeyDown,
+  handleInputSubmit,
+  isInvalid,
+  currentNode,
+  handleChoiceSelect
+}: InputFieldProps) => {
+  // Common props for all input renderers
+  const props = {
+    node: currentNode,
+    inputValue,
+    setInputValue,
+    handleKeyDown,
+    handleInputSubmit,
+    isInvalid,
+    handleChoiceSelect
+  };
+
+  // Only render the input fields, not the prompt
+  switch (nodeType) {
+    case "input_text":
+      return renderTextInputNode(props);
+    case "input_date":
+      return renderDateInputNode(props);
+    case "input_email":
+      return renderEmailInputNode(props);
+    case "input_phone":
+      return renderPhoneInputNode(props);
+    case "input_number":
+      return renderNumberInputNode(props);
+    case "input_website":
+      return renderWebsiteInputNode(props);
+    case "input_buttons":
+      return renderButtonsInputNode(props);
+    case "input_pic_choice":
+      return renderPicChoiceInputNode(props);
+    case "input_payment":
+      return renderPaymentInputNode(props);
+    case "input_wait":
+      return renderWaitInputNode(props);
+    default:
+      console.warn(`Unsupported input node type: ${nodeType}`);
+      return null;
+  }
+});
+
 const ChatReader: React.FC = () => {
   const { custom_url } = useParams<{ custom_url: string }>();
   const [chatFlow, setChatFlow] = useState<{ nodes: FlowNode[] } | null>(null);
@@ -99,6 +162,32 @@ const ChatReader: React.FC = () => {
       chatHistoryRef.current.scrollTop = chatHistoryRef.current.scrollHeight;
     }
   }, [conversation]);
+
+  // Add this new useEffect for smooth scrolling to the latest message
+  useEffect(() => {
+    const scrollToBottom = () => {
+      if (chatHistoryRef.current) {
+        chatHistoryRef.current.scrollTo({
+          top: chatHistoryRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    };
+
+    // Initial scroll
+    scrollToBottom();
+
+    // Also scroll when the window is resized, which can change the content height
+    window.addEventListener('resize', scrollToBottom);
+
+    // Set up a small delay to ensure content has been rendered
+    const timeoutId = setTimeout(scrollToBottom, 100);
+
+    return () => {
+      window.removeEventListener('resize', scrollToBottom);
+      clearTimeout(timeoutId);
+    };
+  }, [conversation, currentNodeId, showInputField]);
 
   // Validate input based on current node type and validation rules
   const validateInput = (value: string, node: FlowNode): boolean => {
@@ -182,14 +271,14 @@ const ChatReader: React.FC = () => {
     return {
       ...node,
       content: {
-        ...node.content,
+        ...(node.content || {}),
         answered: true
       }
     };
   }
 
   function handleInputSubmit() {
-    if (!inputValue.trim() || !isInputValid) return;
+    if (!inputValue?.trim() || !isInputValid) return;
 
     const userBubble = {
       id: `user_${Date.now()}`,
@@ -220,7 +309,7 @@ const ChatReader: React.FC = () => {
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter" && isInputValid && inputValue.trim()) {
+    if (e.key === "Enter" && isInputValid && inputValue?.trim()) {
       handleInputSubmit();
     }
   }
@@ -251,27 +340,42 @@ const ChatReader: React.FC = () => {
     }, 500);
   }
 
-  // Node renderer mapping function
+  // Node renderer mapping function - used for rendering in the conversation history
   function renderNode(node: FlowNode) {
     // Skip rendering start nodes
-    if (node.type === "start") {
+    if (!node || node.type === "start") {
       return null;
     }
 
     // If node is an answered input node, only show the prompt
     if (node.content?.answered && interactiveTypes.includes(node.type)) {
-      return <Box>{node.content.prompt}</Box>;
+      // For answered input nodes, pass the node to its renderer
+      const { type } = node;
+      switch(type) {
+        case "input_text":
+          return renderTextInputNode({ node });
+        case "input_date":
+          return renderDateInputNode({ node });
+        case "input_website":
+          return renderWebsiteInputNode({ node });
+        case "input_phone":
+          return renderPhoneInputNode({ node });
+        case "input_email":
+          return renderEmailInputNode({ node });
+        case "input_number":
+          return renderNumberInputNode({ node });
+        case "input_buttons":
+          return renderButtonsInputNode({ node });
+        case "input_pic_choice":
+          return renderPicChoiceInputNode({ node });
+        case "input_wait":
+          return renderWaitInputNode({ node });
+        case "input_payment":
+          return renderPaymentInputNode({ node });
+        default:
+          return <Box>{node.content?.prompt || ''}</Box>;
+      }
     }
-
-    const props = {
-      node,
-      inputValue,
-      setInputValue,
-      handleKeyDown,
-      handleInputSubmit,
-      handleChoiceSelect,
-      isInvalid: !isInputValid
-    };
 
     // Map node types to their respective renderer functions
     switch (node.type) {
@@ -289,73 +393,31 @@ const ChatReader: React.FC = () => {
       case "user":
         return renderTextNode(node); // User messages are rendered as text
 
-      // Input types
+      // All input types - properly delegate to their respective render functions
       case "input_text":
-        return renderTextInputNode(props);
+        return renderTextInputNode({ node });
       case "input_date":
-        return (
-          <div className="p-1">
-            <div className="relative">
-              <input
-                type="text"
-                value={inputValue}
-                onChange={(e) => {
-                  // Accept only digits and slashes for date input
-                  const value = e.target.value.replace(/[^\d/]/g, '');
-
-                  // Format as user types: add slashes automatically
-                  let formattedValue = value;
-                  if (value.length === 2 && !value.includes('/')) {
-                    formattedValue = value + '/';
-                  } else if (value.length === 5 && value.indexOf('/') === 2 && !value.includes('/', 3)) {
-                    formattedValue = value + '/';
-                  }
-
-                  setInputValue(formattedValue);
-                }}
-                onKeyDown={handleKeyDown}
-                placeholder="DD/MM/AAAA"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                maxLength={10}
-                key="input-date"
-                autoFocus
-              />
-            </div>
-            <button
-              onClick={handleInputSubmit}
-              disabled={(!isInputValid && !!inputValue) || inputValue.length < 10}
-              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md w-full"
-            >
-              Enviar
-            </button>
-          </div>
-        );
+        return renderDateInputNode({ node });
       case "input_website":
-        return renderWebsiteInputNode(props);
+        return renderWebsiteInputNode({ node });
       case "input_phone":
-        return renderPhoneInputNode(props);
+        return renderPhoneInputNode({ node });
       case "input_email":
-        return renderEmailInputNode(props);
+        return renderEmailInputNode({ node });
       case "input_number":
-        return renderNumberInputNode(props);
+        return renderNumberInputNode({ node });
       case "input_buttons":
-        // Para nós de escolha/buttons, mostrar apenas o prompt na conversa
-        // Os botões serão renderizados no campo de input
-        return <Box>{node.content.prompt}</Box>;
+        return renderButtonsInputNode({ node });
       case "input_pic_choice":
-        // Para nós de escolha com imagens, mostrar apenas o prompt na conversa
-        // As opções com imagens serão renderizadas no campo de input
-        return <Box>{node.content.prompt}</Box>;
+        return renderPicChoiceInputNode({ node });
       case "input_wait":
-        return renderWaitInputNode(props);
+        return renderWaitInputNode({ node });
       case "input_payment":
-        return renderPaymentInputNode(props);
+        return renderPaymentInputNode({ node });
 
       default:
-        if (node) {
-          return renderNode(node);
-        }
-        return null;
+        console.warn(`Unsupported node type: ${node.type}`);
+        return <Box>Unsupported node type: {node.type}</Box>;
     }
   }
 
@@ -419,195 +481,16 @@ const ChatReader: React.FC = () => {
               {currentNode.type !== "input_wait" && (
                 <div className="flex justify-end mt-2 mb-10">
                   <div className="bg-white rounded-2xl p-2 max-w-[80%] shadow-sm bubble-animate bubble-appear">
-                    {React.createElement(() => {
-                      const props = {
-                        node: currentNode,
-                        inputValue,
-                        setInputValue,
-                        handleKeyDown,
-                        handleInputSubmit,
-                        isInvalid: !isInputValid
-                      };
-
-                      // Only render the input fields, not the prompt
-                      switch (currentNode.type) {
-                        case "input_text":
-                          return (
-                            <div className="p-1">
-                              <input
-                                type="text"
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder="Digite sua resposta..."
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                // Add key to prevent input from losing focus
-                                key="input-text"
-                                autoFocus
-                              />
-                              <button
-                                onClick={handleInputSubmit}
-                                disabled={!isInputValid && !!inputValue}
-                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md w-full"
-                              >
-                                Enviar
-                              </button>
-                            </div>
-                          );
-                        case "input_date":
-                          return (
-                            <div className="p-1">
-                              <div className="relative">
-                                <input
-                                  type="text"
-                                  value={inputValue}
-                                  onChange={(e) => {
-                                    // Accept only digits and slashes for date input
-                                    const value = e.target.value.replace(/[^\d/]/g, '');
-
-                                    // Format as user types: add slashes automatically
-                                    let formattedValue = value;
-                                    if (value.length === 2 && !value.includes('/')) {
-                                      formattedValue = value + '/';
-                                    } else if (value.length === 5 && value.indexOf('/') === 2 && !value.includes('/', 3)) {
-                                      formattedValue = value + '/';
-                                    }
-
-                                    setInputValue(formattedValue);
-                                  }}
-                                  onKeyDown={handleKeyDown}
-                                  placeholder="DD/MM/AAAA"
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                  maxLength={10}
-                                  key="input-date"
-                                  autoFocus
-                                />
-                              </div>
-                              <button
-                                onClick={handleInputSubmit}
-                                disabled={(!isInputValid && !!inputValue) || inputValue.length < 10}
-                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md w-full"
-                              >
-                                Enviar
-                              </button>
-                            </div>
-                          );
-                        case "input_email":
-                          return (
-                            <div className="p-1">
-                              <input
-                                type="email"
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder="Digite seu email..."
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                key="input-email"
-                                autoFocus
-                              />
-                              <button
-                                onClick={handleInputSubmit}
-                                disabled={!isInputValid && !!inputValue}
-                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md w-full"
-                              >
-                                Enviar
-                              </button>
-                            </div>
-                          );
-                        case "input_phone":
-                          return (
-                            <div className="p-1">
-                              <input
-                                type="tel"
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder="Digite seu telefone..."
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                key="input-phone"
-                                autoFocus
-                              />
-                              <button
-                                onClick={handleInputSubmit}
-                                disabled={!isInputValid && !!inputValue}
-                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md w-full"
-                              >
-                                Enviar
-                              </button>
-                            </div>
-                          );
-                        case "input_number":
-                          return (
-                            <div className="p-1">
-                              <input
-                                type="number"
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder="Digite um número..."
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                key="input-number"
-                                autoFocus
-                              />
-                              <button
-                                onClick={handleInputSubmit}
-                                disabled={!isInputValid && !!inputValue}
-                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md w-full"
-                              >
-                                Enviar
-                              </button>
-                            </div>
-                          );
-                        case "input_website":
-                          return (
-                            <div className="p-1">
-                              <input
-                                type="url"
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder="Digite uma URL..."
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                key="input-website"
-                                autoFocus
-                              />
-                              <button
-                                onClick={handleInputSubmit}
-                                disabled={!isInputValid && !!inputValue}
-                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md w-full"
-                              >
-                                Enviar
-                              </button>
-                            </div>
-                          );
-                        case "input_buttons":
-                          const choices = currentNode.content.choices || [];
-                          const layout = currentNode.content.layout || 'vertical'; // Change default to vertical for mobile
-
-                          return (
-                            <div className="p-1">
-                              <div className={`flex ${layout === 'horizontal' ? 'flex-row flex-wrap' : 'flex-col'} gap-2`}>
-                                {choices.map((choice: any, idx: number) => (
-                                  <button
-                                    key={idx}
-                                    onClick={() => handleChoiceSelect(choice)}
-                                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all shadow-sm"
-                                  >
-                                    {choice.label}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        case "input_pic_choice":
-                          return renderPicChoiceInputNode({
-                            ...props,
-                            handleChoiceSelect
-                          });
-                        default:
-                          return renderNode({...currentNode, content: {...currentNode.content, hidePrompt: true}});
-                      }
-                    })}
+                    <InputField
+                      nodeType={currentNode.type}
+                      inputValue={inputValue}
+                      setInputValue={setInputValue}
+                      handleKeyDown={handleKeyDown}
+                      handleInputSubmit={handleInputSubmit}
+                      isInvalid={!isInputValid}
+                      currentNode={currentNode}
+                      handleChoiceSelect={handleChoiceSelect}
+                    />
                   </div>
                 </div>
               )}

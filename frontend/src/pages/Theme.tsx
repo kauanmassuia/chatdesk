@@ -441,7 +441,7 @@ const Theme: React.FC = () => {
           {isPreviewVisible && (
             <GridItem>
               <Card variant="outline" shadow="sm" overflow="hidden" h="700px">
-                <CardBody p={0}>
+                <CardBody p={0} overflow="hidden" h="100%">
                   {flow && flow.content && (
                     <TestChatReader
                       flowData={flow.content}

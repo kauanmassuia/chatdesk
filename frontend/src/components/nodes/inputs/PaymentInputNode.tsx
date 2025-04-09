@@ -74,32 +74,44 @@ const PaymentInputNode = ({ data, selected }: PaymentInputNodeProps) => {
   )
 }
 
-export function renderPaymentInputNode({ node, handleChoiceSelect }: any) {
-  const amount = node.content.amount || 0;
-  const currency = node.content.currency || 'USD';
-  const description = node.content.description || '';
+export function renderPaymentInputNode(props: any) {
+  const { node, handleChoiceSelect } = props;
+
+  // When used in conversation (without the input handlers), just show the prompt
+  if (!props.handleChoiceSelect) {
+    return (
+      <Box>
+        <Text>{node?.content?.prompt || 'Pagamento Necessário'}</Text>
+      </Box>
+    );
+  }
+
+  // Otherwise show the full payment UI
+  const amount = node?.content?.amount || 0;
+  const currency = node?.content?.currency || 'BRL';
+  const description = node?.content?.description || '';
 
   return (
     <VStack spacing={3} align="stretch" p={3} borderWidth="1px" borderRadius="md">
       <Box>
-        <Text fontWeight="bold">{node.content.prompt || 'Payment Required'}</Text>
+        <Text fontWeight="bold">{node?.content?.prompt || 'Pagamento Necessário'}</Text>
         {description && <Text fontSize="sm" color="gray.600" mt={1}>{description}</Text>}
       </Box>
       <Divider />
       <HStack justifyContent="space-between">
-        <Text>Amount:</Text>
+        <Text>Valor:</Text>
         <Text fontWeight="bold">{amount} {currency}</Text>
       </HStack>
       <Button
-        onClick={() => handleChoiceSelect({ label: 'Payment completed', next: node.next })}
+        onClick={() => handleChoiceSelect({ label: 'Pagamento concluído', next: node?.next })}
         colorScheme="green"
         size="md"
         mt={2}
       >
-        Pay {amount} {currency}
+        Pagar {amount} {currency}
       </Button>
       <Text fontSize="xs" color="gray.500" textAlign="center">
-        Secure payment processed by our payment provider
+        Pagamento seguro processado por nosso provedor de pagamentos
       </Text>
     </VStack>
   );

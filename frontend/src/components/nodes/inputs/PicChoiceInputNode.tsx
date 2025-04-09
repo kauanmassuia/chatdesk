@@ -151,15 +151,24 @@ export function exportPicChoiceInputNode(node: any) {
   }
 }
 
-export function renderPicChoiceInputNode({ node, handleChoiceSelect }: any) {
-  const choices = node.content.choices || [];
-  const columns = node.content.columns || 2; // Default to 2 columns
+export function renderPicChoiceInputNode(props: any) {
+  const { node, handleChoiceSelect } = props;
+
+  // When used in conversation (without the input handlers), just render the prompt
+  if (!props.handleChoiceSelect || !node?.content?.choices) {
+    return (
+      <Box>
+        <Text>{node?.content?.prompt || ''}</Text>
+      </Box>
+    );
+  }
+
+  // For input field rendering, show the image choices
+  const choices = node?.content?.choices || [];
+  const columns = node?.content?.columns || 2; // Default to 2 columns
 
   return (
     <VStack spacing={3} align="stretch">
-      <Box>
-        <Text>{node.content.prompt}</Text>
-      </Box>
       <SimpleGrid columns={columns} spacing={3}>
         {choices.map((choice: any, idx: number) => (
           <Button
