@@ -40,6 +40,9 @@ interface TestChatReaderProps {
     textColor?: string;
     headingFontSize?: string;
     backgroundColor?: string;
+    backgroundType?: string;
+    backgroundImage?: string;
+    showVendFlowBrand?: boolean;
   };
 }
 
@@ -144,9 +147,10 @@ const TestChatReader: React.FC<TestChatReaderProps> = ({ flowData, themeSettings
   const [inputValue, setInputValue] = useState("");
   const [isInputValid, setIsInputValid] = useState(true);
   const chatHistoryRef = useRef<HTMLDivElement>(null);
-  const [chatTitle, setChatTitle] = useState(themeSettings?.chatTitle || "Chat Assistant");
+  const [chatTitle, setChatTitle] = useState(themeSettings?.chatTitle || "Assistente de Chat");
   const [botProfileImg, setBotProfileImg] = useState<string>(themeSettings?.botProfileImg || logoImage);
   const [showInputField, setShowInputField] = useState(false);
+  const [showBrand, setShowBrand] = useState(themeSettings?.showVendFlowBrand !== false);
 
   // Apply theme settings from metadata
   const fontSize = themeSettings?.fontSize || '1rem';
@@ -435,11 +439,14 @@ const TestChatReader: React.FC<TestChatReaderProps> = ({ flowData, themeSettings
     if (themeSettings?.botProfileImg) {
       setBotProfileImg(themeSettings.botProfileImg);
     }
+    if (themeSettings?.showVendFlowBrand !== undefined) {
+      setShowBrand(themeSettings.showVendFlowBrand);
+    }
     // Note: we don't need to update other theme variables as they're used directly from themeSettings
   }, [themeSettings]);
 
   return (
-    <div className="flex flex-col h-full overflow-hidden" style={{
+    <div className="flex flex-col h-full overflow-hidden relative" style={{
       fontSize,
       fontFamily,
       color: textColor
@@ -455,12 +462,44 @@ const TestChatReader: React.FC<TestChatReaderProps> = ({ flowData, themeSettings
       {/* Chat messages with scroll */}
       <div
         ref={chatHistoryRef}
-        className="flex-1 overflow-y-auto p-4 space-y-3"
+        className="flex-1 overflow-y-auto p-4 space-y-3 relative"
         style={{
           backgroundColor,
-          height: 'calc(100% - 114px)' // Account for header (59px) and footer (55px)
+          height: 'calc(100% - 114px)', // Account for header (59px) and footer (55px)
+          position: 'relative'
         }}
       >
+        {/* Center Watermark - Fixed relative to chat container */}
+        {showBrand && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 100,
+              pointerEvents: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '80%',
+              height: '80%'
+            }}
+            className="watermark-container"
+            aria-hidden="true"
+          >
+            <img
+              src={logoImage}
+              alt="VendFlow Watermark"
+              style={{
+                width: '160px',
+                opacity: 0.25,
+                maxWidth: '100%'
+              }}
+            />
+          </div>
+        )}
+
         {conversation.map((node, idx) => {
           if (node.type === "start") return null;
           const alignRight = isRightAligned(node.type);
@@ -520,12 +559,14 @@ const TestChatReader: React.FC<TestChatReaderProps> = ({ flowData, themeSettings
       </div>
 
       {/* Watermark footer */}
-      <div className="p-3 bg-white bg-opacity-90 border-t border-gray-200 text-center w-full">
-        <div className="flex justify-center items-center">
-          <img src={logoImage} alt="VendFlow" className="h-4 mr-1" />
-          <span className="text-xs font-medium text-gray-600">Powered by VendFlow</span>
+      {showBrand && (
+        <div className="p-3 bg-white bg-opacity-90 border-t border-gray-200 text-center w-full">
+          <div className="flex justify-center items-center">
+            <img src={logoImage} alt="VendFlow" className="h-4 mr-1" />
+            <span className="text-xs font-medium text-gray-600">Desenvolvido por VendFlow</span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

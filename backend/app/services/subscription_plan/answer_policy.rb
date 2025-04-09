@@ -3,7 +3,7 @@ module SubscriptionPlan
   class AnswerPolicy < BasePolicy
     LIMITS = {
       free: 10,
-      standard: 30,
+      standard: 2000,
       premium: 10000
     }.freeze
 

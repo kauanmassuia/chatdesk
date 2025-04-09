@@ -144,5 +144,16 @@ export const fetchPublishedFlow = async (customUrl: string) => {
       response.data.published_content = { nodes: [], edges: [] };
     }
   }
+
+  // Make sure metadata is properly handled
+  if (response.data && response.data.metadata && typeof response.data.metadata === 'string') {
+    try {
+      response.data.metadata = JSON.parse(response.data.metadata.replace(/=>/g, ':'));
+    } catch (error) {
+      console.error('Error parsing flow metadata:', error);
+      response.data.metadata = {};
+    }
+  }
+
   return response.data;
 };

@@ -64,7 +64,7 @@ module Api
       # GET /api/v1/flows/published/:custom_url
       def show_by_custom_url
         @flow = Flow.find_by!(custom_url: params[:custom_url], published: true)
-        render json: { published_content: @flow.published_content }, status: :ok
+        render json: { published_content: @flow.published_content, metadata: @flow.metadata }, status: :ok
       rescue ActiveRecord::RecordNotFound
         render json: { error: "Flow not found" }, status: :not_found
       end
