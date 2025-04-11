@@ -37,16 +37,89 @@ export function exportDateInputNode(node: any) {
     content: {
       ...exportBaseInputNodeData(node),
       prompt: node.data?.prompt || '',
+      validation: {
+        pattern: "^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\\d{4}$",
+        message: "Por favor, digite uma data válida no formato DD/MM/AAAA"
+      }
     },
   }
 }
 
-export function renderDateInputNode({ node, inputValue, setInputValue, handleInputSubmit }: any) {
-  // Show only the prompt text since the actual input will be rendered on the right side in ChatReader
+export function renderDateInputNode({ node, inputValue, setInputValue, handleKeyDown, handleInputSubmit, isInvalid }: any) {
+  // When rendering in the conversation, only show the prompt
+  if (node?.content?.answered) {
+    return (
+      <Box>
+        <Text>{node?.content?.prompt || ''}</Text>
+      </Box>
+    );
+  }
+
+  // Get validation from node or use default
+  const validationPattern = node?.content?.validation?.pattern || "^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\\d{4}$";
+  const validationMessage = node?.content?.validation?.message || "Por favor, digite uma data válida no formato DD/MM/AAAA";
+
+  // Custom validation for dates
+  let isDateInvalid = false;
+  if (inputValue && inputValue.length === 10) {
+    if (!new RegExp(validationPattern).test(inputValue)) {
+      isDateInvalid = true;
+    } else {
+      // Additional validation to check if it's a real date
+      try {
+        const [day, month, year] = inputValue.split('/');
+        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        const isValidDate = date.getDate() === parseInt(day) &&
+                          date.getMonth() === parseInt(month) - 1 &&
+                          date.getFullYear() === parseInt(year);
+        isDateInvalid = !isValidDate;
+      } catch (e) {
+        isDateInvalid = true;
+      }
+    }
+  }
+
+  // For input field rendering (right side of the chat)
   return (
-    <Box>
-      <Text>{node.content.prompt}</Text>
-    </Box>
+    <div className="p-1">
+      <div className="relative">
+        <input
+          type="text"
+          value={inputValue || ''}
+          onChange={(e) => {
+            // Accept only digits and slashes for date input
+            const value = e.target.value.replace(/[^\d/]/g, '');
+
+            // Format as user types: add slashes automatically
+            let formattedValue = value;
+            if (value.length === 2 && !value.includes('/')) {
+              formattedValue = value + '/';
+            } else if (value.length === 5 && value.indexOf('/') === 2 && !value.includes('/', 3)) {
+              formattedValue = value + '/';
+            }
+
+            setInputValue(formattedValue);
+          }}
+          onKeyDown={handleKeyDown}
+          placeholder="DD/MM/AAAA"
+          className={`w-full px-3 py-2 border ${isDateInvalid && inputValue?.length === 10 ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+          maxLength={10}
+          autoFocus
+        />
+        {isDateInvalid && inputValue?.length === 10 && (
+          <div className="text-red-500 text-sm mt-1">
+            {validationMessage}
+          </div>
+        )}
+      </div>
+      <button
+        onClick={handleInputSubmit}
+        disabled={(isDateInvalid && !!(inputValue || '')) || (inputValue ? inputValue.length < 10 : false)}
+        className={`mt-2 px-4 py-2 rounded-md w-full ${(isDateInvalid && inputValue) || inputValue?.length < 10 ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+      >
+        Enviar
+      </button>
+    </div>
   );
 }
 

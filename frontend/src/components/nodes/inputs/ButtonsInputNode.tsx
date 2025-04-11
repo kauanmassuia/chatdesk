@@ -117,12 +117,36 @@ export function exportButtonsInputNode(node: any) {
   }
 }
 
-export function renderButtonsInputNode({ node, handleChoiceSelect }: any) {
-  // Just render the prompt text since buttons will be rendered on the right side
+export function renderButtonsInputNode(props: any) {
+  const { node, handleChoiceSelect } = props;
+
+  // When used in conversation (without the input handlers), just render the prompt
+  if (!props.handleChoiceSelect || !node?.content?.choices) {
+    return (
+      <Box>
+        <Text>{node?.content?.prompt || ''}</Text>
+      </Box>
+    );
+  }
+
+  // For input field rendering, show the buttons
+  const choices = node.content.choices || [];
+  const layout = node.content.layout || 'vertical'; // Default to vertical for mobile
+
   return (
-    <Box>
-      <Text>{node.content.prompt}</Text>
-    </Box>
+    <div className="p-1">
+      <div className={`flex ${layout === 'horizontal' ? 'flex-row flex-wrap' : 'flex-col'} gap-2`}>
+        {choices.map((choice: any, idx: number) => (
+          <button
+            key={idx}
+            onClick={() => handleChoiceSelect(choice)}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all shadow-sm"
+          >
+            {choice.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 

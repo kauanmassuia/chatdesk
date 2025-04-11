@@ -36,17 +36,24 @@ export const createFlow = async (title: string, content: object = {}) => {
   return response.data;
 };
 
-export const updateFlow = async (uid: string, content: object, updatePublished: boolean = false) => {
+export const updateFlow = async (uid: string, content: object, updatePublished: boolean = false, metadata?: object) => {
   const accessToken = localStorage.getItem("access-token");
   const client = localStorage.getItem("client");
   const uidHeader = localStorage.getItem("uid");
 
+  const requestData: any = {
+    content,
+    update_published: updatePublished
+  };
+
+  // Add metadata to the request if provided
+  if (metadata) {
+    requestData.metadata = metadata;
+  }
+
   const response = await axios.put(
     `${API_BASE_URL}/flows/${uid}`,
-    {
-      content,
-      update_published: updatePublished // This tells the backend to also update published_content
-    },
+    requestData,
     {
       headers: { 'access-token': accessToken, client, uid: uidHeader },
       withCredentials: true,
@@ -111,6 +118,22 @@ export const updateFlowUrl = async (uid: string, url: string) => {
   return response.data;
 };
 
+export const updateFlowTitle = async (uid: string, title: string) => {
+  const accessToken = localStorage.getItem("access-token");
+  const client = localStorage.getItem("client");
+  const uidHeader = localStorage.getItem("uid");
+
+  const response = await axios.put(
+    `${API_BASE_URL}/flows/${uid}`,
+    { flow: { title } },
+    {
+      headers: { 'access-token': accessToken, client, uid: uidHeader },
+      withCredentials: true,
+    }
+  );
+  return response.data;
+};
+
 export const fetchPublishedFlow = async (customUrl: string) => {
   const response = await axios.get(`${API_BASE_URL}/flows/published/${customUrl}`);
   if (response.data && response.data.published_content && typeof response.data.published_content === 'string') {
@@ -121,5 +144,16 @@ export const fetchPublishedFlow = async (customUrl: string) => {
       response.data.published_content = { nodes: [], edges: [] };
     }
   }
+
+  // Make sure metadata is properly handled
+  if (response.data && response.data.metadata && typeof response.data.metadata === 'string') {
+    try {
+      response.data.metadata = JSON.parse(response.data.metadata.replace(/=>/g, ':'));
+    } catch (error) {
+      console.error('Error parsing flow metadata:', error);
+      response.data.metadata = {};
+    }
+  }
+
   return response.data;
 };

@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import Editor from './pages/Editor'
 import Published from './pages/Published'
 import Results from './pages/Results'
+import Theme from './pages/Theme'
 import ChatReader from './pages/ChatReader';
 import GoogleOAuthSuccess from './pages/GoogleOAuthSuccess'
 import Docs from './pages/docs/docs'
@@ -26,6 +27,8 @@ const EditorRouter: React.FC = () => {
     return <Published />;
   } else if(subRoute === 'results') {
     return <Results />;
+  } else if(subRoute === 'theme') {
+    return <Theme />;
   }
   // Future cases for other subroutes can be handled here.
   return <Editor />;

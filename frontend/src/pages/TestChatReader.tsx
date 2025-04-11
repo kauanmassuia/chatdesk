@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { Box, Image } from '@chakra-ui/react';
 import '../styles/chat.css';
-import { useParams } from 'react-router-dom';
-import { fetchPublishedFlow } from '../services/flowService';
-import { saveAnswer } from '../services/answerService';
 import logoImage from '../assets/logovendflow.png';
+import fallbackFlowData from '../data/testChatReader.json';
 
 // Import node renderers
 import { renderTextNode } from '../components/nodes/TextNode';
@@ -15,7 +13,7 @@ import { renderMessageNode } from '../components/nodes/MessageNode';
 
 // Import input node renderers
 import { renderTextInputNode } from '../components/nodes/inputs/TextInputNode';
-import { renderDateInputNode, formatDateBrazilian, parseToIsoDate } from '../components/nodes/inputs/DateInputNode';
+import { renderDateInputNode } from '../components/nodes/inputs/DateInputNode';
 import { renderWebsiteInputNode } from '../components/nodes/inputs/WebsiteInputNode';
 import { renderPhoneInputNode } from '../components/nodes/inputs/PhoneInputNode';
 import { renderEmailInputNode } from '../components/nodes/inputs/EmailInputNode';
@@ -30,6 +28,22 @@ interface FlowNode {
   type: string;
   content: any;
   next: string | null;
+}
+
+interface TestChatReaderProps {
+  flowData: any;  // The flow content to test
+  themeSettings?: {
+    botProfileImg?: string;
+    chatTitle?: string;
+    fontSize?: string;
+    fontFamily?: string;
+    textColor?: string;
+    headingFontSize?: string;
+    backgroundColor?: string;
+    backgroundType?: string;
+    backgroundImage?: string;
+    showVendFlowBrand?: boolean;
+  };
 }
 
 const interactiveTypes: string[] = [
@@ -51,9 +65,21 @@ function isRightAligned(nodeType: string): boolean {
   return nodeType === "user";
 }
 
+// Check if flow data is sufficient (has more than just a start node)
+const isFlowDataSufficient = (flowData: any): boolean => {
+  if (!flowData || !flowData.nodes || !Array.isArray(flowData.nodes)) {
+    return false;
+  }
+
+  // Check if there are at least two nodes and one of them is not a start node
+  const nodesCount = flowData.nodes.length;
+  const nonStartNodes = flowData.nodes.filter((node: { type: string }) => node.type !== 'start').length;
+
+  return nodesCount >= 2 && nonStartNodes >= 1;
+};
+
 // Define interface for InputField props
 interface InputFieldProps {
-  type?: string;
   nodeType: string;
   inputValue: string;
   setInputValue: (value: string) => void;
@@ -65,7 +91,7 @@ interface InputFieldProps {
 }
 
 // Create an InputField component outside the main component
-const InputField = React.memo(({
+const InputField = memo(({
   nodeType,
   inputValue,
   setInputValue,
@@ -114,74 +140,24 @@ const InputField = React.memo(({
   }
 });
 
-const ChatReader: React.FC = () => {
-  const { custom_url } = useParams<{ custom_url: string }>();
+const TestChatReader: React.FC<TestChatReaderProps> = ({ flowData, themeSettings }) => {
   const [chatFlow, setChatFlow] = useState<{ nodes: FlowNode[] } | null>(null);
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
   const [conversation, setConversation] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isInputValid, setIsInputValid] = useState(true);
   const chatHistoryRef = useRef<HTMLDivElement>(null);
-  const [chatTitle, setChatTitle] = useState("Chat Assistant");
-  const [botProfileImg, setBotProfileImg] = useState<string>(logoImage);
+  const [chatTitle, setChatTitle] = useState(themeSettings?.chatTitle || "Assistente de Chat");
+  const [botProfileImg, setBotProfileImg] = useState<string>(themeSettings?.botProfileImg || logoImage);
   const [showInputField, setShowInputField] = useState(false);
-  const [showBrand, setShowBrand] = useState(true);
-  const [themeSettings, setThemeSettings] = useState<{
-    botProfileImg?: string;
-    chatTitle?: string;
-    fontSize?: string;
-    fontFamily?: string;
-    textColor?: string;
-    headingFontSize?: string;
-    backgroundColor?: string;
-    backgroundType?: string;
-    backgroundImage?: string;
-    showVendFlowBrand?: boolean;
-  }>({});
+  const [showBrand, setShowBrand] = useState(themeSettings?.showVendFlowBrand !== false);
 
-  // Apply theme settings
+  // Apply theme settings from metadata
   const fontSize = themeSettings?.fontSize || '1rem';
   const fontFamily = themeSettings?.fontFamily || 'Inter, sans-serif';
   const textColor = themeSettings?.textColor || '#1A202C';
   const headingFontSize = themeSettings?.headingFontSize || '1.2rem';
   const backgroundColor = themeSettings?.backgroundColor || '#f9fafb'; // default bg-gray-50
-  const backgroundType = themeSettings?.backgroundType || 'color';
-  const backgroundImage = themeSettings?.backgroundImage || '';
-
-  // Create a style object for background
-  const pageBackgroundStyle = useMemo(() => {
-    // If there's a background image and the type is set to image, prioritize it
-    if (backgroundImage && backgroundType === 'image') {
-      return {
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      };
-    }
-    // Otherwise use background color
-    return {
-      backgroundColor
-    };
-  }, [backgroundImage, backgroundColor, backgroundType]);
-
-  // Add a semi-transparent overlay for text readability on image backgrounds
-  const messageContainerStyle = useMemo(() => {
-    const baseStyle = {
-      paddingBottom: '60px',
-      backgroundColor: 'transparent'
-    };
-
-    // If using a background image, add a subtle transparency to messages container for readability
-    if (backgroundImage && backgroundType === 'image') {
-      return {
-        ...baseStyle,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)'
-      };
-    }
-
-    return baseStyle;
-  }, [backgroundImage, backgroundType]);
 
   function getNodeById(flow: { nodes: FlowNode[] }, id: string | null): FlowNode | null {
     if (!id) return null;
@@ -189,90 +165,14 @@ const ChatReader: React.FC = () => {
   }
 
   useEffect(() => {
-    if (!custom_url) return;
-    fetchPublishedFlow(custom_url).then((data) => {
-      console.log('ChatReader: Fetched data:', data);
-
-      if (data && data.published_content) {
-        setChatFlow(data.published_content);
-
-        // Set chat title if available from the published flow
-        if (data.title) {
-          setChatTitle(data.title);
-        }
-
-        // Set bot profile image if available
-        if (data.bot_image) {
-          setBotProfileImg(data.bot_image);
-        }
-
-        // First check for theme in metadata
-        if (data.metadata && data.metadata.theme) {
-          console.log('ChatReader: Using theme from metadata:', data.metadata.theme);
-          setThemeSettings(data.metadata.theme);
-
-          // Apply specific theme settings from metadata
-          const metadataTheme = data.metadata.theme;
-
-          if (metadataTheme.chatTitle) {
-            setChatTitle(metadataTheme.chatTitle);
-          }
-
-          if (metadataTheme.botProfileImg) {
-            setBotProfileImg(metadataTheme.botProfileImg);
-          }
-
-          if (metadataTheme.showVendFlowBrand !== undefined) {
-            setShowBrand(metadataTheme.showVendFlowBrand);
-          }
-        }
-        // Only check published_content.metadata as fallback if top-level metadata is missing
-        else if (data.published_content?.metadata?.theme) {
-          console.log('ChatReader: Using theme from published_content.metadata:',
-            data.published_content.metadata.theme);
-          setThemeSettings(data.published_content.metadata.theme);
-
-          // Apply specific theme settings from published_content.metadata
-          const contentTheme = data.published_content.metadata.theme;
-
-          if (contentTheme.chatTitle) {
-            setChatTitle(contentTheme.chatTitle);
-          }
-
-          if (contentTheme.botProfileImg) {
-            setBotProfileImg(contentTheme.botProfileImg);
-          }
-
-          if (contentTheme.showVendFlowBrand !== undefined) {
-            setShowBrand(contentTheme.showVendFlowBrand);
-          }
-        }
-        // Finally check top-level theme_settings as last fallback
-        else if (data.theme_settings) {
-          console.log('ChatReader: Using theme_settings:', data.theme_settings);
-          setThemeSettings(data.theme_settings);
-
-          // Override with specific theme settings
-          if (data.theme_settings.chatTitle) {
-            setChatTitle(data.theme_settings.chatTitle);
-          }
-
-          if (data.theme_settings.botProfileImg) {
-            setBotProfileImg(data.theme_settings.botProfileImg);
-          }
-
-          if (data.theme_settings.showVendFlowBrand !== undefined) {
-            setShowBrand(data.theme_settings.showVendFlowBrand);
-          }
-        }
-      }
-    });
-  }, [custom_url]);
-
-  // Add a log to see what theme settings are being used
-  useEffect(() => {
-    console.log('ChatReader: Current themeSettings:', themeSettings);
-  }, [themeSettings]);
+    // Check if we have valid flow data, otherwise use fallback
+    if (isFlowDataSufficient(flowData)) {
+      setChatFlow(flowData);
+    } else {
+      console.log('Using fallback flow data for chat preview');
+      setChatFlow(fallbackFlowData);
+    }
+  }, [flowData]);
 
   useEffect(() => {
     if (!chatFlow) return;
@@ -289,30 +189,21 @@ const ChatReader: React.FC = () => {
     }
   }, [conversation]);
 
-  // Add this new useEffect for smooth scrolling to the latest message
+  // Update scroll effect to be more robust
   useEffect(() => {
     const scrollToBottom = () => {
       if (chatHistoryRef.current) {
-        chatHistoryRef.current.scrollTo({
-          top: chatHistoryRef.current.scrollHeight,
-          behavior: 'smooth'
-        });
+        const scrollHeight = chatHistoryRef.current.scrollHeight;
+        const height = chatHistoryRef.current.clientHeight;
+        const maxScrollTop = scrollHeight - height;
+        chatHistoryRef.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
       }
     };
 
-    // Initial scroll
     scrollToBottom();
-
-    // Also scroll when the window is resized, which can change the content height
-    window.addEventListener('resize', scrollToBottom);
-
-    // Set up a small delay to ensure content has been rendered
+    // Add a small delay to ensure content has rendered
     const timeoutId = setTimeout(scrollToBottom, 100);
-
-    return () => {
-      window.removeEventListener('resize', scrollToBottom);
-      clearTimeout(timeoutId);
-    };
+    return () => clearTimeout(timeoutId);
   }, [conversation, currentNodeId, showInputField]);
 
   // Validate input based on current node type and validation rules
@@ -354,7 +245,7 @@ const ChatReader: React.FC = () => {
     }
 
     if (interactiveTypes.includes(node.type)) {
-      // Adicionar o nó de input ao histórico de conversa para manter o prompt visível
+      // Add the input node to the conversation history to keep the prompt visible
       const alreadyInHistory = conversation.some((c) => c.id === node.id);
       if (!alreadyInHistory) {
         const timer = setTimeout(() => {
@@ -363,11 +254,11 @@ const ChatReader: React.FC = () => {
         return () => clearTimeout(timer);
       }
 
-      // Mostrar o campo de input após um pequeno delay para coincidir com o prompt
+      // Show the input field after a small delay to coincide with the prompt
       setShowInputField(false);
       const inputTimer = setTimeout(() => {
         setShowInputField(true);
-      }, 1500); // Um pouco mais de delay que o prompt para parecer uma sequência natural
+      }, 1500);
 
       // Reset input value and validation when showing a new input node
       setInputValue("");
@@ -391,7 +282,7 @@ const ChatReader: React.FC = () => {
     }
   }, [inputValue, currentNodeId, chatFlow]);
 
-  // Add this function for handling already answered nodes
+  // Mark node as answered
   function markNodeAsAnswered(node: FlowNode): FlowNode {
     if (!node) return node;
     return {
@@ -404,7 +295,7 @@ const ChatReader: React.FC = () => {
   }
 
   function handleInputSubmit() {
-    if (!inputValue?.trim() || !isInputValid) return;
+    if (!inputValue.trim() || !isInputValid) return;
 
     const userBubble = {
       id: `user_${Date.now()}`,
@@ -419,11 +310,7 @@ const ChatReader: React.FC = () => {
       ).concat(userBubble);
     });
 
-    // Save answer via saveAnswer
-    if (custom_url && currentNodeId) {
-      saveAnswer(custom_url, { [currentNodeId]: inputValue })
-        .catch((error) => console.error("Error saving answer:", error));
-    }
+    // No answer saving in test mode
 
     setTimeout(() => {
       const node = chatFlow ? getNodeById(chatFlow, currentNodeId) : null;
@@ -435,7 +322,7 @@ const ChatReader: React.FC = () => {
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter" && isInputValid && inputValue?.trim()) {
+    if (e.key === "Enter" && isInputValid && inputValue.trim()) {
       handleInputSubmit();
     }
   }
@@ -454,19 +341,14 @@ const ChatReader: React.FC = () => {
       ).concat(userBubble);
     });
 
-    // Save choice answer
-    if (custom_url && currentNodeId) {
-      const choiceValue = choice.value || choice.label;
-      saveAnswer(custom_url, { [currentNodeId]: choiceValue })
-        .catch((error) => console.error("Error saving choice:", error));
-    }
+    // No answer saving in test mode
 
     setTimeout(() => {
       setCurrentNodeId(choice.next ?? null);
     }, 500);
   }
 
-  // Node renderer mapping function - used for rendering in the conversation history
+  // Node renderer mapping function
   function renderNode(node: FlowNode) {
     // Skip rendering start nodes
     if (!node || node.type === "start") {
@@ -549,133 +431,144 @@ const ChatReader: React.FC = () => {
 
   const currentNode = chatFlow ? getNodeById(chatFlow, currentNodeId) : null;
 
+  useEffect(() => {
+    // Update chat title and bot profile image when theme settings change
+    if (themeSettings?.chatTitle) {
+      setChatTitle(themeSettings.chatTitle);
+    }
+    if (themeSettings?.botProfileImg) {
+      setBotProfileImg(themeSettings.botProfileImg);
+    }
+    if (themeSettings?.showVendFlowBrand !== undefined) {
+      setShowBrand(themeSettings.showVendFlowBrand);
+    }
+    // Note: we don't need to update other theme variables as they're used directly from themeSettings
+  }, [themeSettings]);
+
   return (
-    <div className="flex flex-col h-screen" style={{
+    <div className="flex flex-col h-full overflow-hidden relative" style={{
       fontSize,
       fontFamily,
-      color: textColor,
-      ...pageBackgroundStyle // Apply background to entire page
+      color: textColor
     }}>
       {/* Header with bot profile pic and title */}
       <div className="p-3 bg-white shadow-sm flex items-center border-b">
-        <div className="flex items-center max-w-3xl mx-auto w-full">
+        <div className="flex items-center w-full">
           <img src={botProfileImg} alt="Bot" className="h-9 w-9 rounded-full object-cover mr-3" />
           <h1 className="font-medium" style={{ fontSize: headingFontSize }}>{chatTitle}</h1>
         </div>
       </div>
 
-      {/* Chat container com área de rolagem */}
-      <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full relative overflow-hidden">
-        {/* Messages area com rolagem - no background here, it should be transparent */}
-        <div
-          ref={chatHistoryRef}
-          className="flex-1 overflow-y-auto p-4 space-y-3"
-          style={messageContainerStyle}
-        >
-          {/* Center Watermark - Only show if showBrand is true */}
-          {showBrand && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                zIndex: 100,
-                pointerEvents: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '80%',
-                height: '80%'
-              }}
-              className="watermark-container"
-              aria-hidden="true"
-            >
-              <img
-                src={logoImage}
-                alt="VendFlow Watermark"
-                style={{
-                  width: '160px',
-                  opacity: 0.25,
-                  maxWidth: '100%'
-                }}
-              />
-            </div>
-          )}
-
-          {conversation.map((node, idx) => {
-            // Skip rendering start nodes
-            if (node.type === "start") return null;
-
-            const alignRight = isRightAligned(node.type);
-            return (
-              <div
-                key={node.id || idx}
-                className={`flex ${alignRight ? 'justify-end' : 'justify-start'}`}
-              >
-                {!alignRight && (
-                  <img
-                    src={botProfileImg}
-                    alt="Bot"
-                    className="h-8 w-8 rounded-full object-cover mr-2 self-end"
-                  />
-                )}
-                <div
-                  className={
-                    (alignRight
-                      ? "bg-user-bubble text-user-bubble"
-                      : "bg-bot-bubble text-bot-bubble") +
-                    " rounded-2xl p-3 max-w-[80%] shadow-md bubble-" +
-                    node.type
-                  }
-                  style={{ fontFamily }}
-                >
-                  {renderNode(node)}
-                </div>
-              </div>
-            );
-          })}
-
-          {/* Display current interactive input node - only if it's active (not answered) */}
-          {currentNode && interactiveTypes.includes(currentNode.type) &&
-           !currentNode.content?.answered && showInputField && (
-            <>
-              {/* User input field on the right */}
-              {currentNode.type !== "input_wait" && (
-                <div className="flex justify-end mt-2 mb-10">
-                  <div
-                    className="bg-white rounded-2xl p-2 max-w-[80%] shadow-md bubble-animate bubble-appear"
-                    style={{ fontFamily }}
-                  >
-                    <InputField
-                      nodeType={currentNode.type}
-                      inputValue={inputValue}
-                      setInputValue={setInputValue}
-                      handleKeyDown={handleKeyDown}
-                      handleInputSubmit={handleInputSubmit}
-                      isInvalid={!isInputValid}
-                      currentNode={currentNode}
-                      handleChoiceSelect={handleChoiceSelect}
-                    />
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Fixed watermark at the bottom - Only show if showBrand is true */}
+      {/* Chat messages with scroll */}
+      <div
+        ref={chatHistoryRef}
+        className="flex-1 overflow-y-auto p-4 space-y-3 relative"
+        style={{
+          backgroundColor,
+          height: 'calc(100% - 114px)', // Account for header (59px) and footer (55px)
+          position: 'relative'
+        }}
+      >
+        {/* Center Watermark - Fixed relative to chat container */}
         {showBrand && (
-          <div className="fixed bottom-0 left-0 right-0 p-3 bg-white bg-opacity-90 border-t border-gray-200 text-center z-10 max-w-3xl mx-auto w-full backdrop-blur-sm">
-            <div className="flex justify-center items-center">
-              <img src={logoImage} alt="VendFlow" className="h-4 mr-1" />
-              <span className="text-xs font-medium text-gray-600">Powered by VendFlow</span>
-            </div>
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 100,
+              pointerEvents: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '80%',
+              height: '80%'
+            }}
+            className="watermark-container"
+            aria-hidden="true"
+          >
+            <img
+              src={logoImage}
+              alt="VendFlow Watermark"
+              style={{
+                width: '160px',
+                opacity: 0.25,
+                maxWidth: '100%'
+              }}
+            />
           </div>
         )}
+
+        {conversation.map((node, idx) => {
+          if (node.type === "start") return null;
+          const alignRight = isRightAligned(node.type);
+          return (
+            <div
+              key={node.id || idx}
+              className={`flex ${alignRight ? 'justify-end' : 'justify-start'}`}
+            >
+              {!alignRight && (
+                <img
+                  src={botProfileImg}
+                  alt="Bot"
+                  className="h-8 w-8 rounded-full object-cover mr-2 self-end"
+                />
+              )}
+              <div
+                className={
+                  (alignRight
+                    ? "bg-user-bubble text-user-bubble"
+                    : "bg-bot-bubble text-bot-bubble") +
+                  " rounded-2xl p-3 max-w-[80%] shadow-sm bubble-" +
+                  node.type
+                }
+                style={{ fontFamily }}
+              >
+                {renderNode(node)}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Current interactive input */}
+        {currentNode && interactiveTypes.includes(currentNode.type) &&
+         !currentNode.content?.answered && showInputField && (
+          <>
+            {currentNode.type !== "input_wait" && (
+              <div className="flex justify-end mt-2">
+                <div
+                  className="bg-white rounded-2xl p-2 max-w-[80%] shadow-sm bubble-animate bubble-appear"
+                  style={{ fontFamily }}
+                >
+                  <InputField
+                    nodeType={currentNode.type}
+                    inputValue={inputValue}
+                    setInputValue={setInputValue}
+                    handleKeyDown={handleKeyDown}
+                    handleInputSubmit={handleInputSubmit}
+                    isInvalid={!isInputValid}
+                    currentNode={currentNode}
+                    handleChoiceSelect={handleChoiceSelect}
+                  />
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
+
+      {/* Watermark footer */}
+      {showBrand && (
+        <div className="p-3 bg-white bg-opacity-90 border-t border-gray-200 text-center w-full">
+          <div className="flex justify-center items-center">
+            <img src={logoImage} alt="VendFlow" className="h-4 mr-1" />
+            <span className="text-xs font-medium text-gray-600">Desenvolvido por VendFlow</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default ChatReader;
+export default TestChatReader;

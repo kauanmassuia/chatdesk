@@ -1,6 +1,7 @@
 import { BsTextParagraph } from 'react-icons/bs'
 import InputNode, { exportBaseInputNodeData } from './InputNode'
 import { renderGenericInputNode } from './InputNode';
+import { Box, Text } from '@chakra-ui/react';
 
 interface TextInputNodeProps {
   data: {
@@ -28,7 +29,18 @@ const TextInputNode = ({ data, selected }: TextInputNodeProps) => {
 }
 
 export function renderTextInputNode(props: any) {
-  // Text input can have various validations (min length, max length, etc.)
+  const { node } = props;
+
+  // When being used to render the node in the conversation, only show the prompt
+  if (!props.setInputValue || !props.handleInputSubmit) {
+    return (
+      <Box>
+        <Text>{node?.content?.prompt || ''}</Text>
+      </Box>
+    );
+  }
+
+  // Otherwise, use the generic input renderer for the input fields
   return renderGenericInputNode({
     ...props,
     inputType: "text",

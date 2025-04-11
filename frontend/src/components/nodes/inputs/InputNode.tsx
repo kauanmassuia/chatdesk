@@ -92,7 +92,7 @@ const InputNode = ({
 
 export function renderGenericInputNode({
   node,
-  inputValue,
+  inputValue = '',
   setInputValue,
   handleKeyDown,
   handleInputSubmit,
@@ -102,30 +102,52 @@ export function renderGenericInputNode({
   validationError,
 }: RenderInputNodeProps) {
   // Extract validation patterns from node content if available
-  const validationPattern = node.content.validation?.pattern || null;
-  const validationMessage = node.content.validation?.message || "Por favor, digite um valor válido";
+  const validationPattern = node?.content?.validation?.pattern || null;
+  const validationMessage = node?.content?.validation?.message || "Por favor, digite um valor válido";
 
   // Check if this input has already been answered (if it has an answer node in the conversation)
-  const isAnswered = node.content.answered === true;
+  const isAnswered = node?.content?.answered === true;
 
-  // Check if the current input is valid
-  const isInputInvalid = validationPattern ?
-    !new RegExp(validationPattern).test(inputValue) && inputValue.length > 0 : false || isInvalid;
+  // Check if the current input is valid - adding a null check for inputValue
+  const isInputInvalid = validationPattern && inputValue && inputValue.length > 0 ?
+    !new RegExp(validationPattern).test(inputValue) : isInvalid;
 
   // Only show the prompt since the node is just a prompt message from the bot
   if (isAnswered) {
-  return (
+    return (
       <Box>
-        <Text>{node.content.prompt}</Text>
+        <Text>{node?.content?.prompt || ''}</Text>
       </Box>
     );
   }
 
-  // Show prompt only, input will be displayed on the right side
+  // For rendering the input field (used by the InputField component)
   return (
-    <Box>
-      <Text>{node.content.prompt}</Text>
-    </Box>
+    <div className="p-1">
+      <div className="relative">
+        <input
+          type={inputType}
+          value={inputValue || ''}
+          onChange={(e) => setInputValue && setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className={`w-full px-3 py-2 border ${isInputInvalid && inputValue ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+          autoFocus
+        />
+        {isInputInvalid && inputValue && (
+          <div className="text-red-500 text-sm mt-1">
+            {validationMessage}
+          </div>
+        )}
+      </div>
+      <button
+        onClick={handleInputSubmit}
+        disabled={isInputInvalid && !!(inputValue || '')}
+        className={`mt-2 px-4 py-2 rounded-md w-full ${isInputInvalid && inputValue ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+      >
+        Enviar
+      </button>
+    </div>
   );
 }
 
