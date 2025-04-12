@@ -9,7 +9,9 @@ import {
   HStack,
   Icon,
   VStack,
-  Flex
+  Flex,
+  Spinner,
+  Center
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { FaRegChartBar } from 'react-icons/fa';
@@ -17,10 +19,12 @@ import { countAnswers, CountAnswersResponse } from '../../services/answerService
 import PricingSectionModal from './PricingSectionModal';
 import { getUserSubscription, SubscriptionResponse } from "../../services/subscriptionService";
 import CancelSubscriptionButton from '../buttons/CancelSubscriptionButton';
+import React from 'react';
 
 const UseAndPaymentButton = () => {
   const [usageData, setUsageData] = useState<CountAnswersResponse | null>(null);
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionResponse | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
@@ -32,6 +36,8 @@ const UseAndPaymentButton = () => {
       setSubscriptionData(subscription);
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,6 +47,14 @@ const UseAndPaymentButton = () => {
 
   const bg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
+
+  if (loading) {
+    return (
+      <Center height="100%">
+        <Spinner size="xl" thickness="4px" speed="0.65s" color="blue.500" />
+      </Center>
+    );
+  }
 
   if (!usageData || !subscriptionData) return null;
 
@@ -61,16 +75,13 @@ const UseAndPaymentButton = () => {
     status
   } = subscriptionData;
 
-  // Determine if there is a pending downgrade.
   const hasPendingDowngrade = pendingPlan && pendingPlan !== currentPlan;
-
-  // Check if user has paid plan (not free)
   const hasPaidPlan = currentPlan !== 'free';
 
   return (
     <Box width="100%" height="100%" overflowY="auto">
       <VStack spacing={6} align="stretch">
-        {/* Usage Section */}
+        {/* Uso do plano */}
         <Box
           p={{ base: 4, md: 5 }}
           borderRadius="lg"
@@ -87,13 +98,7 @@ const UseAndPaymentButton = () => {
             mb={3}
           >
             <Heading size="md">Uso do plano</Heading>
-            <Badge
-              colorScheme="blue"
-              fontSize="0.8em"
-              borderRadius="md"
-              px={2}
-              py={1}
-            >
+            <Badge colorScheme="blue" fontSize="0.8em" borderRadius="md" px={2} py={1}>
               Renova em {new Date(billing_end).toLocaleDateString('pt-BR')}
             </Badge>
           </Flex>
@@ -118,7 +123,7 @@ const UseAndPaymentButton = () => {
           </Stack>
         </Box>
 
-        {/* Subscription Plan Section */}
+        {/* Plano atual */}
         <Box
           p={{ base: 4, md: 5 }}
           borderRadius="lg"
@@ -127,14 +132,10 @@ const UseAndPaymentButton = () => {
           borderWidth="1px"
           borderColor={borderColor}
         >
-          <Heading size="md" mb={2}>
-            Meu plano
-          </Heading>
+          <Heading size="md" mb={2}>Meu plano</Heading>
           <Text fontSize="sm" mb={1}>
             Você está usando o plano{' '}
-            <Text as="span" fontWeight="bold">
-              {translatedPlan}
-            </Text>.
+            <Text as="span" fontWeight="bold">{translatedPlan}</Text>.
           </Text>
           <Text fontSize="xs" color="gray.500" mb={3}>
             Ciclo atual: {new Date(billing_start).toLocaleDateString('pt-BR')} até{' '}
@@ -161,7 +162,6 @@ const UseAndPaymentButton = () => {
             </Box>
           )}
 
-          {/* Show cancel button only for paid plans with active status */}
           {hasPaidPlan && status === 'active' && !hasPendingDowngrade && (
             <Box mt={2}>
               <CancelSubscriptionButton onSuccess={fetchData} />
