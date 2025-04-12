@@ -45,7 +45,7 @@ import PricingSection from "../components/PricingSection"
 export default function Home() {
   const navigate = useNavigate()
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const btnRef = useRef()
+  const btnRef = useRef<HTMLButtonElement>(null)
 
   const goToLogin = () => {
     navigate("/login")
@@ -69,15 +69,15 @@ export default function Home() {
   useEffect(() => {
     const counters = document.querySelectorAll(".count")
     const duration = 2000 // 2 segundos de duração
-    const easeOutQuad = (t) => t * (2 - t)
+    const easeOutQuad = (t: number): number => t * (2 - t)
 
     const animateCounters = () => {
       counters.forEach((counter) => {
-        const target = Number.parseInt(counter.getAttribute("data-val"), 10)
+        const target = Number.parseInt(counter.getAttribute("data-val") || "0", 10)
         let current = 0
         const increment = 1000 // Contar sempre de mil em mil
 
-        const updateCounter = (timestamp, start) => {
+        const updateCounter = (timestamp: number, start: number): void => {
           const progress = Math.min((timestamp - start) / duration, 1)
           const eased = easeOutQuad(progress)
 
@@ -580,12 +580,12 @@ export default function Home() {
           </VStack>
 
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={8} maxW="4xl" mx="auto">
-            <Card 
-              bg={cardBg} 
-              rounded="xl" 
-              shadow="md" 
-              p={8} 
-              _hover={{ shadow: "xl" }} 
+            <Card
+              bg={cardBg}
+              rounded="xl"
+              shadow="md"
+              p={8}
+              _hover={{ shadow: "xl" }}
               transition="all 0.3s ease"
               borderLeft="4px solid #2563eb"
             >
@@ -615,12 +615,12 @@ export default function Home() {
                 </Box>
               </Flex>
             </Card>
-            <Card 
-              bg={cardBg} 
-              rounded="xl" 
-              shadow="md" 
-              p={8} 
-              _hover={{ shadow: "xl" }} 
+            <Card
+              bg={cardBg}
+              rounded="xl"
+              shadow="md"
+              p={8}
+              _hover={{ shadow: "xl" }}
               transition="all 0.3s ease"
               borderLeft="4px solid #2563eb"
             >
@@ -660,11 +660,11 @@ export default function Home() {
       {/* Guarantee Section */}
       <Box as="section" py={{ base: 16, md: 24 }} bgGradient="linear(to-b, white, #f8fafc)">
         <Container maxW="4xl" px={4}>
-          <Card 
-            bg={cardBg} 
-            p={10} 
-            rounded="2xl" 
-            shadow="lg" 
+          <Card
+            bg={cardBg}
+            p={10}
+            rounded="2xl"
+            shadow="lg"
             textAlign="center"
             borderTop="4px solid #ff9e2c"
           >

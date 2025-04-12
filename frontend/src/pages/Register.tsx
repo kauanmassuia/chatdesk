@@ -12,7 +12,7 @@ import {
   Flex,
   Image,
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { register, signInWithGoogle } from '../services/authService';
 import logo from '../assets/logovendflow.png';
@@ -28,7 +28,7 @@ export default function Register() {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const handleRegister = async (e) => {
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -71,7 +71,7 @@ export default function Register() {
     <Box minH="100vh" bg="#f1f1f1">
       <Flex direction={{ base: 'column', lg: 'row' }} minH="100vh">
         {/* Left Container - Escondido no Mobile */}
-        <Box 
+        <Box
           flex={{ base: 'none', lg: '1' }}
           p={{ base: '4%', lg: '5%' }}
           display={{ base: 'none', lg: 'flex' }}
@@ -116,7 +116,7 @@ export default function Register() {
             <Stack spacing={3}>
               {/* Logo no Mobile */}
               <Image src={logo} alt="Logo" width="40%" mx="auto" display={{ base: 'block', lg: 'none' }} mb={4} />
-              
+
               <Heading size="md" textAlign="center">
                 Criar conta no VendFlow
               </Heading>
