@@ -48,6 +48,7 @@ import { logout } from "../services/authService"
 import { getFlows, createFlow } from "../services/flowService"
 import CreateFlowModal from "../components/modal/CreateFlowModal"
 import ConfiguracaoModal from "../components/modal/ConfigModal"
+import logoImage from '../assets/logovendflow.png'
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -178,7 +179,7 @@ export default function Dashboard() {
           <Flex justify="space-between" align="center">
             <Link to="/dashboard">
               <Image
-                src="../src/assets/logovendflow.png"
+                src={logoImage}
                 alt="Logo"
                 width={{ base: "40%", md: "20%", lg: "55%" }}
                 height="auto"

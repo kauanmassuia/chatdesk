@@ -41,6 +41,7 @@ import {
   FiCheck,
 } from "react-icons/fi"
 import PricingSection from "../components/PricingSection"
+import logoImage from '../assets/logovendflow.png'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -151,7 +152,7 @@ export default function Home() {
       >
         <Container maxW="container.xl">
           <Flex justify="space-between" align="center">
-            <Image src="/src/assets/logovendflow.png" alt="VendFlow Logo" h={{ base: "40px", md: "48px", lg: "68px" }} ml={"-70px"} />
+            <Image src={logoImage} alt="VendFlow Logo" h={{ base: "40px", md: "48px", lg: "68px" }} ml={"-70px"} />
 
             {isDesktop ? (
               <HStack spacing={8}>

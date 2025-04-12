@@ -1,35 +1,36 @@
 // components/Docs/HeaderDocs.tsx
 import { Flex, Image, Input, Button } from "@chakra-ui/react";
+import logoImage from '../../assets/logovendflow.png';
 
 const HeaderDocs = () => {
   return (
-    <Flex 
-      as="header" 
+    <Flex
+      as="header"
       bg="#f8f9fa"  // Fundo do header
-      color="black" 
-      p={4} 
-      align="center" 
+      color="black"
+      p={4}
+      align="center"
       justify="space-between"
-      w="100%" 
+      w="100%"
       borderBottom="2px solid #E2E8F0" // Borda inferior entre o header e os outros elementos
       position="fixed" // Tornando o header fixo
       top={0} // Colocando no topo da página
       left={0}
       zIndex={10} // Para garantir que fique acima do conteúdo
     >
-      <Image 
-        src="../src/assets/logovendflow.png" 
-        alt="Logo" 
+      <Image
+        src={logoImage}
+        alt="Logo"
         width="180px"  // Largura aumentada
         height="auto"  // Mantendo a proporção da altura
       />
 
-      <Input 
-        placeholder="Procurar..." 
-        bg="white" 
+      <Input
+        placeholder="Procurar..."
+        bg="white"
         color="black"
         borderRadius="full"
-        px={2} 
+        px={2}
         fontSize="sm"
         w="300px"  // Largura maior
         h="50px"   // Aumento de altura
@@ -44,7 +45,7 @@ const HeaderDocs = () => {
           paddingInlineEnd: "0.5rem",
         }}
         _focusVisible={{
-          borderColor: "gray.300", 
+          borderColor: "gray.300",
           boxShadow: "none", // Retirando sombra
         }}
       />
@@ -59,7 +60,7 @@ const HeaderDocs = () => {
           width: "11%", // Personalizando largura
           height: "100%", // Personalizando altura
           fontSize: "16px", // Personalizando tamanho de fonte
-        }}  
+        }}
         _hover={{
           bg: "#FF7F00",  // Cor de fundo no hover
           transform: "scale(1.05)",  // Aumenta o botão no hover
